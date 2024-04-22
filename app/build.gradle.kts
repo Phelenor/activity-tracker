@@ -23,7 +23,9 @@ android {
             useSupportLibrary = true
         }
     }
-
+    hilt {
+        enableAggregatingTask = true
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,11 +40,12 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
+        buildConfig = true
         viewBinding = true
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     packaging {
         resources {
@@ -57,17 +60,19 @@ android {
 dependencies {
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.immutable.collection)
 
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material3)
     implementation(libs.material.compose)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
 
     implementation(libs.constraintlayout.compose)
-    implementation(libs.livedata.compose)
     implementation(libs.lifecycle.compose)
     implementation(libs.viewmodel.compose)
     implementation(libs.androidx.startup.runtime)
@@ -100,6 +105,5 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
-    debugImplementation(libs.ui.test.manifest)
+    debugImplementation(libs.compose.ui.tooling)
 }
