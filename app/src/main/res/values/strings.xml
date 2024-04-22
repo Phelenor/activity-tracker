@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
+    <string name="google_oauth_credential_client_id">895415555574-j4novgtkrrhgscejhghec2v8n7lnurgb.apps.googleusercontent.com</string>
 </resources>

@@ -62,6 +62,10 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.immutable.collection)
 
+    implementation(libs.credentails)
+    implementation(libs.credentails.auth)
+    implementation(libs.google.id)
+
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

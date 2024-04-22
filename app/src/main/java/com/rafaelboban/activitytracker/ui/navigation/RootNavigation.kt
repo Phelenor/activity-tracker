@@ -1,13 +1,11 @@
 package com.rafaelboban.activitytracker.ui.navigation
 
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rafaelboban.activitytracker.ui.auth.LoginScreen
 
 @Composable
 fun RootNavigation(navHostController: NavHostController = rememberNavController()) {
@@ -17,12 +15,7 @@ fun RootNavigation(navHostController: NavHostController = rememberNavController(
         startDestination = NavigationGraph.Auth.route
     ) {
         composable(NavigationGraph.Auth.route) {
-            MockScreen(
-                label = "Auth",
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-            )
+            LoginScreen()
         }
 
         composable(NavigationGraph.Main.route) {
