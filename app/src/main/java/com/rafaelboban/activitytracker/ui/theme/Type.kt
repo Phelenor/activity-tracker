@@ -78,5 +78,4 @@ object TypographyExtras {
             lineHeight = 24.sp
         )
     }
-
 }

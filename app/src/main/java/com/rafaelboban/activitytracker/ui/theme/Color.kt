@@ -64,5 +64,4 @@ val dark_surfaceTint = Color(0xFFE6C51D)
 val dark_outlineVariant = Color(0xFF4B4739)
 val dark_scrim = Color(0xFF000000)
 
-
 val seed = Color(0xFFD7B700)

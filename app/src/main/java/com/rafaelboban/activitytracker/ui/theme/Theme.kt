@@ -39,9 +39,8 @@ private val LightColors = lightColorScheme(
     inversePrimary = light_inversePrimary,
     surfaceTint = light_surfaceTint,
     outlineVariant = light_outlineVariant,
-    scrim = light_scrim,
+    scrim = light_scrim
 )
-
 
 private val DarkColors = darkColorScheme(
     primary = dark_primary,
@@ -72,7 +71,7 @@ private val DarkColors = darkColorScheme(
     inversePrimary = dark_inversePrimary,
     surfaceTint = dark_surfaceTint,
     outlineVariant = dark_outlineVariant,
-    scrim = dark_scrim,
+    scrim = dark_scrim
 )
 
 @Composable
