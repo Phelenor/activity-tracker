@@ -2,7 +2,9 @@ package com.rafaelboban.activitytracker.ui.auth
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,28 +27,39 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.util.CredentialHelper
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    Box(
-        contentAlignment = Alignment.Center,
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
+        Button(onClick = viewModel::test) {
+            Text(text = "Test")
+        }
+
         Button(
             shape = RoundedCornerShape(32.dp),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary),
             onClick = {
                 coroutineScope.launch {
-                    CredentialHelper.startGoogleLogin(context, CredentialManager.create(context))
+                    CredentialHelper.startGoogleLogin(context, CredentialManager.create(context))?.let { (idToken, nonce) ->
+                        viewModel.login(idToken, nonce)
+                    }
                 }
             }
         ) {

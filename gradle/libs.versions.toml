@@ -5,7 +5,7 @@ core-ktx = "1.13.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
-androidx-lifecycle = "2.7.0"
+androidx-lifecycle = "2.8.0-beta01"
 activity-compose = "1.9.0"
 compose-bom = "2024.04.01"
 kotlin-collections-immutable = "0.3.7"
@@ -17,6 +17,7 @@ compose-material3 = "1.3.0-alpha05"
 compose-navigation = "2.7.7"
 
 accompanist = "0.30.1"
+sandwich = "2.0.6"
 
 material = "1.11.0"
 ktlint = "11.6.1"
@@ -34,11 +35,16 @@ coil-compose = "2.6.0"
 timber = "5.0.1"
 moshi = "1.15.1"
 startup-runtime = "1.1.1"
+preferences = "1.2.1"
+datastore_preferences = "1.1.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 immutable-collection = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlin-collections-immutable" }
+preferences = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferences" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore_preferences" }
+
 
 # Lifecycle
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
@@ -70,6 +76,9 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+
+#Sandwich
+sandwich = { group = "com.github.skydoves", name = "sandwich-retrofit", version.ref = "sandwich" }
 
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

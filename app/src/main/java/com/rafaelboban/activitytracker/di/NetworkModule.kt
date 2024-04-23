@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.di
 
 import com.rafaelboban.activitytracker.network.ApiService
+import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -18,7 +19,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val API_BASE_URL = ""
+    private const val API_BASE_URL = "http://192.168.8.102:3000"
 
     @Provides
     @Singleton
@@ -36,7 +37,7 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor { Timber.tag("OkHttp").d(it) }.apply {
-            level = HttpLoggingInterceptor.Level.BASIC
+            level = HttpLoggingInterceptor.Level.BODY
         }
     }
 
@@ -53,6 +54,7 @@ object NetworkModule {
     fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
+            .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl(API_BASE_URL)
             .build()

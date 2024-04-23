@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.credentails)
     implementation(libs.credentails.auth)
     implementation(libs.google.id)
+    implementation(libs.preferences)
+    implementation(libs.datastore.preferences)
 
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
@@ -92,6 +94,8 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    implementation(libs.sandwich)
 
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapter)
