@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker
+package com.rafaelboban.activitytracker.ui
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.rafaelboban.activitytracker.ui.AppViewModel
 import com.rafaelboban.activitytracker.ui.navigation.RootNavigation
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
