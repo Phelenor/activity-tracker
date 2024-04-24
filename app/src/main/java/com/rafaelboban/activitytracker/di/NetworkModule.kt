@@ -1,13 +1,19 @@
 package com.rafaelboban.activitytracker.di
 
+import android.content.Context
+import android.content.SharedPreferences
 import com.rafaelboban.activitytracker.network.ApiService
+import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
+import com.rafaelboban.activitytracker.worker.TokenRefreshWorker
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -43,15 +49,42 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authTokenInterceptor: Interceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(authTokenInterceptor)
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+    fun provideAuthTokenInterceptor(
+        @ApplicationContext application: Context,
+        preferences: SharedPreferences
+    ) = Interceptor { chain ->
+        val request = chain.request().newBuilder().apply {
+            header("Authorization", "Bearer ${preferences.getString(AUTH_TOKEN, null)}")
+        }
+
+        val response = chain.proceed(request.build())
+        val tokenRefreshSignal = response.header("X-Token-Expiry")
+
+        if (tokenRefreshSignal != null) {
+            TokenRefreshWorker.enqueue(application)
+        }
+
+        return@Interceptor response
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())

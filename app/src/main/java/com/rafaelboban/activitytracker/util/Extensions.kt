@@ -6,4 +6,4 @@ import androidx.preference.PreferenceManager
 
 inline fun Context.editPreferences(block: SharedPreferences.Editor.() -> SharedPreferences.Editor) = PreferenceManager.getDefaultSharedPreferences(this).edit().block().apply()
 
-inline fun <T> Context.getPreference(block: SharedPreferences.() -> T): T =  PreferenceManager.getDefaultSharedPreferences(this).block()
+inline fun <T> Context.getPreference(block: SharedPreferences.() -> T): T = PreferenceManager.getDefaultSharedPreferences(this).block()

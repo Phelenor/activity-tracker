@@ -66,7 +66,6 @@ dependencies {
     implementation(libs.credentails.auth)
     implementation(libs.google.id)
     implementation(libs.preferences)
-    implementation(libs.datastore.preferences)
 
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
@@ -83,9 +82,10 @@ dependencies {
     implementation(libs.viewmodel.compose)
     implementation(libs.androidx.startup.runtime)
 
-    ksp(libs.hilt.compiler)
-    implementation(libs.hilt.android)
+    implementation(libs.dagger.hilt.android)
     implementation(libs.hilt.navigation)
+    ksp(libs.dagger.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
@@ -104,8 +104,10 @@ dependencies {
     implementation(libs.compose.coil)
     implementation(libs.navigation.compose)
 
-    implementation(libs.timber)
+    implementation(libs.hilt.work)
+    implementation(libs.work.runtime)
 
+    implementation(libs.timber)
     implementation(libs.accompanist)
 
     testImplementation(libs.junit)

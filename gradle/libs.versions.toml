@@ -24,7 +24,8 @@ ktlint = "11.6.1"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 kotlinx-coroutines = "1.8.0"
-hilt = "2.51.1"
+hilt-dagger = "2.51.1"
+hilt = "1.2.0"
 
 androidx-room = "2.6.1"
 hilt-navigation-compose = "1.2.0"
@@ -37,6 +38,7 @@ moshi = "1.15.1"
 startup-runtime = "1.1.1"
 preferences = "1.2.1"
 datastore_preferences = "1.1.0"
+work = "2.9.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -79,12 +81,6 @@ retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", v
 
 #Sandwich
 sandwich = { group = "com.github.skydoves", name = "sandwich-retrofit", version.ref = "sandwich" }
-
-# Hilt
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
-
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
@@ -108,6 +104,17 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 accompanist = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
 
 
+# Dagger Holt
+dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt-dagger" }
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt-dagger" }
+hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt" }
+
+# Work
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt" }
+work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+
+
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
@@ -123,6 +130,6 @@ google-id = { group = "com.google.android.libraries.identity.googleid", name = "
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "android-gradle" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-android" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt-dagger" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
