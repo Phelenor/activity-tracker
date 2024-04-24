@@ -156,11 +156,12 @@ fun LoginScreen(
                     .clickable {
                         viewModel.loginState = LoginState.IN_PROGRESS
                         coroutineScope.launch {
-                            CredentialHelper
-                                .startGoogleLogin(context, CredentialManager.create(context))
-                                ?.let { (idToken, nonce) ->
-                                    viewModel.login(idToken, nonce)
-                                }
+                            CredentialHelper.startGoogleLogin(
+                                context = context,
+                                credentialManager = CredentialManager.create(context),
+                                onSuccess = { idToken, nonce -> viewModel.login(idToken, nonce) },
+                                onError = { viewModel.loginState = LoginState.IDLE }
+                            )
                         }
                     }
                     .padding(horizontal = 16.dp, vertical = 8.dp)

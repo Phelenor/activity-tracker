@@ -1,5 +1,9 @@
 package com.rafaelboban.activitytracker.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,7 +47,11 @@ fun LoadingIndicator(
 
 @Composable
 fun FullScreenLoadingDialog(showDialog: Boolean) {
-    if (showDialog) {
+    AnimatedVisibility(
+        visible = showDialog,
+        enter = fadeIn(animationSpec = tween(200)),
+        exit = fadeOut(animationSpec = tween(200))
+    ) {
         Dialog(
             onDismissRequest = { /* Disallow dismissing */ },
             properties = DialogProperties(
