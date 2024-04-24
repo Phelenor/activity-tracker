@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.ui.auth
 
 import android.app.Application
+import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     application: Application,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val preferences: SharedPreferences
 ) : AndroidViewModel(application) {
 
     var loginState by mutableStateOf(LoginState.IDLE)

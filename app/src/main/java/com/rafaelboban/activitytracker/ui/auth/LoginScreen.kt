@@ -150,6 +150,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
                     .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
                     .border(width = 1.dp, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary)
                     .clip(RoundedCornerShape(16.dp))

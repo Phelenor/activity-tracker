@@ -65,7 +65,9 @@ dependencies {
     implementation(libs.credentails)
     implementation(libs.credentails.auth)
     implementation(libs.google.id)
+    implementation(libs.auth0.jwt)
     implementation(libs.preferences)
+    implementation(libs.splashscreen)
 
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))

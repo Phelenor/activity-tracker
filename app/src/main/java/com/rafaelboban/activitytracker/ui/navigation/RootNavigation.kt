@@ -8,11 +8,14 @@ import androidx.navigation.compose.rememberNavController
 import com.rafaelboban.activitytracker.ui.auth.LoginScreen
 
 @Composable
-fun RootNavigation(navHostController: NavHostController = rememberNavController()) {
+fun RootNavigation(
+    skipLogin: Boolean,
+    navHostController: NavHostController = rememberNavController()
+) {
     NavHost(
         navController = navHostController,
         route = NavigationGraph.Root.route,
-        startDestination = NavigationGraph.Auth.route
+        startDestination = if (skipLogin) NavigationGraph.Main.route else NavigationGraph.Auth.route
     ) {
         composable(NavigationGraph.Auth.route) {
             LoginScreen(

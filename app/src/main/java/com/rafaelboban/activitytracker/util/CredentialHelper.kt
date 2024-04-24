@@ -8,9 +8,9 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rafaelboban.activitytracker.R
-import timber.log.Timber
 import java.security.MessageDigest
 import java.util.UUID
+import kotlin.jvm.Throws
 
 object CredentialHelper {
 
@@ -23,15 +23,11 @@ object CredentialHelper {
         val nonce = generateNonce()
         val clientId = context.getString(R.string.google_oauth_credential_client_id)
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(clientId)
-            .setNonce(nonce)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+        val request = try {
+            buildCredentialRequest(clientId, nonce, filterByAuthorizedAccounts = true)
+        } catch (e: IllegalArgumentException) {
+            buildCredentialRequest(clientId, nonce, filterByAuthorizedAccounts = false)
+        }
 
         try {
             val result = credentialManager.getCredential(context, request)
@@ -41,6 +37,25 @@ object CredentialHelper {
         } catch (e: GetCredentialException) {
             onError(e)
         }
+    }
+
+    @Throws(IllegalArgumentException::class)
+    private fun buildCredentialRequest(
+        clientId: String,
+        nonce: String,
+        filterByAuthorizedAccounts: Boolean
+    ): GetCredentialRequest {
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
+            .setServerClientId(clientId)
+            .setNonce(nonce)
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        return request
     }
 
     private fun generateNonce(): String {

@@ -39,6 +39,7 @@ startup-runtime = "1.1.1"
 preferences = "1.2.1"
 datastore_preferences = "1.1.0"
 work = "2.9.0"
+auth0-jwt = "2.0.2"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -46,7 +47,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 immutable-collection = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlin-collections-immutable" }
 preferences = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferences" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore_preferences" }
-
+splashscreen = {group = "androidx.core", name="core-splashscreen", version="1.0.1"}
 
 # Lifecycle
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
@@ -122,10 +123,11 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "startup-runtime" }
 
-#credentials
+# Credentials
 credentails = { group = "androidx.credentials", name = "credentials", version = "1.2.2" }
 credentails-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version = "1.2.2" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version = "1.1.0" }
+auth0-jwt = { group = "com.auth0.android", name = "jwtdecode", version.ref = "auth0-jwt" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "android-gradle" }
