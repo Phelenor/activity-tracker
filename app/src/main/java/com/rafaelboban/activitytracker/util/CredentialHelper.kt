@@ -4,13 +4,12 @@ import android.content.Context
 import android.util.Base64
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rafaelboban.activitytracker.R
 import java.security.MessageDigest
 import java.util.UUID
-import kotlin.jvm.Throws
 
 object CredentialHelper {
 
@@ -18,33 +17,48 @@ object CredentialHelper {
         context: Context,
         credentialManager: CredentialManager,
         onSuccess: (token: String, nonce: String) -> Unit,
-        onError: (error: GetCredentialException) -> Unit
+        onError: (error: Exception) -> Unit
     ) {
         val nonce = generateNonce()
         val clientId = context.getString(R.string.google_oauth_credential_client_id)
 
-        val request = try {
-            buildCredentialRequest(clientId, nonce, filterByAuthorizedAccounts = true)
-        } catch (e: IllegalArgumentException) {
-            buildCredentialRequest(clientId, nonce, filterByAuthorizedAccounts = false)
-        }
-
         try {
-            val result = credentialManager.getCredential(context, request)
-            val tokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
-            val googleIdToken = tokenCredential.idToken
-            onSuccess(googleIdToken, nonce)
-        } catch (e: GetCredentialException) {
+            val token = buildCredentialRequest(
+                context,
+                credentialManager,
+                clientId,
+                nonce,
+                filterByAuthorizedAccounts = true
+            )
+
+            onSuccess(token, nonce)
+        } catch (e: NoCredentialException) {
+            try {
+                val token = buildCredentialRequest(
+                    context,
+                    credentialManager,
+                    clientId,
+                    nonce,
+                    filterByAuthorizedAccounts = false
+                )
+
+                onSuccess(token, nonce)
+            } catch (e: Exception) {
+                onError(e)
+            }
+        } catch (e: Exception) {
             onError(e)
         }
     }
 
     @Throws(IllegalArgumentException::class)
-    private fun buildCredentialRequest(
+    private suspend fun buildCredentialRequest(
+        context: Context,
+        credentialManager: CredentialManager,
         clientId: String,
         nonce: String,
         filterByAuthorizedAccounts: Boolean
-    ): GetCredentialRequest {
+    ): String {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
             .setServerClientId(clientId)
@@ -55,7 +69,10 @@ object CredentialHelper {
             .addCredentialOption(googleIdOption)
             .build()
 
-        return request
+        val result = credentialManager.getCredential(context, request)
+        val tokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+
+        return tokenCredential.idToken
     }
 
     private fun generateNonce(): String {
