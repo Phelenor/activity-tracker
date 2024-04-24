@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
     <string name="google_oauth_credential_client_id">895415555574-j4novgtkrrhgscejhghec2v8n7lnurgb.apps.googleusercontent.com</string>
+
+    <string name="login_welcome">Embark on your fitness journey and achieve your goals, whether you\'re flying solo or part of a team. \n\nTrack your progress in running, cycling, and more.</string>
+    <string name="login_ready">Ready to get moving?</string>
 </resources>

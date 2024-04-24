@@ -15,7 +15,15 @@ fun RootNavigation(navHostController: NavHostController = rememberNavController(
         startDestination = NavigationGraph.Auth.route
     ) {
         composable(NavigationGraph.Auth.route) {
-            LoginScreen()
+            LoginScreen(
+                onLoginSuccess = {
+                    navHostController.navigate(NavigationGraph.Main.route) {
+                        popUpTo(NavigationGraph.Auth.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         composable(NavigationGraph.Main.route) {
