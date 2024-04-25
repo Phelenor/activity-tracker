@@ -30,7 +30,7 @@ class AppViewModel @Inject constructor(
 
     fun initAndSplashDelay() {
         viewModelScope.launch {
-            val splashDelay = async { delay(250) }
+            val splashDelay = async { delay(200) }
             isAuthTokenValid = checkAuthToken()
 
             splashDelay.await()

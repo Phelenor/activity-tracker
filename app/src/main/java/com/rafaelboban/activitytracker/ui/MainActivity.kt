@@ -1,17 +1,14 @@
 package com.rafaelboban.activitytracker.ui
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.rafaelboban.activitytracker.di.PreferencesEncrypted
 import com.rafaelboban.activitytracker.ui.navigation.RootNavigation
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -22,6 +19,12 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        splashScreen.setOnExitAnimationListener { provider ->
+            provider.view.animate().alpha(0f).setDuration(200).withEndAction {
+                provider.remove()
+            }
+        }
 
         viewModel.initAndSplashDelay()
 
