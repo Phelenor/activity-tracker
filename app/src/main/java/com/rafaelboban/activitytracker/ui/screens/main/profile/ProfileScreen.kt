@@ -29,7 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.work.Operation.State.IN_PROGRESS
 import com.rafaelboban.activitytracker.model.User
 import com.rafaelboban.activitytracker.model.network.PostStatus
 import com.rafaelboban.activitytracker.ui.components.ButtonWithIcon

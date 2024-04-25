@@ -84,19 +84,19 @@ fun LoginScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(maxHeight)
+                .height(maxHeight / 1.5f)
         )
 
         Image(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillHeight,
             colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .rotate(180f)
                 .fillMaxWidth()
-                .height(maxHeight / 32)
+                .height(maxHeight / 2)
         )
 
         Column(
@@ -114,7 +114,7 @@ fun LoginScreen(
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 24.sp,
                 style = Typography.displayLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onPrimary
             )
 
             Box(
