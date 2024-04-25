@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.google.id)
     implementation(libs.auth0.jwt)
     implementation(libs.preferences)
+    implementation(libs.security.crypto)
     implementation(libs.splashscreen)
 
     implementation(libs.activity.compose)

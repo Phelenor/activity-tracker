@@ -63,7 +63,7 @@ object NetworkModule {
     @Singleton
     fun provideAuthTokenInterceptor(
         @ApplicationContext application: Context,
-        preferences: SharedPreferences
+        @PreferencesEncrypted preferences: SharedPreferences
     ) = Interceptor { chain ->
         val request = chain.request().newBuilder().apply {
             header("Authorization", "Bearer ${preferences.getString(AUTH_TOKEN, null)}")

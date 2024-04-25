@@ -5,11 +5,13 @@ import android.content.SharedPreferences
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.rafaelboban.activitytracker.di.PreferencesEncrypted
 import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
 import com.rafaelboban.activitytracker.network.repository.UserRepository
 import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
 import com.rafaelboban.activitytracker.util.Constants.USER_ID
 import com.rafaelboban.activitytracker.util.UserData
+import com.rafaelboban.activitytracker.util.edit
 import com.skydoves.sandwich.getOrNull
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -19,7 +21,7 @@ class TokenRefreshWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val userRepository: UserRepository,
-    private val preferences: SharedPreferences
+    @PreferencesEncrypted private val preferences: SharedPreferences
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
@@ -32,7 +34,7 @@ class TokenRefreshWorker @AssistedInject constructor(
         val response = userRepository.refreshToken(TokenRefreshRequest(userId))
 
         response.getOrNull()?.let { data ->
-            preferences.edit().putString(AUTH_TOKEN, data.token).apply()
+            preferences.edit { putString(AUTH_TOKEN, data.token) }
             UserData.user = data.user
             return Result.success()
         } ?: run {

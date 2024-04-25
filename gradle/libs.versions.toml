@@ -40,14 +40,18 @@ preferences = "1.2.1"
 datastore_preferences = "1.1.0"
 work = "2.9.0"
 auth0-jwt = "2.0.2"
+security-crypto = "1.1.0-alpha06"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 immutable-collection = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlin-collections-immutable" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version = "1.0.1" }
+
+# Preferences
 preferences = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferences" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore_preferences" }
-splashscreen = {group = "androidx.core", name="core-splashscreen", version="1.0.1"}
+security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 
 # Lifecycle
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }

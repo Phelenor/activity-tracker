@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
+import com.rafaelboban.activitytracker.di.PreferencesEncrypted
 import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -18,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AppViewModel @Inject constructor(
     application: Application,
-    private val preferences: SharedPreferences
+    @PreferencesEncrypted private val preferences: SharedPreferences
 ) : AndroidViewModel(application) {
 
     private val _showSplashScreen = MutableStateFlow(true)
