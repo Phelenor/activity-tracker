@@ -2,10 +2,13 @@ package com.rafaelboban.activitytracker.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.auth0.android.jwt.DecodeException
+import com.auth0.android.jwt.JWT
 import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
 import com.rafaelboban.activitytracker.worker.TokenRefreshWorker
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
+import com.skydoves.sandwich.retry.runAndRetry
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -19,6 +22,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import javax.inject.Singleton
 
 @Module
@@ -65,15 +70,24 @@ object NetworkModule {
         @ApplicationContext application: Context,
         @PreferencesEncrypted preferences: SharedPreferences
     ) = Interceptor { chain ->
+        val token = preferences.getString(AUTH_TOKEN, null)
         val request = chain.request().newBuilder().apply {
             header("Authorization", "Bearer ${preferences.getString(AUTH_TOKEN, null)}")
         }
 
         val response = chain.proceed(request.build())
-        val tokenRefreshSignal = response.header("X-Token-Expiry")
 
-        if (tokenRefreshSignal != null) {
-            TokenRefreshWorker.enqueue(application)
+        token?.let {
+            try {
+                val jwt = JWT(token)
+                val shouldRefreshToken = jwt.expiresAt?.toInstant()?.isBefore(Instant.now().plus(1, ChronoUnit.DAYS)) == true
+
+                if (shouldRefreshToken) {
+                    TokenRefreshWorker.enqueue(application)
+                }
+            } catch (e: DecodeException) {
+                Timber.e(e)
+            }
         }
 
         return@Interceptor response
