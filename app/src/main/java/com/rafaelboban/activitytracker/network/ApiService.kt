@@ -1,5 +1,7 @@
 package com.rafaelboban.activitytracker.network
 
+import com.rafaelboban.activitytracker.model.User
+import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.model.LoginResponse
 import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
@@ -18,4 +20,10 @@ interface ApiService {
 
     @POST("/api/token-refresh")
     suspend fun refreshToken(@Body body: TokenRefreshRequest): ApiResponse<LoginResponse>
+
+    @POST("/api/delete-account")
+    suspend fun deleteAccount(): ApiResponse<Unit>
+
+    @POST("/api/change-name")
+    suspend fun changeUserName(@Body body: ChangeNameRequest): ApiResponse<User>
 }

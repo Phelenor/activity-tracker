@@ -5,16 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,18 +23,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rafaelboban.activitytracker.ui.AppViewModel
+import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreen
 import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.activitytracker.util.getActivity
 
 @Composable
 fun MainNavigationGraph(
     navController: NavHostController,
+    navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val appViewModel: AppViewModel = hiltViewModel(LocalContext.current.getActivity() as ViewModelStoreOwner)
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -48,8 +58,10 @@ fun MainNavigationGraph(
             MockScreen(label = MainScreen.Second.name)
         }
 
-        composable(MainScreen.Third.route) {
-            MockScreen(label = MainScreen.Third.name)
+        composable(MainScreen.Profile.route) {
+            ProfileScreen(
+                navigateToLogin = navigateToLogin
+            )
         }
     }
 }
@@ -57,11 +69,12 @@ fun MainNavigationGraph(
 sealed class MainScreen(val route: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: String) {
     data object First : MainScreen("first", Icons.Filled.Favorite, Icons.Outlined.Favorite, "First")
     data object Second : MainScreen("second", Icons.Filled.Call, Icons.Outlined.Call, "Second")
-    data object Third : MainScreen("third", Icons.Filled.Home, Icons.Outlined.Home, "Third")
+    data object Profile : MainScreen("profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle, "Profile")
 }
 
 @Composable
 fun MainScreen(
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -71,15 +84,19 @@ fun MainScreen(
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
 
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
                 listOf(
                     MainScreen.First,
                     MainScreen.Second,
-                    MainScreen.Third
+                    MainScreen.Profile
                 ).forEach { item ->
                     val selected = currentRoute == item.route
 
                     NavigationBarItem(
+                        colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.inversePrimary),
                         label = { Text(item.name) },
                         selected = selected,
                         onClick = {
@@ -107,7 +124,8 @@ fun MainScreen(
     ) { padding ->
         MainNavigationGraph(
             modifier = Modifier.padding(padding),
-            navController = navController
+            navController = navController,
+            navigateToLogin = onLogout
         )
     }
 }

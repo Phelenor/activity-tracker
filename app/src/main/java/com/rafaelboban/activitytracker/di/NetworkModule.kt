@@ -8,7 +8,6 @@ import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
 import com.rafaelboban.activitytracker.worker.TokenRefreshWorker
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
-import com.skydoves.sandwich.retry.runAndRetry
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module

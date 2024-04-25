@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.auth
+package com.rafaelboban.activitytracker.ui.screens.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
-import com.rafaelboban.activitytracker.ui.auth.LoginViewModel.LoginState
+import com.rafaelboban.activitytracker.model.network.PostStatus
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.theme.Typography
 import com.rafaelboban.activitytracker.util.CredentialHelper
@@ -55,28 +56,31 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier,
     onLoginSuccess: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(viewModel.loginState) {
-        if (viewModel.loginState == LoginState.SUCCESS) {
+    LaunchedEffect(viewModel.postStatus) {
+        if (viewModel.postStatus == PostStatus.SUCCESS) {
             onLoginSuccess()
         }
     }
 
-    FullScreenLoadingDialog(showDialog = viewModel.loginState == LoginState.IN_PROGRESS)
+    FullScreenLoadingDialog(showDialog = viewModel.postStatus == PostStatus.IN_PROGRESS)
 
     BoxWithConstraints(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .background(color = MaterialTheme.colorScheme.surface)
+            .statusBarsPadding()
     ) {
         Image(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -87,11 +91,12 @@ fun LoginScreen(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .height(maxHeight / 12)
                 .rotate(180f)
+                .fillMaxWidth()
+                .height(maxHeight / 32)
         )
 
         Column(
@@ -108,7 +113,8 @@ fun LoginScreen(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 24.sp,
-                style = Typography.displayLarge
+                style = Typography.displayLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Box(
@@ -132,7 +138,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(vertical = 8.dp),
                 text = stringResource(id = R.string.login_welcome),
                 style = Typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -141,7 +147,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(vertical = 12.dp),
                 text = stringResource(id = R.string.login_ready),
                 style = Typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onPrimary
             )
 
             Row(
@@ -155,13 +161,13 @@ fun LoginScreen(
                     .border(width = 1.dp, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary)
                     .clip(RoundedCornerShape(16.dp))
                     .clickable {
-                        viewModel.loginState = LoginState.IN_PROGRESS
+                        viewModel.postStatus = PostStatus.IN_PROGRESS
                         coroutineScope.launch {
                             CredentialHelper.startGoogleLogin(
                                 context = context,
                                 credentialManager = CredentialManager.create(context),
                                 onSuccess = { idToken, nonce -> viewModel.login(idToken, nonce) },
-                                onError = { viewModel.loginState = LoginState.IDLE }
+                                onError = { viewModel.postStatus = null }
                             )
                         }
                     }
