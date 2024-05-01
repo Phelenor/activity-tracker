@@ -1,8 +1,8 @@
-package com.rafaelboban.activitytracker.network.model
+package com.rafaelboban.activitytracker.data.session
 
 import com.rafaelboban.activitytracker.model.User
 
-data class LoginResponse(
+data class AuthInfo(
     val user: User,
     val accessToken: String,
     val refreshToken: String

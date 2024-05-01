@@ -1,13 +1,13 @@
 package com.rafaelboban.activitytracker.di
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.auth0.android.jwt.DecodeException
-import com.auth0.android.jwt.JWT
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.rafaelboban.activitytracker.data.session.AuthInfo
+import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.ApiService
-import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
-import com.rafaelboban.activitytracker.worker.TokenRefreshWorker
+import com.rafaelboban.activitytracker.network.TokenRefreshService
+import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
+import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -16,14 +16,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import javax.inject.Singleton
 
 @Module
@@ -68,28 +69,59 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideRefreshService(
+        loggingInterceptor: HttpLoggingInterceptor,
+        moshi: Moshi
+    ): TokenRefreshService {
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .client(okHttpClient)
+            .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .baseUrl(API_BASE_URL)
+            .build()
+
+        return retrofit.create(TokenRefreshService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideAuthTokenInterceptor(
-        @ApplicationContext application: Context,
-        @PreferencesEncrypted preferences: SharedPreferences
+        applicationScope: CoroutineScope,
+        sessionStorage: EncryptedSessionStorage,
+        refreshService: TokenRefreshService
     ) = Interceptor { chain ->
-        val token = preferences.getString(AUTH_TOKEN, null)
-        val request = chain.request().newBuilder().apply {
-            header("Authorization", "Bearer ${preferences.getString(AUTH_TOKEN, null)}")
+        val sessionData = runBlocking { sessionStorage.get() }
+        val accessToken = sessionData?.accessToken
+        val originalRequest = chain.request()
+
+        val request = originalRequest.newBuilder().apply {
+            header("Authorization", "Bearer $accessToken")
         }
 
         val response = chain.proceed(request.build())
 
-        token?.let {
-            try {
-                val jwt = JWT(token)
-                val shouldRefreshToken = jwt.expiresAt?.toInstant()?.isBefore(Instant.now().plus(1, ChronoUnit.DAYS)) == true
-
-                if (shouldRefreshToken) {
-                    TokenRefreshWorker.enqueue(application)
-                }
-            } catch (e: DecodeException) {
-                Timber.e(e)
+        if (response.code == 401 && sessionData?.refreshToken != null) {
+            val refreshResponse = runBlocking { refreshService.refreshToken(TokenRefreshRequest(sessionData.refreshToken)) }
+            val data = refreshResponse.getOrNull() ?: run {
+                applicationScope.launch { sessionStorage.clear() }
+                return@Interceptor response
             }
+
+            val retryRequest = originalRequest.newBuilder().apply {
+                header("Authorization", "Bearer ${data.accessToken}")
+            }
+
+            applicationScope.launch {
+                sessionStorage.set(AuthInfo(data.user, data.accessToken, data.refreshToken))
+            }
+
+            response.close()
+
+            return@Interceptor chain.proceed(retryRequest.build())
         }
 
         return@Interceptor response

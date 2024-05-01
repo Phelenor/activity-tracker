@@ -5,12 +5,10 @@ import android.util.Base64
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rafaelboban.activitytracker.R
-import timber.log.Timber
 import java.security.MessageDigest
 import java.util.UUID
 

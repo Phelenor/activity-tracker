@@ -4,7 +4,6 @@ import com.rafaelboban.activitytracker.model.User
 import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.model.LoginResponse
-import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
 import com.skydoves.sandwich.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -17,9 +16,6 @@ interface ApiService {
 
     @POST("/api/login")
     suspend fun login(@Body body: LoginRequest): ApiResponse<LoginResponse>
-
-    @POST("/api/token-refresh")
-    suspend fun refreshToken(@Body body: TokenRefreshRequest): ApiResponse<LoginResponse>
 
     @POST("/api/delete-account")
     suspend fun deleteAccount(): ApiResponse<Unit>

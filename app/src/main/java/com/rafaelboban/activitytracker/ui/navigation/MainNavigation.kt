@@ -23,18 +23,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.rafaelboban.activitytracker.ui.AppViewModel
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreen
 import com.rafaelboban.activitytracker.ui.theme.Typography
-import com.rafaelboban.activitytracker.util.getActivity
 
 @Composable
 fun MainNavigationGraph(
@@ -42,8 +37,6 @@ fun MainNavigationGraph(
     navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val appViewModel: AppViewModel = hiltViewModel(LocalContext.current.getActivity() as ViewModelStoreOwner)
-
     NavHost(
         modifier = modifier,
         navController = navController,

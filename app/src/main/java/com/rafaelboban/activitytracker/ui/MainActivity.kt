@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<AppViewModel>()
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         viewModel.initAndSplashDelay()
 
         splashScreen.setKeepOnScreenCondition {
-            viewModel.showSplashScreen.value
+            viewModel.state.isCheckingToken
         }
 
         setContent {
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 )
 
                 RootNavigation(
-                    skipLogin = viewModel.isAuthTokenValid
+                    skipLogin = viewModel.state.isLoggedIn
                 )
             }
         }
