@@ -36,33 +36,35 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            ActivityTrackerTheme {
-                enableEdgeToEdge(
-                    statusBarStyle = if (isSystemInDarkTheme()) {
-                        SystemBarStyle.light(
-                            MaterialTheme.colorScheme.primary.toArgb(),
-                            MaterialTheme.colorScheme.primary.toArgb()
-                        )
-                    } else {
-                        SystemBarStyle.dark(
-                            MaterialTheme.colorScheme.primary.toArgb()
-                        )
-                    },
-                    navigationBarStyle = if (!isSystemInDarkTheme()) {
-                        SystemBarStyle.light(
-                            MaterialTheme.colorScheme.inversePrimary.toArgb(),
-                            MaterialTheme.colorScheme.inversePrimary.toArgb()
-                        )
-                    } else {
-                        SystemBarStyle.dark(
-                            MaterialTheme.colorScheme.inversePrimary.toArgb()
-                        )
-                    }
-                )
+            if (viewModel.state.isCheckingToken.not()) {
+                ActivityTrackerTheme {
+                    enableEdgeToEdge(
+                        statusBarStyle = if (isSystemInDarkTheme()) {
+                            SystemBarStyle.light(
+                                MaterialTheme.colorScheme.primary.toArgb(),
+                                MaterialTheme.colorScheme.primary.toArgb()
+                            )
+                        } else {
+                            SystemBarStyle.dark(
+                                MaterialTheme.colorScheme.primary.toArgb()
+                            )
+                        },
+                        navigationBarStyle = if (!isSystemInDarkTheme()) {
+                            SystemBarStyle.light(
+                                MaterialTheme.colorScheme.inversePrimary.toArgb(),
+                                MaterialTheme.colorScheme.inversePrimary.toArgb()
+                            )
+                        } else {
+                            SystemBarStyle.dark(
+                                MaterialTheme.colorScheme.inversePrimary.toArgb()
+                            )
+                        }
+                    )
 
-                RootNavigation(
-                    skipLogin = viewModel.state.isLoggedIn
-                )
+                    RootNavigation(
+                        skipLogin = viewModel.state.isLoggedIn
+                    )
+                }
             }
         }
     }
