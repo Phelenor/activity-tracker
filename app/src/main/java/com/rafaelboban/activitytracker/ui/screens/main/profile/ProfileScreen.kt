@@ -137,7 +137,7 @@ private fun ProfileScreen(
 
             state.showHeightDialog -> {
                 EnterNumberDialog(
-                    number = state.user.weight,
+                    number = state.user.height,
                     label = stringResource(id = R.string.height),
                     title = stringResource(id = R.string.update_height),
                     isValid = { weight -> weight.toIntOrNull() in 100..250 || weight.isBlank() },
