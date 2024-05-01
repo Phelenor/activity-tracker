@@ -42,6 +42,8 @@ work = "2.9.0"
 auth0-jwt = "2.0.2"
 security-crypto = "1.1.0-alpha06"
 
+chucker = "4.0.0"
+
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -84,8 +86,10 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 
-#Sandwich
-sandwich = { group = "com.github.skydoves", name = "sandwich-retrofit", version.ref = "sandwich" }
+# Sandwich
+sandwich = { group = "com.github.skydoves", name = "sandwich", version.ref = "sandwich" }
+sandwich-retrofit = { group = "com.github.skydoves", name = "sandwich-retrofit", version.ref = "sandwich" }
+
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
@@ -132,6 +136,10 @@ credentails = { group = "androidx.credentials", name = "credentials", version = 
 credentails-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version = "1.2.2" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version = "1.1.0" }
 auth0-jwt = { group = "com.auth0.android", name = "jwtdecode", version.ref = "auth0-jwt" }
+
+# Chucker
+chucker = { group = "com.github.chuckerteam.chucker", name = "library", version.ref = "chucker" }
+chucker-no-op = { group = "com.github.chuckerteam.chucker", name = "library-no-op", version.ref = "chucker" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "android-gradle" }

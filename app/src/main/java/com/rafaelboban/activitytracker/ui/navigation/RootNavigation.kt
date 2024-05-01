@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.rafaelboban.activitytracker.ui.screens.login.LoginScreen
+import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 
 @Composable
 fun RootNavigation(
@@ -18,7 +18,7 @@ fun RootNavigation(
         startDestination = if (skipLogin) NavigationGraph.Main.route else NavigationGraph.Auth.route
     ) {
         composable(NavigationGraph.Auth.route) {
-            LoginScreen(
+            LoginScreenRoot(
                 onLoginSuccess = {
                     navHostController.navigate(NavigationGraph.Main.route) {
                         popUpTo(NavigationGraph.Auth.route) {

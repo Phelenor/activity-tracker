@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.auth0.android.jwt.DecodeException
 import com.auth0.android.jwt.JWT
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.activitytracker.util.Constants.AUTH_TOKEN
 import com.rafaelboban.activitytracker.worker.TokenRefreshWorker
@@ -55,9 +56,11 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
-        authTokenInterceptor: Interceptor
+        authTokenInterceptor: Interceptor,
+        @ApplicationContext context: Context
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(ChuckerInterceptor(context))
             .addInterceptor(loggingInterceptor)
             .addInterceptor(authTokenInterceptor)
             .build()

@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.okhttp.logging)
 
     implementation(libs.sandwich)
+    implementation(libs.sandwich.retrofit)
 
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapter)
@@ -112,6 +113,9 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.accompanist)
+
+    debugImplementation(libs.chucker)
+    releaseImplementation(libs.chucker.no.op)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

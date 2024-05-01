@@ -25,9 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.User
 import com.rafaelboban.activitytracker.model.network.PostStatus
@@ -39,6 +41,9 @@ import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.UserImage
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.activitytracker.util.CredentialHelper
+import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 private enum class ProfileDialogType {
     LOGOUT, DELETE_ACCOUNT, CHANGE_NAME
@@ -46,10 +51,11 @@ private enum class ProfileDialogType {
 
 @Composable
 fun ProfileScreen(
+    navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    navigateToLogin: () -> Unit
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val viewModel = hiltViewModel<ProfileViewModel>()
+    val context = LocalContext.current
 
     var dialogData by remember { mutableStateOf<ProfileDialogType?>(null) }
 
@@ -92,6 +98,7 @@ fun ProfileScreen(
                     viewModel.deleteAccount()
                 } else {
                     viewModel.logout()
+                    // CredentialHelper.logout(CredentialManager.create(context))
                     navigateToLogin()
                 }
             }

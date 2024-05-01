@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,30 +46,58 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
-import com.rafaelboban.activitytracker.model.network.PostStatus
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
+import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
 import com.rafaelboban.activitytracker.util.CredentialHelper
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(
+fun LoginScreenRoot(
     onLoginSuccess: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(viewModel.postStatus) {
-        if (viewModel.postStatus == PostStatus.SUCCESS) {
-            onLoginSuccess()
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            is LoginEvent.Error -> Toast.makeText(context, event.error.asString(context), Toast.LENGTH_LONG).show()
+            is LoginEvent.Success -> onLoginSuccess()
         }
     }
 
-    FullScreenLoadingDialog(showDialog = viewModel.postStatus == PostStatus.IN_PROGRESS)
+    LoginScreen(
+        isLoading = viewModel.isLoading,
+        onAction = { action ->
+            when (action) {
+                LoginAction.OnLoginClick -> {
+                    viewModel.startGoogleLogin()
+
+                    coroutineScope.launch {
+                        CredentialHelper.startGoogleLogin(
+                            context = context,
+                            credentialManager = CredentialManager.create(context),
+                            onSuccess = { idToken, nonce -> viewModel.login(idToken, nonce) },
+                            onError = { error -> viewModel.finishGoogleLogin(showMessage = error !is GetCredentialCancellationException) }
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun LoginScreen(
+    isLoading: Boolean,
+    onAction: (LoginAction) -> Unit
+) {
+    FullScreenLoadingDialog(showDialog = isLoading)
 
     BoxWithConstraints(
         modifier = Modifier
@@ -101,7 +129,7 @@ fun LoginScreen(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(top = 32.dp, start = 16.dp, end = 16.dp, bottom = 32.dp)
@@ -109,7 +137,7 @@ fun LoginScreen(
                 .navigationBarsPadding()
         ) {
             Text(
-                text = "Fitness Activity Tracker",
+                text = stringResource(id = R.string.fitness_activity_tracker),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 24.sp,
@@ -160,17 +188,7 @@ fun LoginScreen(
                     .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
                     .border(width = 1.dp, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary)
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        viewModel.postStatus = PostStatus.IN_PROGRESS
-                        coroutineScope.launch {
-                            CredentialHelper.startGoogleLogin(
-                                context = context,
-                                credentialManager = CredentialManager.create(context),
-                                onSuccess = { idToken, nonce -> viewModel.login(idToken, nonce) },
-                                onError = { viewModel.postStatus = null }
-                            )
-                        }
-                    }
+                    .clickable { onAction(LoginAction.OnLoginClick) }
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Icon(
@@ -183,7 +201,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "Login with Google",
+                    text = stringResource(id = R.string.login_with_google),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = Typography.labelLarge,
@@ -197,5 +215,10 @@ fun LoginScreen(
 @Preview
 @Composable
 private fun LoginScreenPreview() {
-    LoginScreen(onLoginSuccess = {})
+    ActivityTrackerTheme {
+        LoginScreen(
+            isLoading = false,
+            onAction = {}
+        )
+    }
 }
