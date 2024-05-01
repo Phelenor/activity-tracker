@@ -28,7 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreen
+import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
 import com.rafaelboban.activitytracker.ui.theme.Typography
 
 @Composable
@@ -52,7 +52,7 @@ fun MainNavigationGraph(
         }
 
         composable(MainScreen.Profile.route) {
-            ProfileScreen(
+            ProfileScreenRoot(
                 navigateToLogin = navigateToLogin
             )
         }

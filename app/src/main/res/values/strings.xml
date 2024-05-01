@@ -6,6 +6,16 @@
     <string name="login_ready">Ready to get moving?</string>
     <string name="google_login_error">Google Login error</string>
     <string name="login_error">Login error</string>
-    <string name="login_with_google">Login with Google</string>
+    <string name="login_with_google">Sign in with Google</string>
     <string name="fitness_activity_tracker">Fitness Activity Tracker</string>
+    <string name="change_name">Change Name</string>
+    <string name="sign_out">Sign out</string>
+    <string name="delete_account">Delete Account\n</string>
+    <string name="confirm_delete_account">Are you sure you want to delete your account?</string>
+    <string name="confirm_sign_out">Are you sure you want to sign out?</string>
+    <string name="delete_account_warning">This action cannot be undone.</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_account_error">Delete account error</string>
+    <string name="change_name_error">Change name error</string>
+    <string name="change_name_success">Name changed!</string>
 </resources>

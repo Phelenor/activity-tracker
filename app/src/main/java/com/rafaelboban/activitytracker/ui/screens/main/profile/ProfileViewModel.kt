@@ -7,13 +7,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
-import com.rafaelboban.activitytracker.model.network.PostStatus
 import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.repository.UserRepository
-import com.rafaelboban.activitytracker.util.UserData
-import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnSuccess
+import com.rafaelboban.activitytracker.util.UserData.user
+import com.skydoves.sandwich.ApiResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,38 +24,72 @@ class ProfileViewModel @Inject constructor(
     private val sessionStorage: EncryptedSessionStorage
 ) : AndroidViewModel(application) {
 
-    var user by mutableStateOf(checkNotNull(UserData.user))
+    var state by mutableStateOf(ProfileState(checkNotNull(user)))
+        private set
 
-    var changeNamePostStatus by mutableStateOf<PostStatus?>(null)
-    var deleteAccountPostStatus by mutableStateOf<PostStatus?>(null)
+    private val eventChannel = Channel<ProfileEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     fun logout() {
         viewModelScope.launch {
-            UserData.user = null
+            user = null
             sessionStorage.clear()
+            eventChannel.send(ProfileEvent.LogoutSuccess)
         }
     }
 
     fun deleteAccount() {
         viewModelScope.launch {
-            deleteAccountPostStatus = PostStatus.IN_PROGRESS
-            userRepository.deleteAccount()
-            deleteAccountPostStatus = PostStatus.SUCCESS
+            state = state.copy(submitInProgress = true)
+
+            val response = userRepository.deleteAccount()
+
+            if (response is ApiResponse.Success) {
+                user = null
+                sessionStorage.clear()
+                eventChannel.send(ProfileEvent.DeleteAccountSuccess)
+            } else {
+                eventChannel.send(ProfileEvent.DeleteAccountError)
+            }
+
+            state = state.copy(submitInProgress = false)
         }
     }
 
     fun changeName(name: String) {
         viewModelScope.launch {
-            changeNamePostStatus = PostStatus.IN_PROGRESS
+            state = state.copy(submitInProgress = true)
 
-            userRepository.changeName(ChangeNameRequest(name)).suspendOnSuccess {
-                user = data
-                UserData.user = data
-                sessionStorage.set(sessionStorage.get()?.copy(user = data))
-                changeNamePostStatus = PostStatus.SUCCESS
-            }.onFailure {
-                changeNamePostStatus = PostStatus.ERROR
+            val response = userRepository.changeName(ChangeNameRequest(name))
+
+            if (response is ApiResponse.Success) {
+                user = response.data
+                state = state.copy(submitInProgress = false, user = response.data)
+                sessionStorage.set(sessionStorage.get()?.copy(user = response.data))
+                eventChannel.send(ProfileEvent.NameChangeSuccess)
+            } else {
+                eventChannel.send(ProfileEvent.NameChangeError)
             }
         }
     }
+
+    fun dismissDialogs() {
+        state = state.copy(
+            showLogoutDialog = false,
+            showChangeNameDialog = false,
+            showDeleteAccountDialog = false
+        )
+    }
+
+    fun showDialog(type: ProfileDialogType) {
+        state = state.copy(
+            showLogoutDialog = type == ProfileDialogType.SIGN_OUT,
+            showChangeNameDialog = type == ProfileDialogType.CHANGE_NAME,
+            showDeleteAccountDialog = type == ProfileDialogType.DELETE_ACCOUNT
+        )
+    }
+}
+
+enum class ProfileDialogType {
+    SIGN_OUT, DELETE_ACCOUNT, CHANGE_NAME
 }

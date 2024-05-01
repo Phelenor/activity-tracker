@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.main.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -17,21 +18,20 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.User
-import com.rafaelboban.activitytracker.model.network.PostStatus
 import com.rafaelboban.activitytracker.ui.components.ButtonWithIcon
 import com.rafaelboban.activitytracker.ui.components.ChangeNameDialog
 import com.rafaelboban.activitytracker.ui.components.ConfirmActionDialog
@@ -40,104 +40,103 @@ import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.UserImage
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import com.rafaelboban.activitytracker.ui.theme.Typography
-
-private enum class ProfileDialogType {
-    LOGOUT, DELETE_ACCOUNT, CHANGE_NAME
-}
+import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
+import com.rafaelboban.activitytracker.util.CredentialHelper
+import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(
+fun ProfileScreenRoot(
     navigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember { CredentialManager.create(context) }
 
-    var dialogData by remember { mutableStateOf<ProfileDialogType?>(null) }
-
-    FullScreenLoadingDialog(
-        showDialog = viewModel.changeNamePostStatus == PostStatus.IN_PROGRESS || viewModel.deleteAccountPostStatus == PostStatus.IN_PROGRESS
-    )
-
-    LaunchedEffect(viewModel.deleteAccountPostStatus) {
-        if (viewModel.deleteAccountPostStatus == PostStatus.IN_PROGRESS) {
-            navigateToLogin()
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            ProfileEvent.NameChangeError -> Toast.makeText(context, context.getString(R.string.change_name_error), Toast.LENGTH_LONG).show()
+            ProfileEvent.NameChangeSuccess -> Toast.makeText(context, context.getString(R.string.change_name_success), Toast.LENGTH_LONG).show()
+            ProfileEvent.DeleteAccountError -> Toast.makeText(context, context.getString(R.string.delete_account_error), Toast.LENGTH_LONG).show()
+            ProfileEvent.LogoutSuccess,
+            ProfileEvent.DeleteAccountSuccess -> coroutineScope.launch {
+                CredentialHelper.logout(credentialManager)
+                navigateToLogin()
+            }
         }
     }
 
-    DialogScaffold(
-        showDialog = dialogData != null,
-        onDismiss = { dialogData = null }
-    ) {
-        val dialogType = checkNotNull(dialogData)
-
-        if (dialogType == ProfileDialogType.CHANGE_NAME) {
-            ChangeNameDialog(
-                currentName = viewModel.user.displayName,
-                onActionClick = viewModel::changeName,
-                onDismissClick = { dialogData = null }
-            )
-        } else {
-            val title = when (dialogType) {
-                ProfileDialogType.LOGOUT -> "Are you sure you want to logout?"
-                ProfileDialogType.DELETE_ACCOUNT -> "Are you sure you want to delete your account?"
-                else -> ""
+    ProfileScreen(
+        state = viewModel.state,
+        onAction = { action ->
+            when (action) {
+                is ProfileAction.ConfirmChangeName -> viewModel.changeName(action.name)
+                ProfileAction.ConfirmDeleteAccount -> viewModel.deleteAccount()
+                ProfileAction.ConfirmLogout -> viewModel.logout()
+                ProfileAction.DismissDialog -> viewModel.dismissDialogs()
+                ProfileAction.OnChangeNameClick -> viewModel.showDialog(ProfileDialogType.CHANGE_NAME)
+                ProfileAction.OnDeleteAccountClick -> viewModel.showDialog(ProfileDialogType.DELETE_ACCOUNT)
+                ProfileAction.OnLogoutClick -> viewModel.showDialog(ProfileDialogType.SIGN_OUT)
             }
-
-            val subtitle = when (dialogType) {
-                ProfileDialogType.DELETE_ACCOUNT -> "This action cannot be undone."
-                else -> null
-            }
-
-            val action = {
-                if (dialogType == ProfileDialogType.DELETE_ACCOUNT) {
-                    viewModel.deleteAccount()
-                } else {
-                    viewModel.logout()
-                    // CredentialHelper.logout(CredentialManager.create(context))
-                    navigateToLogin()
-                }
-            }
-
-            ConfirmActionDialog(
-                title = title,
-                subtitle = subtitle,
-                actionText = "Confirm",
-                actionButtonColor = MaterialTheme.colorScheme.primary,
-                actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
-                onDismissClick = { dialogData = null },
-                onActionClick = action
-            )
         }
-    }
-
-    ProfileContent(
-        modifier = modifier,
-        user = viewModel.user,
-        onLogoutClick = { dialogData = ProfileDialogType.LOGOUT },
-        onDeleteAccountClick = { dialogData = ProfileDialogType.DELETE_ACCOUNT },
-        onChangeNameClick = { dialogData = ProfileDialogType.CHANGE_NAME }
     )
 }
 
 @Composable
-private fun ProfileContent(
-    user: User,
-    onLogoutClick: () -> Unit,
-    onDeleteAccountClick: () -> Unit,
-    onChangeNameClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun ProfileScreen(
+    state: ProfileState,
+    onAction: (ProfileAction) -> Unit
 ) {
+    FullScreenLoadingDialog(showDialog = state.submitInProgress)
+
+    DialogScaffold(
+        showDialog = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog,
+        onDismiss = { onAction(ProfileAction.DismissDialog) }
+    ) {
+        when {
+            state.showChangeNameDialog -> {
+                ChangeNameDialog(
+                    currentName = state.user.displayName,
+                    onActionClick = { name -> onAction(ProfileAction.ConfirmChangeName(name)) },
+                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                )
+            }
+
+            state.showDeleteAccountDialog -> {
+                ConfirmActionDialog(
+                    title = stringResource(id = R.string.confirm_delete_account),
+                    subtitle = stringResource(id = R.string.delete_account_warning),
+                    actionText = stringResource(id = R.string.confirm),
+                    actionButtonColor = MaterialTheme.colorScheme.primary,
+                    actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
+                    onActionClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
+                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                )
+            }
+
+            else -> {
+                ConfirmActionDialog(
+                    title = stringResource(id = R.string.confirm_sign_out),
+                    actionText = stringResource(id = R.string.confirm),
+                    actionButtonColor = MaterialTheme.colorScheme.primary,
+                    actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
+                    onActionClick = { onAction(ProfileAction.ConfirmLogout) },
+                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                )
+            }
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = MaterialTheme.colorScheme.surface)
             .padding(top = 32.dp, bottom = 16.dp)
     ) {
         UserImage(
-            imageUrl = user.imageUrl,
+            imageUrl = state.user.imageUrl,
             modifier = Modifier
                 .border(width = 6.dp, color = MaterialTheme.colorScheme.primary, shape = CircleShape)
                 .padding(12.dp)
@@ -149,7 +148,7 @@ private fun ProfileContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = user.displayName,
+            text = state.user.displayName,
             color = MaterialTheme.colorScheme.onSurface,
             style = Typography.displayLarge
         )
@@ -157,7 +156,7 @@ private fun ProfileContent(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = user.email,
+            text = state.user.email,
             color = MaterialTheme.colorScheme.onSurface,
             style = Typography.labelLarge
         )
@@ -165,24 +164,24 @@ private fun ProfileContent(
         Spacer(modifier = Modifier.weight(1f))
 
         ButtonWithIcon(
-            text = "Change Name",
-            onClick = onChangeNameClick,
+            text = stringResource(id = R.string.change_name),
+            onClick = { onAction(ProfileAction.OnChangeNameClick) },
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
         )
 
         ButtonWithIcon(
-            text = "Logout",
-            onClick = onLogoutClick,
+            text = stringResource(id = R.string.sign_out),
+            onClick = { onAction(ProfileAction.OnLogoutClick) },
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
         )
 
         ButtonWithIcon(
-            text = "Delete Account",
-            onClick = onDeleteAccountClick,
+            text = stringResource(id = R.string.delete_account),
+            onClick = { onAction(ProfileAction.OnDeleteAccountClick) },
             imageVector = Icons.Default.Delete,
             containerColor = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.onError,
@@ -198,16 +197,16 @@ private fun ProfileContent(
 @Composable
 private fun ProfileScreenPreview() {
     ActivityTrackerTheme {
-        ProfileContent(
-            onLogoutClick = {},
-            onDeleteAccountClick = {},
-            onChangeNameClick = {},
-            user = User(
-                id = "213141",
-                email = "test@gmail.com",
-                imageUrl = "https://lh3.googleusercontent.com/a/ACg8ocIkI-iHUZ-RnNOU6tqTO7NPPLQ_pZbVZLV-Ha6Lx8rV6aPk_uc=s96-c",
-                name = "Johnny Silverhand",
-                displayName = "Johnny Silverhand"
+        ProfileScreen(
+            onAction = {},
+            state = ProfileState(
+                user = User(
+                    id = "213141",
+                    email = "test@gmail.com",
+                    imageUrl = "https://lh3.googleusercontent.com/a/ACg8ocIkI-iHUZ-RnNOU6tqTO7NPPLQ_pZbVZLV-Ha6Lx8rV6aPk_uc=s96-c",
+                    name = "Johnny Silverhand",
+                    displayName = "Johnny Silverhand"
+                )
             )
         )
     }
