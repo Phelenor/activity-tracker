@@ -28,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
 import com.rafaelboban.activitytracker.ui.theme.Typography
 
@@ -63,6 +64,12 @@ sealed class MainScreen(val route: String, val selectedIcon: ImageVector, val un
     data object First : MainScreen("first", Icons.Filled.Favorite, Icons.Outlined.Favorite, "First")
     data object Second : MainScreen("second", Icons.Filled.Call, Icons.Outlined.Call, "Second")
     data object Profile : MainScreen("profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle, "Profile")
+
+    companion object {
+        fun getByRoute(route: String): MainScreen? {
+            return listOf(First, Second, Profile).find { it.route == route }
+        }
+    }
 }
 
 @Composable
@@ -71,12 +78,17 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     Scaffold(
         modifier = modifier,
+        topBar = {
+            TrackerTopAppBar(
+                title = currentRoute?.let { MainScreen.getByRoute(it)?.name } ?: ""
+            )
+        },
         bottomBar = {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.primary
