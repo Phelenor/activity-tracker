@@ -102,6 +102,7 @@ fun ConfirmActionDialog(
 ) {
     Column(
         modifier = modifier
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceBright)
             .padding(24.dp)
@@ -149,6 +150,7 @@ fun ChangeNameDialog(
 
     Column(
         modifier = modifier
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceBright)
             .padding(24.dp)
@@ -220,6 +222,7 @@ fun EnterNumberDialog(
 
     Column(
         modifier = modifier
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceBright)
             .padding(24.dp)
