@@ -7,5 +7,7 @@ data class ProfileState(
     val showChangeNameDialog: Boolean = false,
     val showLogoutDialog: Boolean = false,
     val showDeleteAccountDialog: Boolean = false,
-    val submitInProgress: Boolean = false
+    val submitInProgress: Boolean = false,
+    val showWeightDialog: Boolean = false,
+    val showHeightDialog: Boolean = false
 )

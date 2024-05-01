@@ -10,6 +10,7 @@ activity-compose = "1.9.0"
 compose-bom = "2024.04.01"
 kotlin-collections-immutable = "0.3.7"
 ksp = "1.9.23-1.0.20"
+material-icons-extended = "1.6.3"
 
 compose = "1.7.0-alpha07"
 compose-compiler = "1.5.12"
@@ -71,6 +72,8 @@ compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "compose-material3" }
 material-compose = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "compose-constraint-layout" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons-extended" }
+
 
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "compose" }

@@ -16,6 +16,11 @@
     <string name="delete_account_warning">This action cannot be undone.</string>
     <string name="confirm">Confirm</string>
     <string name="delete_account_error">Delete account error</string>
-    <string name="change_name_error">Change name error</string>
-    <string name="change_name_success">Name changed!</string>
+    <string name="user_info_change_error">Info change error</string>
+    <string name="user_info_change_success">Info changed!</string>
+    <string name="image_load_error">Error loading image</string>
+    <string name="height">Height</string>
+    <string name="update_height">Update height</string>
+    <string name="weight">Weight</string>
+    <string name="update_weight">Update weight</string>
 </resources>

@@ -3,15 +3,19 @@ package com.rafaelboban.activitytracker.ui.screens.main.profile
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -36,7 +40,9 @@ import com.rafaelboban.activitytracker.ui.components.ButtonWithIcon
 import com.rafaelboban.activitytracker.ui.components.ChangeNameDialog
 import com.rafaelboban.activitytracker.ui.components.ConfirmActionDialog
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
+import com.rafaelboban.activitytracker.ui.components.EnterNumberDialog
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
+import com.rafaelboban.activitytracker.ui.components.LabeledItem
 import com.rafaelboban.activitytracker.ui.components.UserImage
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import com.rafaelboban.activitytracker.ui.theme.Typography
@@ -55,8 +61,8 @@ fun ProfileScreenRoot(
 
     ObserveAsEvents(flow = viewModel.events) { event ->
         when (event) {
-            ProfileEvent.NameChangeError -> Toast.makeText(context, context.getString(R.string.change_name_error), Toast.LENGTH_LONG).show()
-            ProfileEvent.NameChangeSuccess -> Toast.makeText(context, context.getString(R.string.change_name_success), Toast.LENGTH_LONG).show()
+            ProfileEvent.UserInfoChangeError -> Toast.makeText(context, context.getString(R.string.user_info_change_error), Toast.LENGTH_LONG).show()
+            ProfileEvent.UserInfoChangeSuccess -> Toast.makeText(context, context.getString(R.string.user_info_change_success), Toast.LENGTH_LONG).show()
             ProfileEvent.DeleteAccountError -> Toast.makeText(context, context.getString(R.string.delete_account_error), Toast.LENGTH_LONG).show()
             ProfileEvent.LogoutSuccess,
             ProfileEvent.DeleteAccountSuccess -> coroutineScope.launch {
@@ -70,13 +76,17 @@ fun ProfileScreenRoot(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
-                is ProfileAction.ConfirmChangeName -> viewModel.changeName(action.name)
                 ProfileAction.ConfirmDeleteAccount -> viewModel.deleteAccount()
                 ProfileAction.ConfirmLogout -> viewModel.logout()
                 ProfileAction.DismissDialog -> viewModel.dismissDialogs()
                 ProfileAction.OnChangeNameClick -> viewModel.showDialog(ProfileDialogType.CHANGE_NAME)
                 ProfileAction.OnDeleteAccountClick -> viewModel.showDialog(ProfileDialogType.DELETE_ACCOUNT)
                 ProfileAction.OnLogoutClick -> viewModel.showDialog(ProfileDialogType.SIGN_OUT)
+                ProfileAction.OnHeightClick -> viewModel.showDialog(ProfileDialogType.UPDATE_HEIGHT)
+                ProfileAction.OnWeightClick -> viewModel.showDialog(ProfileDialogType.UPDATE_WEIGHT)
+                is ProfileAction.ConfirmChangeName -> viewModel.updateUser(name = action.name)
+                is ProfileAction.ConfirmHeightClick -> viewModel.updateUser(height = action.height)
+                is ProfileAction.ConfirmWeightClick -> viewModel.updateUser(weight = action.weight)
             }
         }
     )
@@ -90,7 +100,7 @@ private fun ProfileScreen(
     FullScreenLoadingDialog(showDialog = state.submitInProgress)
 
     DialogScaffold(
-        showDialog = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog,
+        showDialog = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog || state.showWeightDialog || state.showHeightDialog,
         onDismiss = { onAction(ProfileAction.DismissDialog) }
     ) {
         when {
@@ -114,6 +124,28 @@ private fun ProfileScreen(
                 )
             }
 
+            state.showWeightDialog -> {
+                EnterNumberDialog(
+                    number = state.user.weight,
+                    label = stringResource(id = R.string.weight),
+                    title = stringResource(id = R.string.update_weight),
+                    isValid = { weight -> weight.toIntOrNull() in 30..400 || weight.isBlank() },
+                    onActionClick = { weight -> weight?.let { onAction(ProfileAction.ConfirmWeightClick(weight)) } },
+                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                )
+            }
+
+            state.showHeightDialog -> {
+                EnterNumberDialog(
+                    number = state.user.weight,
+                    label = stringResource(id = R.string.height),
+                    title = stringResource(id = R.string.update_height),
+                    isValid = { weight -> weight.toIntOrNull() in 100..250 || weight.isBlank() },
+                    onActionClick = { height -> height?.let { onAction(ProfileAction.ConfirmHeightClick(height)) } },
+                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                )
+            }
+
             else -> {
                 ConfirmActionDialog(
                     title = stringResource(id = R.string.confirm_sign_out),
@@ -132,7 +164,7 @@ private fun ProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(top = 32.dp, bottom = 16.dp)
     ) {
         UserImage(
@@ -160,6 +192,38 @@ private fun ProfileScreen(
             color = MaterialTheme.colorScheme.onSurface,
             style = Typography.labelLarge
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceContainerLow)
+                .padding(16.dp)
+        ) {
+            LabeledItem(
+                label = stringResource(id = R.string.height),
+                value = state.user.height?.let { "${it}cm" } ?: "Add",
+                modifier = Modifier
+                    .weight(1f)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onAction(ProfileAction.OnHeightClick) }
+                    .padding(vertical = 6.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            LabeledItem(
+                label = stringResource(id = R.string.weight),
+                value = state.user.weight?.let { "${it}kg" } ?: "Add",
+                modifier = Modifier
+                    .weight(1f)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onAction(ProfileAction.OnWeightClick) }
+                    .padding(vertical = 6.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -205,7 +269,9 @@ private fun ProfileScreenPreview() {
                     email = "test@gmail.com",
                     imageUrl = "https://lh3.googleusercontent.com/a/ACg8ocIkI-iHUZ-RnNOU6tqTO7NPPLQ_pZbVZLV-Ha6Lx8rV6aPk_uc=s96-c",
                     name = "Johnny Silverhand",
-                    displayName = "Johnny Silverhand"
+                    displayName = "Johnny Silverhand",
+                    weight = 83,
+                    height = 192
                 )
             )
         )

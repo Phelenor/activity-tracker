@@ -1,8 +1,8 @@
 package com.rafaelboban.activitytracker.network.repository
 
 import com.rafaelboban.activitytracker.network.ApiService
-import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
+import com.rafaelboban.activitytracker.network.model.UpdateUserData
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,5 +13,5 @@ class UserRepository @Inject constructor(private val api: ApiService) {
 
     suspend fun deleteAccount() = api.deleteAccount()
 
-    suspend fun changeName(body: ChangeNameRequest) = api.changeUserName(body)
+    suspend fun updateUserData(name: String? = null, height: Int? = null, weight: Int? = null) = api.updateUserData(UpdateUserData(name, height, weight))
 }

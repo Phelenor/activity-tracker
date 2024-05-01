@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
-import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.repository.UserRepository
 import com.rafaelboban.activitytracker.util.UserData.user
 import com.skydoves.sandwich.ApiResponse
@@ -56,19 +55,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun changeName(name: String) {
+    fun updateUser(name: String? = null, height: Int? = null, weight: Int? = null) {
         viewModelScope.launch {
             state = state.copy(submitInProgress = true)
 
-            val response = userRepository.changeName(ChangeNameRequest(name))
+            val response = userRepository.updateUserData(name, height, weight)
 
             if (response is ApiResponse.Success) {
                 user = response.data
                 state = state.copy(submitInProgress = false, user = response.data)
                 sessionStorage.set(sessionStorage.get()?.copy(user = response.data))
-                eventChannel.send(ProfileEvent.NameChangeSuccess)
+                eventChannel.send(ProfileEvent.UserInfoChangeSuccess)
             } else {
-                eventChannel.send(ProfileEvent.NameChangeError)
+                eventChannel.send(ProfileEvent.UserInfoChangeError)
             }
         }
     }
@@ -77,7 +76,9 @@ class ProfileViewModel @Inject constructor(
         state = state.copy(
             showLogoutDialog = false,
             showChangeNameDialog = false,
-            showDeleteAccountDialog = false
+            showDeleteAccountDialog = false,
+            showWeightDialog = false,
+            showHeightDialog = false
         )
     }
 
@@ -85,11 +86,13 @@ class ProfileViewModel @Inject constructor(
         state = state.copy(
             showLogoutDialog = type == ProfileDialogType.SIGN_OUT,
             showChangeNameDialog = type == ProfileDialogType.CHANGE_NAME,
-            showDeleteAccountDialog = type == ProfileDialogType.DELETE_ACCOUNT
+            showDeleteAccountDialog = type == ProfileDialogType.DELETE_ACCOUNT,
+            showWeightDialog = type == ProfileDialogType.UPDATE_WEIGHT,
+            showHeightDialog = type == ProfileDialogType.UPDATE_HEIGHT
         )
     }
 }
 
 enum class ProfileDialogType {
-    SIGN_OUT, DELETE_ACCOUNT, CHANGE_NAME
+    SIGN_OUT, DELETE_ACCOUNT, CHANGE_NAME, UPDATE_WEIGHT, UPDATE_HEIGHT
 }

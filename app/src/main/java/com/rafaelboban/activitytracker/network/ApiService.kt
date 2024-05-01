@@ -1,9 +1,9 @@
 package com.rafaelboban.activitytracker.network
 
 import com.rafaelboban.activitytracker.model.User
-import com.rafaelboban.activitytracker.network.model.ChangeNameRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.model.LoginResponse
+import com.rafaelboban.activitytracker.network.model.UpdateUserData
 import com.skydoves.sandwich.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -20,6 +20,6 @@ interface ApiService {
     @POST("/api/delete-account")
     suspend fun deleteAccount(): ApiResponse<Unit>
 
-    @POST("/api/change-name")
-    suspend fun changeUserName(@Body body: ChangeNameRequest): ApiResponse<User>
+    @POST("/api/update-user")
+    suspend fun updateUserData(@Body body: UpdateUserData): ApiResponse<User>
 }
