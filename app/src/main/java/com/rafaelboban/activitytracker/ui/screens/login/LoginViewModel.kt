@@ -1,10 +1,9 @@
 package com.rafaelboban.activitytracker.ui.screens.login
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.data.session.AuthInfo
@@ -25,10 +24,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    application: Application,
     private val userRepository: UserRepository,
     private val sessionStorage: EncryptedSessionStorage
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     var isLoading by mutableStateOf(false)
         private set

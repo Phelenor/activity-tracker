@@ -1,10 +1,9 @@
 package com.rafaelboban.activitytracker.ui.screens.main.profile
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.repository.UserRepository
@@ -18,10 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    application: Application,
     private val userRepository: UserRepository,
     private val sessionStorage: EncryptedSessionStorage
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     var state by mutableStateOf(ProfileState(checkNotNull(user)))
         private set

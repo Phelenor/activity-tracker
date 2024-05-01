@@ -76,6 +76,6 @@ fun TrackerTopAppBar(
 @Composable
 private fun TrackerTopAppBarPreview() {
     ActivityTrackerTheme {
-        TrackerTopAppBar("Profile")
+        TrackerTopAppBar(title = "Profile", showBackButton = true)
     }
 }

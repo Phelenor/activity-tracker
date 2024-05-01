@@ -3,6 +3,7 @@
 package com.rafaelboban.activitytracker.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -20,9 +21,10 @@ import coil.compose.SubcomposeAsyncImage
 
 @Composable
 fun ImageWithIndicator(
-    url: String,
+    url: String?,
     modifier: Modifier = Modifier,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    placeholder: (@Composable BoxScope.() -> Unit)? = null
 ) {
     SubcomposeAsyncImage(
         model = url,
@@ -47,11 +49,15 @@ fun ImageWithIndicator(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    tint = MaterialTheme.colorScheme.error,
-                    contentDescription = "error"
-                )
+                placeholder?.let {
+                    placeholder()
+                } ?: run {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        tint = MaterialTheme.colorScheme.error,
+                        contentDescription = "error"
+                    )
+                }
             }
         }
     )

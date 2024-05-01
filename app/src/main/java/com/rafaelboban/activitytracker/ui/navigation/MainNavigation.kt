@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -25,49 +25,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
+import com.rafaelboban.activitytracker.ui.components.composableFade
+import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
 import com.rafaelboban.activitytracker.ui.theme.Typography
 
-@Composable
-fun MainNavigationGraph(
-    navController: NavHostController,
-    navigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NavHost(
-        modifier = modifier,
-        navController = navController,
-        route = NavigationGraph.Main.route,
-        startDestination = MainScreen.First.route
-    ) {
-        composable(MainScreen.First.route) {
-            MockScreen(label = MainScreen.First.name)
-        }
-
-        composable(MainScreen.Second.route) {
-            MockScreen(label = MainScreen.Second.name)
-        }
-
-        composable(MainScreen.Profile.route) {
-            ProfileScreenRoot(
-                navigateToLogin = navigateToLogin
-            )
-        }
-    }
-}
-
 sealed class MainScreen(val route: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: String) {
-    data object First : MainScreen("first", Icons.Filled.Favorite, Icons.Outlined.Favorite, "First")
-    data object Second : MainScreen("second", Icons.Filled.Call, Icons.Outlined.Call, "Second")
+    data object History : MainScreen("history", Icons.Filled.DateRange, Icons.Outlined.DateRange, "History")
+    data object Dashboard : MainScreen("dashboard", Icons.Filled.Home, Icons.Outlined.Home, "Dashboard")
     data object Profile : MainScreen("profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle, "Profile")
 
     companion object {
+
+        val Screens = linkedSetOf(History, Dashboard, Profile)
+
         fun getByRoute(route: String): MainScreen? {
-            return listOf(First, Second, Profile).find { it.route == route }
+            return listOf(History, Dashboard, Profile).find { it.route == route }
         }
     }
 }
@@ -75,6 +51,7 @@ sealed class MainScreen(val route: String, val selectedIcon: ImageVector, val un
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
+    navigateToActivity: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -93,17 +70,13 @@ fun MainScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
-                listOf(
-                    MainScreen.First,
-                    MainScreen.Second,
-                    MainScreen.Profile
-                ).forEach { item ->
-                    val selected = currentRoute == item.route
+                MainScreen.Screens.forEach { item ->
+                    val isSelected = currentRoute == item.route
 
                     NavigationBarItem(
                         colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.inversePrimary),
                         label = { Text(item.name) },
-                        selected = selected,
+                        selected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
                                 navController.graph.startDestinationRoute?.let { startRoute ->
@@ -118,7 +91,7 @@ fun MainScreen(
                         },
                         icon = {
                             Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                                 contentDescription = item.name
                             )
                         }
@@ -130,25 +103,67 @@ fun MainScreen(
         MainNavigationGraph(
             modifier = Modifier.padding(padding),
             navController = navController,
+            navigateToActivity = navigateToActivity,
             navigateToLogin = onLogout
         )
     }
 }
 
 @Composable
-fun MockScreen(
-    label: String,
+fun MainNavigationGraph(
+    navController: NavHostController,
+    navigateToLogin: () -> Unit,
+    navigateToActivity: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
+    NavHost(
+        modifier = modifier,
+        navController = navController,
+        route = NavigationGraph.Main.route,
+        startDestination = MainScreen.Dashboard.route
     ) {
-        Text(
-            text = label,
-            style = Typography.displayLarge
-        )
+        composableFade(route = MainScreen.History.route) {
+            MockScreen(label = MainScreen.History.name, navigateUp = { navController.navigateUp() })
+        }
+
+        composableFade(route = MainScreen.Dashboard.route) {
+            DashboardScreenRoot(navigateToActivity = navigateToActivity)
+        }
+
+        composableFade(route = MainScreen.Profile.route) {
+            ProfileScreenRoot(
+                navigateToLogin = navigateToLogin
+            )
+        }
+    }
+}
+
+@Composable
+fun MockScreen(
+    label: String,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TrackerTopAppBar(
+                title = label,
+                showBackButton = true,
+                onBackButtonClick = navigateUp
+            )
+        }
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
+        ) {
+            Text(
+                text = label,
+                style = Typography.displayLarge
+            )
+        }
     }
 }

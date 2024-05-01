@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 data class User(
     val id: String,
     val email: String,
-    val imageUrl: String,
+    val imageUrl: String?,
     val name: String,
     val weight: Int?,
     val height: Int?,

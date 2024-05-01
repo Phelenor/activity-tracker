@@ -1,10 +1,9 @@
 package com.rafaelboban.activitytracker.ui
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.util.UserData
@@ -16,9 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    application: Application,
     private val sessionStorage: EncryptedSessionStorage
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     var state by mutableStateOf(MainState())
         private set
