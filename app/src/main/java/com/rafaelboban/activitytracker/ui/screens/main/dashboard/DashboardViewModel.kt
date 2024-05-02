@@ -7,5 +7,13 @@ import androidx.lifecycle.ViewModel
 
 class DashboardViewModel : ViewModel() {
 
-    var state by mutableStateOf(DashboardState(isLoading = false))
+    var state by mutableStateOf(DashboardState())
+
+    fun dismissBottomSheet() {
+        state = state.copy(showSelectActivityBottomSheet = false)
+    }
+
+    fun showSelectActivityBottomSheet() {
+        state = state.copy(showSelectActivityBottomSheet = true)
+    }
 }

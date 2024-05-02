@@ -28,4 +28,14 @@
     <string name="name">Name</string>
     <string name="name_validation">Name length longer than 3 characters, and shorter than 30 characters</string>
     <string name="add">Add</string>
+    <string name="individual_activity_label">Start individual activity</string>
+    <string name="create_group_activity">Start group activity\n</string>
+    <string name="join_group_activity">Join group activity</string>
+    <string name="join_gym_activity">Join gym activity</string>
+    <string name="get_equipment_info">Get equipment info</string>
+    <string name="running">Running</string>
+    <string name="other">Other</string>
+    <string name="walking">Walking</string>
+    <string name="cycling">Cycling</string>
+    <string name="select_activity">Select activity</string>
 </resources>
