@@ -32,8 +32,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
@@ -256,7 +258,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.sign_out),
             onClick = { onAction(ProfileAction.OnLogoutClick) },
-            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
