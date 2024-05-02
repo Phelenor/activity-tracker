@@ -27,4 +27,5 @@
     <string name="update_name">Update name</string>
     <string name="name">Name</string>
     <string name="name_validation">Name length longer than 3 characters, and shorter than 30 characters</string>
+    <string name="add">Add</string>
 </resources>

@@ -18,11 +18,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -99,18 +102,30 @@ private fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val bottomSheetState = rememberModalBottomSheetState()
     val showBottomSheet = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog || state.showWeightDialog || state.showHeightDialog
+
+    val dismissBottomSheet: () -> Unit = {
+        coroutineScope.launch {
+            bottomSheetState.hide()
+            onAction(ProfileAction.DismissDialog)
+        }
+    }
 
     FullScreenLoadingDialog(showDialog = state.submitInProgress)
 
     if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { onAction(ProfileAction.DismissDialog) }) {
+        ModalBottomSheet(
+            sheetState = bottomSheetState,
+            onDismissRequest = { onAction(ProfileAction.DismissDialog) }
+        ) {
             when {
                 state.showChangeNameDialog -> {
                     ChangeNameBottomSheet(
                         currentName = state.user.displayName,
                         onActionClick = { name -> onAction(ProfileAction.ConfirmChangeName(name)) },
-                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                        onDismissClick = dismissBottomSheet
                     )
                 }
 
@@ -122,7 +137,7 @@ private fun ProfileScreen(
                         actionButtonColor = MaterialTheme.colorScheme.error,
                         actionButtonTextColor = MaterialTheme.colorScheme.onError,
                         onActionClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
-                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                        onDismissClick = dismissBottomSheet
                     )
                 }
 
@@ -133,7 +148,7 @@ private fun ProfileScreen(
                         title = stringResource(id = R.string.update_weight),
                         isValid = { weight -> weight.toIntOrNull() in 30..400 || weight.isBlank() },
                         onActionClick = { weight -> weight?.let { onAction(ProfileAction.ConfirmWeightClick(weight)) } },
-                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                        onDismissClick = dismissBottomSheet
                     )
                 }
 
@@ -144,7 +159,7 @@ private fun ProfileScreen(
                         title = stringResource(id = R.string.update_height),
                         isValid = { weight -> weight.toIntOrNull() in 100..250 || weight.isBlank() },
                         onActionClick = { height -> height?.let { onAction(ProfileAction.ConfirmHeightClick(height)) } },
-                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                        onDismissClick = dismissBottomSheet
                     )
                 }
 
@@ -155,7 +170,7 @@ private fun ProfileScreen(
                         actionButtonColor = MaterialTheme.colorScheme.primary,
                         actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
                         onActionClick = { onAction(ProfileAction.ConfirmLogout) },
-                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                        onDismissClick = dismissBottomSheet
                     )
                 }
             }
@@ -207,7 +222,7 @@ private fun ProfileScreen(
         ) {
             LabeledItem(
                 label = stringResource(id = R.string.height),
-                value = state.user.height?.let { "${it}cm" } ?: "Add",
+                value = state.user.height?.let { "${it}cm" } ?: stringResource(id = R.string.add),
                 modifier = Modifier
                     .weight(1f)
                     .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
@@ -218,7 +233,7 @@ private fun ProfileScreen(
             Spacer(modifier = Modifier.width(8.dp))
             LabeledItem(
                 label = stringResource(id = R.string.weight),
-                value = state.user.weight?.let { "${it}kg" } ?: "Add",
+                value = state.user.weight?.let { "${it}kg" } ?: stringResource(id = R.string.add),
                 modifier = Modifier
                     .weight(1f)
                     .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
@@ -233,6 +248,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.change_name),
             onClick = { onAction(ProfileAction.OnChangeNameClick) },
+            imageVector = Icons.Filled.Edit,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
@@ -241,6 +257,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.sign_out),
             onClick = { onAction(ProfileAction.OnLogoutClick) },
+            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
