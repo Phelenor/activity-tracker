@@ -123,7 +123,17 @@ fun MainNavigationGraph(
         startDestination = MainScreen.Dashboard.route
     ) {
         composableFade(route = MainScreen.History.route) {
-            MockScreen(label = MainScreen.History.name, navigateUp = { navController.navigateUp() })
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
+            ) {
+                Text(
+                    text = "History",
+                    style = Typography.displayLarge
+                )
+            }
         }
 
         composableFade(route = MainScreen.Dashboard.route) {

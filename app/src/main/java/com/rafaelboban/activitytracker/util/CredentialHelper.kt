@@ -29,7 +29,7 @@ object CredentialHelper {
                 credentialManager,
                 clientId,
                 nonce,
-                filterByAuthorizedAccounts = true
+                filterByAuthorizedAccounts = false // TODO: change this to true
             )
 
             onSuccess(token, nonce)
