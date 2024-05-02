@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,10 +22,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import com.rafaelboban.activitytracker.ui.theme.Typography
 
 @Composable
-fun ButtonWithIcon(
+fun ButtonSecondary(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -98,20 +100,64 @@ fun ButtonPrimary(
     }
 }
 
+@Composable
+fun OutlinedButtonPrimary(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick,
+        enabled = enabled,
+        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.primary),
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceDim,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Text(
+            text = text.uppercase(),
+            style = Typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun ButtonWithIconPreview() {
-    ButtonWithIcon(text = "LOGOUT", onClick = { /*TODO*/ }, imageVector = Icons.Default.Delete)
+    ActivityTrackerTheme {
+        ButtonSecondary(text = "LOGOUT", onClick = { /*TODO*/ }, imageVector = Icons.Default.Delete)
+    }
 }
 
 @Preview
 @Composable
 private fun ButtonWithIconDisabledPreview() {
-    ButtonWithIcon(text = "LOGOUT", onClick = { /*TODO*/ }, enabled = false)
+    ActivityTrackerTheme {
+        ButtonSecondary(text = "LOGOUT", onClick = { /*TODO*/ }, enabled = false)
+    }
 }
 
 @Preview
 @Composable
 private fun ButtonPrimaryPreview() {
-    ButtonPrimary(text = "Confirm", onClick = { /*TODO*/ })
+    ActivityTrackerTheme {
+        ButtonPrimary(text = "Confirm", onClick = { /*TODO*/ })
+    }
+}
+
+@Preview
+@Composable
+private fun ButtonPrimaryOutlinedPreview() {
+    ActivityTrackerTheme {
+        OutlinedButtonPrimary(text = "Confirm", onClick = { /*TODO*/ })
+    }
 }

@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,11 +38,10 @@ import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.User
-import com.rafaelboban.activitytracker.ui.components.ButtonWithIcon
-import com.rafaelboban.activitytracker.ui.components.ChangeNameDialog
-import com.rafaelboban.activitytracker.ui.components.ConfirmActionDialog
-import com.rafaelboban.activitytracker.ui.components.DialogScaffold
-import com.rafaelboban.activitytracker.ui.components.EnterNumberDialog
+import com.rafaelboban.activitytracker.ui.components.ButtonSecondary
+import com.rafaelboban.activitytracker.ui.components.ChangeNameBottomSheet
+import com.rafaelboban.activitytracker.ui.components.ConfirmActionBottomSheet
+import com.rafaelboban.activitytracker.ui.components.EnterNumberBottomSheet
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.LabeledItem
 import com.rafaelboban.activitytracker.ui.components.UserImage
@@ -92,69 +93,71 @@ fun ProfileScreenRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit
 ) {
+    val showBottomSheet = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog || state.showWeightDialog || state.showHeightDialog
+
     FullScreenLoadingDialog(showDialog = state.submitInProgress)
 
-    DialogScaffold(
-        showDialog = state.showLogoutDialog || state.showChangeNameDialog || state.showDeleteAccountDialog || state.showWeightDialog || state.showHeightDialog,
-        onDismiss = { onAction(ProfileAction.DismissDialog) }
-    ) {
-        when {
-            state.showChangeNameDialog -> {
-                ChangeNameDialog(
-                    currentName = state.user.displayName,
-                    onActionClick = { name -> onAction(ProfileAction.ConfirmChangeName(name)) },
-                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
-                )
-            }
+    if (showBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { onAction(ProfileAction.DismissDialog) }) {
+            when {
+                state.showChangeNameDialog -> {
+                    ChangeNameBottomSheet(
+                        currentName = state.user.displayName,
+                        onActionClick = { name -> onAction(ProfileAction.ConfirmChangeName(name)) },
+                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                    )
+                }
 
-            state.showDeleteAccountDialog -> {
-                ConfirmActionDialog(
-                    title = stringResource(id = R.string.confirm_delete_account),
-                    subtitle = stringResource(id = R.string.delete_account_warning),
-                    actionText = stringResource(id = R.string.confirm),
-                    actionButtonColor = MaterialTheme.colorScheme.primary,
-                    actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
-                    onActionClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
-                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
-                )
-            }
+                state.showDeleteAccountDialog -> {
+                    ConfirmActionBottomSheet(
+                        title = stringResource(id = R.string.confirm_delete_account),
+                        subtitle = stringResource(id = R.string.delete_account_warning),
+                        actionText = stringResource(id = R.string.confirm),
+                        actionButtonColor = MaterialTheme.colorScheme.error,
+                        actionButtonTextColor = MaterialTheme.colorScheme.onError,
+                        onActionClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
+                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                    )
+                }
 
-            state.showWeightDialog -> {
-                EnterNumberDialog(
-                    number = state.user.weight,
-                    label = stringResource(id = R.string.weight),
-                    title = stringResource(id = R.string.update_weight),
-                    isValid = { weight -> weight.toIntOrNull() in 30..400 || weight.isBlank() },
-                    onActionClick = { weight -> weight?.let { onAction(ProfileAction.ConfirmWeightClick(weight)) } },
-                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
-                )
-            }
+                state.showWeightDialog -> {
+                    EnterNumberBottomSheet(
+                        number = state.user.weight,
+                        label = stringResource(id = R.string.weight),
+                        title = stringResource(id = R.string.update_weight),
+                        isValid = { weight -> weight.toIntOrNull() in 30..400 || weight.isBlank() },
+                        onActionClick = { weight -> weight?.let { onAction(ProfileAction.ConfirmWeightClick(weight)) } },
+                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                    )
+                }
 
-            state.showHeightDialog -> {
-                EnterNumberDialog(
-                    number = state.user.height,
-                    label = stringResource(id = R.string.height),
-                    title = stringResource(id = R.string.update_height),
-                    isValid = { weight -> weight.toIntOrNull() in 100..250 || weight.isBlank() },
-                    onActionClick = { height -> height?.let { onAction(ProfileAction.ConfirmHeightClick(height)) } },
-                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
-                )
-            }
+                state.showHeightDialog -> {
+                    EnterNumberBottomSheet(
+                        number = state.user.height,
+                        label = stringResource(id = R.string.height),
+                        title = stringResource(id = R.string.update_height),
+                        isValid = { weight -> weight.toIntOrNull() in 100..250 || weight.isBlank() },
+                        onActionClick = { height -> height?.let { onAction(ProfileAction.ConfirmHeightClick(height)) } },
+                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                    )
+                }
 
-            else -> {
-                ConfirmActionDialog(
-                    title = stringResource(id = R.string.confirm_sign_out),
-                    actionText = stringResource(id = R.string.confirm),
-                    actionButtonColor = MaterialTheme.colorScheme.primary,
-                    actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
-                    onActionClick = { onAction(ProfileAction.ConfirmLogout) },
-                    onDismissClick = { onAction(ProfileAction.DismissDialog) }
-                )
+                else -> {
+                    ConfirmActionBottomSheet(
+                        title = stringResource(id = R.string.confirm_sign_out),
+                        actionText = stringResource(id = R.string.confirm),
+                        actionButtonColor = MaterialTheme.colorScheme.primary,
+                        actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
+                        onActionClick = { onAction(ProfileAction.ConfirmLogout) },
+                        onDismissClick = { onAction(ProfileAction.DismissDialog) }
+                    )
+                }
             }
         }
     }
@@ -227,7 +230,7 @@ private fun ProfileScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        ButtonWithIcon(
+        ButtonSecondary(
             text = stringResource(id = R.string.change_name),
             onClick = { onAction(ProfileAction.OnChangeNameClick) },
             modifier = Modifier
@@ -235,7 +238,7 @@ private fun ProfileScreen(
                 .fillMaxWidth()
         )
 
-        ButtonWithIcon(
+        ButtonSecondary(
             text = stringResource(id = R.string.sign_out),
             onClick = { onAction(ProfileAction.OnLogoutClick) },
             modifier = Modifier
@@ -243,7 +246,7 @@ private fun ProfileScreen(
                 .fillMaxWidth()
         )
 
-        ButtonWithIcon(
+        ButtonSecondary(
             text = stringResource(id = R.string.delete_account),
             onClick = { onAction(ProfileAction.OnDeleteAccountClick) },
             imageVector = Icons.Default.Delete,

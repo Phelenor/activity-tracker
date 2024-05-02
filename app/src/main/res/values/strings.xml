@@ -23,4 +23,8 @@
     <string name="update_height">Update height</string>
     <string name="weight">Weight</string>
     <string name="update_weight">Update weight</string>
+    <string name="cancel">Cancel</string>
+    <string name="update_name">Update name</string>
+    <string name="name">Name</string>
+    <string name="name_validation">Name length longer than 3 characters, and shorter than 30 characters</string>
 </resources>
