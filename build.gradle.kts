@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+buildscript {
+    dependencies {
+        classpath(libs.gradle.secrets)
+    }
+}
+
 ktlint {
     version = "0.39.0"
     verbose = true

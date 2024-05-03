@@ -45,6 +45,18 @@ security-crypto = "1.1.0-alpha06"
 
 chucker = "4.0.0"
 
+maps = "4.3.3"
+gmsLocation = "21.2.0"
+mapsUtils = "5.0.0"
+playServicesMaps = "18.2.0"
+secretsPlugin = "2.0.1"
+
+composeWearOs = "1.3.1"
+composeMaterialWearOs = "1.0.0-alpha20"
+health = "1.0.0-rc02"
+play-services-wearable = "18.1.0"
+wear = "1.3.0"
+
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -135,6 +147,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "startup-runtime" }
 
 # Credentials
+#noinspection CredentialDependency
 credentails = { group = "androidx.credentials", name = "credentials", version = "1.2.2" }
 credentails-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version = "1.2.2" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version = "1.1.0" }
@@ -143,6 +156,21 @@ auth0-jwt = { group = "com.auth0.android", name = "jwtdecode", version.ref = "au
 # Chucker
 chucker = { group = "com.github.chuckerteam.chucker", name = "library", version.ref = "chucker" }
 chucker-no-op = { group = "com.github.chuckerteam.chucker", name = "library-no-op", version.ref = "chucker" }
+
+# Maps & Location
+google-maps-android-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps" }
+google-android-gms-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "gmsLocation" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+google-maps-android-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtils" }
+gradle-secrets = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "secretsPlugin" }
+
+# Wear & Health Services
+wear-compose-material = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterialWearOs" }
+wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeWearOs" }
+wear-compose-ui-tooling = { group = "androidx.wear.compose", name = "compose-ui-tooling", version.ref = "composeWearOs" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "play-services-wearable" }
+health-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "health" }
+wear = { group = "androidx.wear", name = "wear", version.ref = "wear" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "android-gradle" }

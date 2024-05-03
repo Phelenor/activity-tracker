@@ -5,6 +5,13 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ktlint)
     id("kotlin-parcelize")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "secrets.properties"
+    ignoreList.add("sdk.*")
 }
 
 android {
@@ -113,6 +120,11 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.accompanist)
+
+    implementation(libs.google.android.gms.play.services.location)
+    implementation(libs.google.maps.android.compose)
+    implementation(libs.google.maps.android.utils.ktx)
+    implementation(libs.play.services.maps)
 
     debugImplementation(libs.chucker)
     releaseImplementation(libs.chucker.no.op)

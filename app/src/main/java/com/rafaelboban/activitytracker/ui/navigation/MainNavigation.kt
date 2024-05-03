@@ -27,6 +27,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.maps.android.compose.GoogleMap
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
@@ -163,17 +164,9 @@ fun MockScreen(
                 onBackButtonClick = navigateUp
             )
         }
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
-        ) {
-            Text(
-                text = label,
-                style = Typography.displayLarge
-            )
-        }
+    ) { padding ->
+        GoogleMap(
+            modifier = Modifier.padding(padding)
+        )
     }
 }
