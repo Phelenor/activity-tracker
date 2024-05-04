@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.kotlin.serialization)
     id("kotlin-parcelize")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
@@ -68,6 +69,9 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.immutable.collection)
+    implementation(libs.kotlin.serialization)
+    implementation(libs.kotlin.serialization.retrofit)
+    implementation(libs.material.icons.extended)
 
     implementation(libs.credentails)
     implementation(libs.credentails.auth)
@@ -101,16 +105,11 @@ dependencies {
     implementation(libs.coroutines.android)
 
     implementation(libs.retrofit.core)
-    implementation(libs.retrofit.moshi)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
     implementation(libs.sandwich)
     implementation(libs.sandwich.retrofit)
-
-    implementation(libs.moshi.kotlin)
-    implementation(libs.moshi.adapter)
-    ksp(libs.moshi.codegen)
 
     implementation(libs.compose.coil)
     implementation(libs.navigation.compose)

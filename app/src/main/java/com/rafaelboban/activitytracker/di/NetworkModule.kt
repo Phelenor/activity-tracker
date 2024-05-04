@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.di
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.rafaelboban.activitytracker.data.session.AuthInfo
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.ApiService
@@ -9,8 +10,6 @@ import com.rafaelboban.activitytracker.network.TokenRefreshService
 import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,11 +18,13 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 import javax.inject.Singleton
 
@@ -35,14 +36,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideKotlinJsonAdapterFactory(): KotlinJsonAdapterFactory = KotlinJsonAdapterFactory()
-
-    @Provides
-    @Singleton
-    fun provideMoshi(kotlinJsonAdapterFactory: KotlinJsonAdapterFactory): Moshi {
-        return Moshi.Builder()
-            .add(kotlinJsonAdapterFactory)
-            .build()
+    fun provideJsonRetrofitAdapter(): Converter.Factory {
+        val json = Json { ignoreUnknownKeys = true }
+        return json.asConverterFactory("application/json".toMediaType())
     }
 
     @Provides
@@ -71,7 +67,7 @@ object NetworkModule {
     @Singleton
     fun provideRefreshService(
         loggingInterceptor: HttpLoggingInterceptor,
-        moshi: Moshi
+        jsonConverterFactory: Converter.Factory
     ): TokenRefreshService {
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
@@ -80,7 +76,7 @@ object NetworkModule {
         val retrofit = Retrofit.Builder()
             .client(okHttpClient)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(jsonConverterFactory)
             .baseUrl(API_BASE_URL)
             .build()
 
@@ -131,12 +127,12 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
-        moshi: Moshi
+        jsonConverterFactory: Converter.Factory
     ): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(jsonConverterFactory)
             .baseUrl(API_BASE_URL)
             .build()
     }

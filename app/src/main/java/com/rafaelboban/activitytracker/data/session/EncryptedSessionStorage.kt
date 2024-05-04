@@ -3,15 +3,13 @@ package com.rafaelboban.activitytracker.data.session
 import android.content.SharedPreferences
 import com.rafaelboban.activitytracker.di.PreferencesEncrypted
 import com.rafaelboban.activitytracker.util.edit
-import com.rafaelboban.activitytracker.util.jsonToObject
-import com.rafaelboban.activitytracker.util.objectToJson
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class EncryptedSessionStorage @Inject constructor(
-    private val moshi: Moshi,
     @PreferencesEncrypted private val preferences: SharedPreferences
 ) {
 
@@ -20,7 +18,7 @@ class EncryptedSessionStorage @Inject constructor(
             val json = preferences.getString(AUTH_INFO, null)
 
             json?.let {
-                moshi.jsonToObject<AuthInfo>(json)
+                Json.decodeFromString<AuthInfo>(json)
             }
         }
     }
@@ -32,7 +30,7 @@ class EncryptedSessionStorage @Inject constructor(
                 return@withContext
             }
 
-            val json = moshi.objectToJson(info)
+            val json = Json.encodeToString(info)
             preferences.edit { putString(AUTH_INFO, json) }
         }
     }

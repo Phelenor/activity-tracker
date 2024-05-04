@@ -1,7 +1,9 @@
 package com.rafaelboban.activitytracker.model
 
-import com.squareup.moshi.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class User(
     val id: String,
     val email: String,
@@ -9,6 +11,6 @@ data class User(
     val name: String,
     val weight: Int?,
     val height: Int?,
-    @Json(name = "display_name")
+    @SerialName("display_name")
     val displayName: String
 )
