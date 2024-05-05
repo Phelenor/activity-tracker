@@ -41,4 +41,7 @@
     <string name="history">History</string>
     <string name="dashboard">Dashboard</string>
     <string name="profile">Profile</string>
+    <string name="speed">Speed</string>
+    <string name="distance">Distance</string>
+    <string name="duration">Duration</string>
 </resources>

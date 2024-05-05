@@ -28,7 +28,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.maps.android.compose.GoogleMap
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
@@ -164,27 +163,5 @@ fun MainNavigationGraph(
                 navigateToLogin = navigateToLogin
             )
         }
-    }
-}
-
-@Composable
-fun MockScreen(
-    label: String,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TrackerTopAppBar(
-                title = label,
-                showBackButton = true,
-                onBackButtonClick = navigateUp
-            )
-        }
-    ) { padding ->
-        GoogleMap(
-            modifier = Modifier.padding(padding)
-        )
     }
 }

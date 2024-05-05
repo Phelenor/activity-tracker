@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.SharedPreferences
+import android.util.Half.toFloat
 import androidx.preference.PreferenceManager
 
 inline fun Context.editPreferences(block: SharedPreferences.Editor.() -> SharedPreferences.Editor) = PreferenceManager.getDefaultSharedPreferences(this).edit().block().apply()
@@ -19,3 +20,17 @@ fun Context.getActivity(): Activity? = when (this) {
     is ContextWrapper -> baseContext.getActivity()
     else -> null
 }
+
+fun <T> List<List<T>>.replaceLastSublist(new: List<T>): List<List<T>> {
+    return if (isEmpty()) {
+        listOf(new)
+    } else {
+        dropLast(1) + listOf(new)
+    }
+}
+
+val Int.F: Float
+    get() = toFloat()
+
+val Double.F: Float
+    get() = toFloat()

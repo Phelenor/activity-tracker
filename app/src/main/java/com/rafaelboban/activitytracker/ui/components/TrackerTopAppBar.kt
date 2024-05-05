@@ -34,7 +34,7 @@ fun TrackerTopAppBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
+        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
         navigationIcon = {
             if (showBackButton) {

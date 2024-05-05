@@ -13,8 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,7 +78,7 @@ fun DialogButtonRow(
 }
 
 @Composable
-fun ConfirmActionDialog(
+fun InfoDialog(
     title: String,
     actionText: String,
     onActionClick: () -> Unit,
@@ -145,7 +143,7 @@ private fun DialogButtonRowPreview() {
 @Composable
 private fun ConfirmActionDialogPreview() {
     ActivityTrackerTheme {
-        ConfirmActionDialog(
+        InfoDialog(
             title = "Are you sure you want to logout?",
             subtitle = "This action cannot be undone.",
             actionText = "Confirm",

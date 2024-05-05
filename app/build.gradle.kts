@@ -118,7 +118,7 @@ dependencies {
     implementation(libs.work.runtime)
 
     implementation(libs.timber)
-    implementation(libs.accompanist)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.google.android.gms.play.services.location)
     implementation(libs.google.maps.android.compose)

@@ -1,5 +1,8 @@
 package com.rafaelboban.activitytracker.ui.screens.main.dashboard
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -20,23 +23,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomSheetBody
 import com.rafaelboban.activitytracker.ui.components.ControlCard
+import com.rafaelboban.activitytracker.ui.components.DialogScaffold
+import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPermissionsApi::class)
+@SuppressLint("InlinedApi")
 @Composable
 fun DashboardScreenRoot(
     navigateToActivity: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
+    val locationTrackingPermissions = rememberMultiplePermissionsState(
+        listOfNotNull(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS.takeIf { Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU }
+        )
+    )
+
     DashboardScreen(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
                 DashboardAction.DismissBottomSheet -> viewModel.dismissBottomSheet()
-                DashboardAction.OpenSelectActivityBottomSheet -> viewModel.showSelectActivityBottomSheet()
+                DashboardAction.DismissRationaleDialog -> viewModel.displayRationaleDialog(isVisible = false)
+                DashboardAction.RequestPermissions -> locationTrackingPermissions.launchMultiplePermissionRequest()
+                DashboardAction.OpenSelectActivityBottomSheet -> {
+                    if (locationTrackingPermissions.allPermissionsGranted) {
+                        viewModel.showSelectActivityBottomSheet()
+                    } else if (locationTrackingPermissions.shouldShowRationale) {
+                        viewModel.displayRationaleDialog(isVisible = true)
+                    } else {
+                        locationTrackingPermissions.launchMultiplePermissionRequest()
+                    }
+                }
+
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
                     navigateToActivity()
@@ -60,6 +88,19 @@ fun DashboardScreen(
             bottomSheetState.hide()
             onAction(DashboardAction.DismissBottomSheet)
         }
+    }
+
+    DialogScaffold(
+        showDialog = state.shouldShowPermissionRationale,
+        onDismiss = { onAction(DashboardAction.DismissRationaleDialog) }
+    ) {
+        InfoDialog(
+            title = "Permissions",
+            subtitle = "Activity Tracker requires location permission for tracking your activities.",
+            actionText = "Okay",
+            onActionClick = { onAction(DashboardAction.RequestPermissions) },
+            onDismissClick = { onAction(DashboardAction.DismissRationaleDialog) }
+        )
     }
 
     if (state.showSelectActivityBottomSheet) {

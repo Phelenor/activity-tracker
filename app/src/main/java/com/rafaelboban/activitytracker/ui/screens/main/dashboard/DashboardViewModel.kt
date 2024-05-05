@@ -16,4 +16,8 @@ class DashboardViewModel : ViewModel() {
     fun showSelectActivityBottomSheet() {
         state = state.copy(showSelectActivityBottomSheet = true)
     }
+
+    fun displayRationaleDialog(isVisible: Boolean) {
+        state = state.copy(shouldShowPermissionRationale = isVisible)
+    }
 }

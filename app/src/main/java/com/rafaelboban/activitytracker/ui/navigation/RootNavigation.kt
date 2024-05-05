@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.rafaelboban.activitytracker.ui.components.composableSlide
+import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -45,7 +46,7 @@ fun RootNavigation(
         }
 
         composableSlide<NavigationGraph.Activity> {
-            MockScreen(label = "Activity", navigateUp = { navHostController.navigateUp() })
+            ActivityScreenRoot(navigateUp = { navHostController.navigateUp() })
         }
     }
 }
