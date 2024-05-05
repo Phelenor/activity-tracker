@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
+import kotlinx.serialization.Serializable
 
 @Composable
 fun RootNavigation(
@@ -14,14 +15,13 @@ fun RootNavigation(
 ) {
     NavHost(
         navController = navHostController,
-        route = NavigationGraph.Root.route,
-        startDestination = if (skipLogin) NavigationGraph.Main.route else NavigationGraph.Auth.route
+        startDestination = if (skipLogin) NavigationGraph.Main else NavigationGraph.Auth
     ) {
-        composableSlide(NavigationGraph.Auth.route) {
+        composableSlide<NavigationGraph.Auth> {
             LoginScreenRoot(
                 onLoginSuccess = {
-                    navHostController.navigate(NavigationGraph.Main.route) {
-                        popUpTo(NavigationGraph.Auth.route) {
+                    navHostController.navigate(NavigationGraph.Main) {
+                        popUpTo(NavigationGraph.Auth) {
                             inclusive = true
                         }
                     }
@@ -29,14 +29,14 @@ fun RootNavigation(
             )
         }
 
-        composableSlide(NavigationGraph.Main.route) {
+        composableSlide<NavigationGraph.Main> {
             MainScreen(
                 navigateToActivity = {
-                    navHostController.navigate(NavigationGraph.Activity.route)
+                    navHostController.navigate(NavigationGraph.Activity)
                 },
                 onLogout = {
-                    navHostController.navigate(NavigationGraph.Auth.route) {
-                        popUpTo(NavigationGraph.Main.route) {
+                    navHostController.navigate(NavigationGraph.Auth) {
+                        popUpTo(NavigationGraph.Main) {
                             inclusive = true
                         }
                     }
@@ -44,15 +44,20 @@ fun RootNavigation(
             )
         }
 
-        composableSlide(NavigationGraph.Activity.route) {
+        composableSlide<NavigationGraph.Activity> {
             MockScreen(label = "Activity", navigateUp = { navHostController.navigateUp() })
         }
     }
 }
 
-sealed class NavigationGraph(val route: String) {
-    data object Root : NavigationGraph("root")
-    data object Auth : NavigationGraph("auth")
-    data object Main : NavigationGraph("main")
-    data object Activity : NavigationGraph("activity")
+sealed interface NavigationGraph {
+
+    @Serializable
+    data object Auth : NavigationGraph
+
+    @Serializable
+    data object Main : NavigationGraph
+
+    @Serializable
+    data object Activity : NavigationGraph
 }

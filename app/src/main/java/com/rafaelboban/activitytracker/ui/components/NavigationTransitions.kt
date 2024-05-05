@@ -34,3 +34,23 @@ fun NavGraphBuilder.composableSlide(
         content = content
     )
 }
+
+inline fun <reified T : Any> NavGraphBuilder.composableFade(
+    noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
+) {
+    composable<T>(
+        enterTransition = { fadeIn(tween(200)) },
+        exitTransition = { fadeOut(tween(200)) },
+        content = content
+    )
+}
+
+inline fun <reified T : Any> NavGraphBuilder.composableSlide(
+    noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
+) {
+    composable<T>(
+        enterTransition = { slideInHorizontally(tween(200), initialOffsetX = { x -> x }) },
+        exitTransition = { slideOutHorizontally(tween(200), targetOffsetX = { x -> -x }) },
+        content = content
+    )
+}

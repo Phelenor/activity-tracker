@@ -23,29 +23,48 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.maps.android.compose.GoogleMap
+import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
 import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.activitytracker.ui.util.UiText
+import kotlinx.serialization.Serializable
 
-sealed class MainScreen(val route: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: String) {
-    data object History : MainScreen("history", Icons.Filled.DateRange, Icons.Outlined.DateRange, "History")
-    data object Dashboard : MainScreen("dashboard", Icons.Filled.Home, Icons.Outlined.Home, "Dashboard")
-    data object Profile : MainScreen("profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle, "Profile")
+sealed interface MainScreenNavigation {
+
+    @Serializable
+    data object History : MainScreenNavigation
+
+    @Serializable
+    data object Dashboard : MainScreenNavigation
+
+    @Serializable
+    data object Profile : MainScreenNavigation
 
     companion object {
 
-        val Screens = linkedSetOf(History, Dashboard, Profile)
+        val All = linkedSetOf(History, Dashboard, Profile)
+    }
+}
 
-        fun getByRoute(route: String): MainScreen? {
-            return listOf(History, Dashboard, Profile).find { it.route == route }
-        }
+sealed class MainScreenBottomBarItem(val route: MainScreenNavigation, val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: UiText) {
+    data object History : MainScreenBottomBarItem(MainScreenNavigation.History, Icons.Filled.DateRange, Icons.Outlined.DateRange, UiText.StringResource(R.string.history))
+    data object Dashboard : MainScreenBottomBarItem(MainScreenNavigation.Dashboard, Icons.Filled.Home, Icons.Outlined.Home, UiText.StringResource(R.string.dashboard))
+    data object Profile : MainScreenBottomBarItem(MainScreenNavigation.Profile, Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle, UiText.StringResource(R.string.profile))
+
+    companion object {
+
+        val All = linkedSetOf(History, Dashboard, Profile)
+
+        fun getByRoute(route: MainScreenNavigation) = All.first { it.route == route }
     }
 }
 
@@ -57,13 +76,13 @@ fun MainScreen(
     navController: NavHostController = rememberNavController()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoute = MainScreenNavigation.All.find { navBackStackEntry?.destination?.hasRoute(it::class) == true }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TrackerTopAppBar(
-                title = currentRoute?.let { MainScreen.getByRoute(it)?.name } ?: ""
+                title = currentRoute?.let { MainScreenBottomBarItem.getByRoute(it).name.asString() } ?: ""
             )
         },
         bottomBar = {
@@ -71,12 +90,12 @@ fun MainScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
-                MainScreen.Screens.forEach { item ->
+                MainScreenBottomBarItem.All.forEach { item ->
                     val isSelected = currentRoute == item.route
 
                     NavigationBarItem(
                         colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.inversePrimary),
-                        label = { Text(item.name) },
+                        label = { Text(item.name.asString()) },
                         selected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
@@ -93,7 +112,7 @@ fun MainScreen(
                         icon = {
                             Icon(
                                 imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.name
+                                contentDescription = item.name.asString()
                             )
                         }
                     )
@@ -120,10 +139,9 @@ fun MainNavigationGraph(
     NavHost(
         modifier = modifier,
         navController = navController,
-        route = NavigationGraph.Main.route,
-        startDestination = MainScreen.Dashboard.route
+        startDestination = MainScreenNavigation.Dashboard
     ) {
-        composableFade(route = MainScreen.History.route) {
+        composableFade<MainScreenNavigation.History> {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = modifier
@@ -137,11 +155,11 @@ fun MainNavigationGraph(
             }
         }
 
-        composableFade(route = MainScreen.Dashboard.route) {
+        composableFade<MainScreenNavigation.Dashboard> {
             DashboardScreenRoot(navigateToActivity = navigateToActivity)
         }
 
-        composableFade(route = MainScreen.Profile.route) {
+        composableFade<MainScreenNavigation.Profile> {
             ProfileScreenRoot(
                 navigateToLogin = navigateToLogin
             )

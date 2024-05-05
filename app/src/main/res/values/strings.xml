@@ -38,4 +38,7 @@
     <string name="walking">Walking</string>
     <string name="cycling">Cycling</string>
     <string name="select_activity">Select activity</string>
+    <string name="history">History</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="profile">Profile</string>
 </resources>
