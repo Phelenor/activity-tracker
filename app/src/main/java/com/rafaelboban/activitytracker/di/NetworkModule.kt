@@ -18,6 +18,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -34,10 +35,15 @@ object NetworkModule {
 
     private const val API_BASE_URL = "http://192.168.8.102:3000"
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
     fun provideJsonRetrofitAdapter(): Converter.Factory {
-        val json = Json { ignoreUnknownKeys = true }
+        val json = Json {
+            ignoreUnknownKeys = true
+            explicitNulls = false
+        }
+
         return json.asConverterFactory("application/json".toMediaType())
     }
 

@@ -16,7 +16,7 @@ data class Location(
         val longDistance = Math.toRadians(other.longitude - longitude)
 
         val a = sin(latDistance / 2) * sin(latDistance / 2) +
-                cos(Math.toRadians(latitude)) * cos(Math.toRadians(other.latitude)) * sin(longDistance / 2) * sin(longDistance / 2)
+            cos(Math.toRadians(latitude)) * cos(Math.toRadians(other.latitude)) * sin(longDistance / 2) * sin(longDistance / 2)
 
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 

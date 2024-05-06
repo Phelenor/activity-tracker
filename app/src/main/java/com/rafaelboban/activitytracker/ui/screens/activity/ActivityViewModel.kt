@@ -22,7 +22,9 @@ class ActivityViewModel @Inject constructor(
     var state by mutableStateOf(ActivityState())
         private set
 
-    private val isActive = snapshotFlow { state.isActive }.stateIn(viewModelScope, SharingStarted.Lazily, state.isActive)
+    private val isActive = snapshotFlow {
+        state.isActive
+    }.stateIn(viewModelScope, SharingStarted.Lazily, state.isActive)
 
     init {
         tracker.startTrackingLocation()
@@ -42,5 +44,32 @@ class ActivityViewModel @Inject constructor(
         tracker.duration.onEach { duration ->
             state = state.copy(duration = duration)
         }.launchIn(viewModelScope)
+    }
+
+    fun onAction(action: ActivityAction) {
+        when (action) {
+            ActivityAction.OnStartClick -> state = state.copy(
+                isStarted = true,
+                activityStatus = ActivityStatus.IN_PROGRESS,
+                isActive = true
+            )
+
+            ActivityAction.OnPauseClick -> state = state.copy(
+                activityStatus = ActivityStatus.PAUSED,
+                isActive = false
+            )
+
+            ActivityAction.OnResumeClick -> state = state.copy(
+                activityStatus = ActivityStatus.IN_PROGRESS,
+                isActive = true
+            )
+
+            ActivityAction.OnFinishClick -> state = state.copy(
+                activityStatus = ActivityStatus.FINISHED,
+                isActive = false
+            )
+
+            else -> Unit
+        }
     }
 }

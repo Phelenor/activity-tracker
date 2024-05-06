@@ -5,7 +5,6 @@ package com.rafaelboban.activitytracker.tracking
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.util.currentSpeed
-import com.rafaelboban.activitytracker.util.distanceMeters
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.activitytracker.util.replaceLastSublist
 import kotlinx.coroutines.CoroutineScope
@@ -30,12 +29,13 @@ class ActivityTracker(
 ) {
 
     private val _activityData = MutableStateFlow(ActivityData())
-     val activityData = _activityData.asStateFlow()
+    val activityData = _activityData.asStateFlow()
 
     private val _duration = MutableStateFlow(Duration.ZERO)
-     val duration = _duration.asStateFlow()
+    val duration = _duration.asStateFlow()
 
-    private val isActive = MutableStateFlow(false)
+    private val _isActive = MutableStateFlow(false)
+    val isActive = _isActive.asStateFlow()
 
     private val isTrackingLocation = MutableStateFlow(false)
 
@@ -43,7 +43,9 @@ class ActivityTracker(
         .flatMapLatest { isObservingLocation ->
             if (isObservingLocation) {
                 locationObserver.observeLocation(2000L)
-            } else flowOf()
+            } else {
+                flowOf()
+            }
         }
         .stateIn(
             applicationScope,
@@ -52,7 +54,13 @@ class ActivityTracker(
         )
 
     init {
-        isActive.flatMapLatest { isActive ->
+        _isActive.onEach { isActive ->
+            if (!isActive) {
+                _activityData.update { data ->
+                    data.copy(locations = data.locations + listOf())
+                }
+            }
+        }.flatMapLatest { isActive ->
             if (isActive) Timer.time() else flowOf()
         }.onEach { interval ->
             _duration.update { it + interval }
@@ -60,7 +68,7 @@ class ActivityTracker(
 
         currentLocation
             .filterNotNull()
-            .combineTransform(isActive) { location, isActive ->
+            .combineTransform(_isActive) { location, isActive ->
                 if (isActive) {
                     emit(location)
                 }
@@ -80,14 +88,14 @@ class ActivityTracker(
                     ActivityData(
                         locations = data.locations.replaceLastSublist(currentLocationSequence),
                         distanceMeters = data.locations.distanceSequenceMeters,
-                        speed = currentLocationSequence.currentSpeed
+                        speed = location.location.speed ?: currentLocationSequence.currentSpeed
                     )
                 }
-            }
+            }.launchIn(applicationScope)
     }
 
     fun setIsActive(active: Boolean) {
-        isActive.value = active
+        _isActive.value = active
     }
 
     fun startTrackingLocation() {

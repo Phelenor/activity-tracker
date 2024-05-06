@@ -11,5 +11,10 @@ data class ActivityState(
     val isStarted: Boolean = false,
     val currentLocation: Location? = null,
     val isFinished: Boolean = false,
-    val isSaving: Boolean = false
+    val isSaving: Boolean = false,
+    val activityStatus: ActivityStatus = ActivityStatus.NOT_STARTED
 )
+
+enum class ActivityStatus {
+    NOT_STARTED, IN_PROGRESS, PAUSED, FINISHED
+}

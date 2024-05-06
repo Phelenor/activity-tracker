@@ -13,5 +13,4 @@ data class LocationTimestamp(
             latitude = location.location.latitude
             longitude = location.location.longitude
         }
-
 }
