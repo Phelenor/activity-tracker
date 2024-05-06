@@ -8,13 +8,17 @@ data class ActivityState(
     val activityData: ActivityData = ActivityData(),
     val duration: Duration = Duration.ZERO,
     val isActive: Boolean = false,
-    val isStarted: Boolean = false,
     val currentLocation: Location? = null,
-    val isFinished: Boolean = false,
     val isSaving: Boolean = false,
+    val showDiscardDialog: Boolean = false,
     val activityStatus: ActivityStatus = ActivityStatus.NOT_STARTED
 )
 
 enum class ActivityStatus {
-    NOT_STARTED, IN_PROGRESS, PAUSED, FINISHED
+    NOT_STARTED, IN_PROGRESS, PAUSED, FINISHED;
+
+    companion object {
+        val ActivityStatus.isRunning: Boolean
+            get() = this == IN_PROGRESS || this == PAUSED
+    }
 }

@@ -6,4 +6,6 @@ sealed interface ActivityAction {
     data object OnResumeClick : ActivityAction
     data object OnPauseClick : ActivityAction
     data object OnFinishClick : ActivityAction
+    data object DismissDiscardDialog : ActivityAction
+    data object DiscardActivity : ActivityAction
 }

@@ -7,6 +7,8 @@ import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.activitytracker.util.replaceLastSublist
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +59,7 @@ class ActivityTracker(
         _isActive.onEach { isActive ->
             if (!isActive) {
                 _activityData.update { data ->
-                    data.copy(locations = data.locations + listOf())
+                    data.copy(locations = (data.locations + listOf(persistentListOf())).toImmutableList())
                 }
             }
         }.flatMapLatest { isActive ->
@@ -79,14 +81,18 @@ class ActivityTracker(
                 )
             }.onEach { location ->
                 _activityData.update { data ->
-                    val currentLocationSequence = if (data.locations.isNotEmpty()) {
-                        data.locations.last() + location
-                    } else {
-                        listOf(location)
+                    val currentSpeed = location.location.speed ?: Float.MAX_VALUE
+                    val distanceFromLastLocation = data.locations.lastOrNull()?.lastOrNull()?.latLong?.distanceTo(location.latLong) ?: Float.MAX_VALUE
+                    val shouldSaveLocation = currentSpeed > 0.8 && distanceFromLastLocation > 1
+
+                    val currentLocationSequence = when {
+                        data.locations.isEmpty() -> listOf(location)
+                        !shouldSaveLocation -> data.locations.last()
+                        else -> data.locations.last() + location
                     }
 
                     ActivityData(
-                        locations = data.locations.replaceLastSublist(currentLocationSequence),
+                        locations = data.locations.replaceLastSublist(currentLocationSequence).map { it.toImmutableList() }.toImmutableList(),
                         distanceMeters = data.locations.distanceSequenceMeters,
                         speed = location.location.speed ?: currentLocationSequence.currentSpeed
                     )
@@ -102,7 +108,19 @@ class ActivityTracker(
         isTrackingLocation.value = true
     }
 
-    fun stopTrackingLocation() {
+    private fun stopTrackingLocation() {
         isTrackingLocation.value = false
+    }
+
+    fun stop() {
+        stopTrackingLocation()
+        setIsActive(false)
+    }
+
+    fun clear() {
+        stop()
+
+        _duration.value = Duration.ZERO
+        _activityData.value = ActivityData()
     }
 }

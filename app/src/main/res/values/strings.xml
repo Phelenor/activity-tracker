@@ -44,4 +44,7 @@
     <string name="speed">Speed</string>
     <string name="distance">Distance</string>
     <string name="duration">Duration</string>
+    <string name="discard_activity">Discard current activity?</string>
+    <string name="discard">Discard</string>
+    <string name="discard_activity_info">Activity won\'t be saved in your activity log.</string>
 </resources>

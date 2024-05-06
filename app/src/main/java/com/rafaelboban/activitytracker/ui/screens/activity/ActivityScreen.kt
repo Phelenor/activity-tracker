@@ -1,7 +1,12 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
@@ -43,9 +49,13 @@ import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.ActivityType
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
-import com.rafaelboban.activitytracker.ui.components.ActivityTrackerMap
+import com.rafaelboban.activitytracker.ui.components.DialogScaffold
+import com.rafaelboban.activitytracker.ui.components.InfoDialog
+import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
+import com.rafaelboban.activitytracker.ui.screens.activity.ActivityStatus.Companion.isRunning
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
+import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter.roundToDecimals
@@ -56,13 +66,22 @@ fun ActivityScreenRoot(
     navigateUp: () -> Boolean,
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            ActivityEvent.NavigateBack -> navigateUp()
+        }
+    }
+
     ActivityScreen(
         state = viewModel.state,
         onAction = { action ->
-            when (action) {
-                ActivityAction.OnBackClick -> navigateUp()
-                else -> viewModel.onAction(action)
+            if (action == ActivityAction.OnBackClick) {
+                if (viewModel.state.activityStatus.isRunning.not()) {
+                    navigateUp()
+                }
             }
+
+            viewModel.onAction(action)
         }
     )
 }
@@ -75,6 +94,21 @@ fun ActivityScreen(
 ) {
     val density = LocalDensity.current
     val navigationBarPadding = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
+
+    DialogScaffold(
+        showDialog = state.showDiscardDialog,
+        onDismiss = { onAction(ActivityAction.DismissDiscardDialog) }
+    ) {
+        InfoDialog(
+            title = stringResource(id = R.string.discard_activity),
+            subtitle = stringResource(id = R.string.discard_activity_info),
+            actionText = stringResource(id = R.string.discard),
+            actionButtonColor = MaterialTheme.colorScheme.error,
+            actionButtonTextColor = MaterialTheme.colorScheme.onError,
+            onActionClick = { onAction(ActivityAction.DiscardActivity) },
+            onDismissClick = { onAction(ActivityAction.DismissDiscardDialog) }
+        )
+    }
 
     BottomSheetScaffold(
         sheetPeekHeight = 36.dp + navigationBarPadding,
@@ -144,6 +178,7 @@ fun ActivityScreen(
 
             ActivityTrackerMap(
                 currentLocation = state.currentLocation,
+                locations = state.activityData.locations,
                 modifier = Modifier.constrainAs(map) {
                     top.linkTo(infoCard.bottom, margin = (-16).dp)
                     bottom.linkTo(parent.bottom)
@@ -153,43 +188,65 @@ fun ActivityScreen(
             )
 
             if (state.activityStatus != ActivityStatus.FINISHED) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
+                AnimatedContent(
+                    targetState = state.activityStatus,
+                    label = "controls",
+                    transitionSpec = {
+                        slideInVertically(
+                            animationSpec = tween(200),
+                            initialOffsetY = { it }
+                        ) togetherWith slideOutVertically(
+                            animationSpec = tween(200),
+                            targetOffsetY = { it }
+                        )
+                    },
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(bottom = 42.dp)
                         .zIndex(1f)
                         .constrainAs(controls) {
                             bottom.linkTo(parent.bottom)
-                            width = Dimension.matchParent
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            width = Dimension.value(152.dp)
                         }
-                ) {
-                    when (state.activityStatus) {
+                ) { status ->
+                    when (status) {
                         ActivityStatus.NOT_STARTED -> {
-                            ActivityFloatingActionButton(
-                                icon = Icons.Filled.PlayArrow,
-                                onClick = { onAction(ActivityAction.OnStartClick) }
-                            )
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.PlayArrow,
+                                    onClick = { onAction(ActivityAction.OnStartClick) }
+                                )
+                            }
                         }
 
                         ActivityStatus.IN_PROGRESS -> {
-                            ActivityFloatingActionButton(
-                                icon = Icons.Filled.Pause,
-                                onClick = { onAction(ActivityAction.OnPauseClick) }
-                            )
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.Pause,
+                                    onClick = { onAction(ActivityAction.OnPauseClick) }
+                                )
+                            }
                         }
 
                         ActivityStatus.PAUSED -> {
-                            ActivityFloatingActionButton(
-                                icon = Icons.Filled.PlayArrow,
-                                onClick = { onAction(ActivityAction.OnResumeClick) }
-                            )
+                            Row {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.PlayArrow,
+                                    onClick = { onAction(ActivityAction.OnResumeClick) }
+                                )
 
-                            ActivityFloatingActionButton(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                                onClick = { onAction(ActivityAction.OnFinishClick) }
-                            )
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                ActivityFloatingActionButton(
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+                                    onClick = { onAction(ActivityAction.OnFinishClick) }
+                                )
+                            }
                         }
 
                         else -> Unit

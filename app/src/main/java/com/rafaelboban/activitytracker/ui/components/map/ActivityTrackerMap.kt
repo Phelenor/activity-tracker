@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.components
+package com.rafaelboban.activitytracker.ui.components.map
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -34,11 +35,14 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.location.Location
+import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.util.F
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ActivityTrackerMap(
     currentLocation: Location?,
+    locations: ImmutableList<ImmutableList<LocationTimestamp>>,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -91,13 +95,17 @@ fun ActivityTrackerMap(
             minZoomPreference = 12f
         ),
         uiSettings = MapUiSettings(
-            zoomControlsEnabled = false
+            zoomControlsEnabled = false,
+            tiltGesturesEnabled = false
         )
     ) {
-        if (currentLocation != null) {
+        StandardPolylines(locations = locations)
+
+        currentLocation?.let {
             MarkerComposable(
                 currentLocation,
-                state = markerState
+                state = markerState,
+                anchor = Offset(0.5f, 0.5f)
             ) {
                 Box(
                     contentAlignment = Alignment.Center,

@@ -7,11 +7,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.ui.screens.activity.ActivityStatus.Companion.isRunning
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,6 +25,9 @@ class ActivityViewModel @Inject constructor(
 
     var state by mutableStateOf(ActivityState())
         private set
+
+    private val eventChannel = Channel<ActivityEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val isActive = snapshotFlow {
         state.isActive
@@ -49,7 +56,6 @@ class ActivityViewModel @Inject constructor(
     fun onAction(action: ActivityAction) {
         when (action) {
             ActivityAction.OnStartClick -> state = state.copy(
-                isStarted = true,
                 activityStatus = ActivityStatus.IN_PROGRESS,
                 isActive = true
             )
@@ -64,12 +70,40 @@ class ActivityViewModel @Inject constructor(
                 isActive = true
             )
 
-            ActivityAction.OnFinishClick -> state = state.copy(
-                activityStatus = ActivityStatus.FINISHED,
-                isActive = false
+            ActivityAction.OnFinishClick -> {
+                state = state.copy(
+                    activityStatus = ActivityStatus.FINISHED,
+                    isActive = false
+                )
+
+                tracker.stop()
+            }
+
+            ActivityAction.OnBackClick -> state = state.copy(
+                showDiscardDialog = state.activityStatus.isRunning
             )
 
-            else -> Unit
+            ActivityAction.DismissDiscardDialog -> state = state.copy(
+                showDiscardDialog = false
+            )
+
+            ActivityAction.DiscardActivity -> {
+                state = state.copy(
+                    showDiscardDialog = false
+                )
+
+                tracker.clear()
+
+                viewModelScope.launch {
+                    eventChannel.trySend(ActivityEvent.NavigateBack)
+                }
+            }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        tracker.clear()
     }
 }
