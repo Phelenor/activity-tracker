@@ -98,6 +98,7 @@ dependencies {
 
     implementation(libs.dagger.hilt.android)
     implementation(libs.hilt.navigation)
+    implementation(libs.androidx.lifecycle.service)
     ksp(libs.dagger.hilt.compiler)
     ksp(libs.hilt.compiler)
 

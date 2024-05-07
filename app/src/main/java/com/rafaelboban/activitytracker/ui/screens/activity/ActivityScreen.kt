@@ -31,9 +31,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -47,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.ActivityType
+import com.rafaelboban.activitytracker.tracking.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
@@ -66,6 +69,8 @@ fun ActivityScreenRoot(
     navigateUp: () -> Boolean,
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     ObserveAsEvents(flow = viewModel.events) { event ->
         when (event) {
             ActivityEvent.NavigateBack -> navigateUp()
@@ -74,6 +79,13 @@ fun ActivityScreenRoot(
 
     ActivityScreen(
         state = viewModel.state,
+        toggleTrackerService = { shouldRun ->
+            if (shouldRun) {
+                context.startService(ActivityTrackerService.createStartIntent(context))
+            } else {
+                context.startService(ActivityTrackerService.createStopIntent(context))
+            }
+        },
         onAction = { action ->
             if (action == ActivityAction.OnBackClick) {
                 if (viewModel.state.activityStatus.isRunning.not()) {
@@ -90,10 +102,21 @@ fun ActivityScreenRoot(
 @Composable
 fun ActivityScreen(
     state: ActivityState,
-    onAction: (ActivityAction) -> Unit
+    onAction: (ActivityAction) -> Unit,
+    toggleTrackerService: (Boolean) -> Unit
 ) {
     val density = LocalDensity.current
     val navigationBarPadding = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
+
+    LaunchedEffect(state.activityStatus) {
+        if (state.activityStatus == ActivityStatus.IN_PROGRESS && ActivityTrackerService.isActive.not()) {
+            toggleTrackerService(true)
+        }
+
+        if (state.activityStatus == ActivityStatus.FINISHED && ActivityTrackerService.isActive) {
+            toggleTrackerService(false)
+        }
+    }
 
     DialogScaffold(
         showDialog = state.showDiscardDialog,
@@ -105,8 +128,11 @@ fun ActivityScreen(
             actionText = stringResource(id = R.string.discard),
             actionButtonColor = MaterialTheme.colorScheme.error,
             actionButtonTextColor = MaterialTheme.colorScheme.onError,
-            onActionClick = { onAction(ActivityAction.DiscardActivity) },
-            onDismissClick = { onAction(ActivityAction.DismissDiscardDialog) }
+            onDismissClick = { onAction(ActivityAction.DismissDiscardDialog) },
+            onActionClick = {
+                toggleTrackerService(false)
+                onAction(ActivityAction.DiscardActivity)
+            }
         )
     }
 
@@ -264,6 +290,7 @@ private fun ActivityScreenPreview() {
     ActivityTrackerTheme {
         ActivityScreen(
             onAction = {},
+            toggleTrackerService = {},
             state = ActivityState(
                 duration = Duration.parse("1h 30m 52s"),
                 activityData = ActivityData(distanceMeters = 1925, speed = 9.2f)

@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:name=".ActivityTrackerApplication"
@@ -17,10 +18,10 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/Theme.ActivityTracker"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31">
+        tools:targetApi="34">
 
         <activity
             android:name=".ui.MainActivity"
@@ -32,6 +33,9 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".tracking.service.ActivityTrackerService"
+            android:foregroundServiceType="location" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

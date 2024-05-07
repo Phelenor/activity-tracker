@@ -169,6 +169,7 @@ wear-compose-ui-tooling = { group = "androidx.wear.compose", name = "compose-ui-
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "play-services-wearable" }
 health-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "health" }
 wear = { group = "androidx.wear", name = "wear", version.ref = "wear" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "androidx-lifecycle" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "android-gradle" }

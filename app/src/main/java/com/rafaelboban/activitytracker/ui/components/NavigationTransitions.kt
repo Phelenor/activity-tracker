@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 
@@ -36,9 +37,11 @@ fun NavGraphBuilder.composableSlide(
 }
 
 inline fun <reified T : Any> NavGraphBuilder.composableFade(
+    deepLinks: List<NavDeepLink> = emptyList(),
     noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
 ) {
     composable<T>(
+        deepLinks = deepLinks,
         enterTransition = { fadeIn(tween(200)) },
         exitTransition = { fadeOut(tween(200)) },
         content = content
@@ -46,9 +49,11 @@ inline fun <reified T : Any> NavGraphBuilder.composableFade(
 }
 
 inline fun <reified T : Any> NavGraphBuilder.composableSlide(
+    deepLinks: List<NavDeepLink> = emptyList(),
     noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
 ) {
     composable<T>(
+        deepLinks = deepLinks,
         enterTransition = { slideInHorizontally(tween(200), initialOffsetX = { x -> x }) },
         exitTransition = { slideOutHorizontally(tween(200), targetOffsetX = { x -> -x }) },
         content = content

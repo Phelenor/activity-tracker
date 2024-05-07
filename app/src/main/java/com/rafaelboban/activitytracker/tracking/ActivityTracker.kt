@@ -4,6 +4,7 @@ package com.rafaelboban.activitytracker.tracking
 
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.ui.screens.activity.ActivityStatus
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.activitytracker.util.replaceLastSublist
@@ -38,6 +39,9 @@ class ActivityTracker(
 
     private val _isActive = MutableStateFlow(false)
     val isActive = _isActive.asStateFlow()
+
+    private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
+    val activityStatus = _activityStatus.asStateFlow()
 
     private val isTrackingLocation = MutableStateFlow(false)
 
@@ -102,6 +106,10 @@ class ActivityTracker(
 
     fun setIsActive(active: Boolean) {
         _isActive.value = active
+    }
+
+    fun setStatus(status: ActivityStatus) {
+        _activityStatus.value = status
     }
 
     fun startTrackingLocation() {

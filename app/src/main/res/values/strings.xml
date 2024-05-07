@@ -47,4 +47,5 @@
     <string name="discard_activity">Discard current activity?</string>
     <string name="discard">Discard</string>
     <string name="discard_activity_info">Activity won\'t be saved in your activity log.</string>
+    <string name="now_running">Now Running</string>
 </resources>

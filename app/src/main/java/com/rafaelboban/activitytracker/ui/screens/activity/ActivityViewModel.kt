@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.tracking.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityStatus.Companion.isRunning
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -23,7 +24,12 @@ class ActivityViewModel @Inject constructor(
     private val tracker: ActivityTracker
 ) : ViewModel() {
 
-    var state by mutableStateOf(ActivityState())
+    var state by mutableStateOf(
+        ActivityState(
+            isActive = ActivityTrackerService.isActive && tracker.isActive.value,
+            activityStatus = if (ActivityTrackerService.isActive) tracker.activityStatus.value else ActivityStatus.NOT_STARTED
+        )
+    )
         private set
 
     private val eventChannel = Channel<ActivityEvent>()
@@ -33,11 +39,19 @@ class ActivityViewModel @Inject constructor(
         state.isActive
     }.stateIn(viewModelScope, SharingStarted.Lazily, state.isActive)
 
+    private val activityStatus = snapshotFlow {
+        state.activityStatus
+    }.stateIn(viewModelScope, SharingStarted.Lazily, state.activityStatus)
+
     init {
         tracker.startTrackingLocation()
 
         isActive.onEach { isActive ->
             tracker.setIsActive(isActive)
+        }.launchIn(viewModelScope)
+
+        activityStatus.onEach { status ->
+            tracker.setStatus(status)
         }.launchIn(viewModelScope)
 
         tracker.currentLocation.onEach { currentLocation ->
@@ -88,12 +102,6 @@ class ActivityViewModel @Inject constructor(
             )
 
             ActivityAction.DiscardActivity -> {
-                state = state.copy(
-                    showDiscardDialog = false
-                )
-
-                tracker.clear()
-
                 viewModelScope.launch {
                     eventChannel.trySend(ActivityEvent.NavigateBack)
                 }
@@ -104,6 +112,8 @@ class ActivityViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
 
-        tracker.clear()
+        if (ActivityTrackerService.isActive.not()) {
+            tracker.clear()
+        }
     }
 }
