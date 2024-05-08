@@ -47,21 +47,22 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
-import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.ActivityType
-import com.rafaelboban.activitytracker.tracking.service.ActivityTrackerService
+import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
-import com.rafaelboban.activitytracker.ui.screens.activity.ActivityStatus.Companion.isRunning
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.activitytracker.util.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.tracker.model.ActivityData
+import com.rafaelboban.core.tracker.model.ActivityStatus
+import com.rafaelboban.core.tracker.model.ActivityStatus.Companion.isRunning
 import kotlin.time.Duration
 
 @Composable

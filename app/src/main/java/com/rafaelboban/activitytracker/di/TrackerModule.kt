@@ -1,8 +1,8 @@
 package com.rafaelboban.activitytracker.di
 
 import android.content.Context
-import com.rafaelboban.activitytracker.tracking.ActivityTracker
-import com.rafaelboban.activitytracker.tracking.LocationObserver
+import com.rafaelboban.core.tracker.tracking.ActivityTracker
+import com.rafaelboban.core.tracker.tracking.LocationObserver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
