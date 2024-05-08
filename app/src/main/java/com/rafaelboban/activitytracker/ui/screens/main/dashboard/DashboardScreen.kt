@@ -30,7 +30,7 @@ import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomShe
 import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)

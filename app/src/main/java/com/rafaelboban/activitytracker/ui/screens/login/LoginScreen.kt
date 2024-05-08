@@ -51,10 +51,10 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
-import com.rafaelboban.activitytracker.ui.theme.Typography
 import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
 import com.rafaelboban.activitytracker.util.CredentialHelper
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.coroutines.launch
 
 @Composable

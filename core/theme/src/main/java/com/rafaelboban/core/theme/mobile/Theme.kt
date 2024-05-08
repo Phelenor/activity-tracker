@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.theme
+package com.rafaelboban.core.theme.mobile
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +44,7 @@ private val LightColors = lightColorScheme(
     surfaceContainerHighest = surfaceContainerHighestLight
 )
 
-private val DarkColors = darkColorScheme(
+internal val DarkColors = darkColorScheme(
     primary = primaryDark,
     onPrimary = onPrimaryDark,
     primaryContainer = primaryContainerDark,

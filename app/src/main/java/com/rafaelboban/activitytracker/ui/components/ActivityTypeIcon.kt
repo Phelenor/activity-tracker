@@ -16,7 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.model.ActivityType
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 
 @Composable
 fun ActivityTypeIcon(

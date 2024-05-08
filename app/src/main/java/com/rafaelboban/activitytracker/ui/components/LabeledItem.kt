@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.core.theme.mobile.Typography
 
 @Composable
 fun LabeledItem(

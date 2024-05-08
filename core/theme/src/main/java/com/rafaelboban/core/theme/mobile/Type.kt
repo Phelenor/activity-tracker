@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.theme
+package com.rafaelboban.core.theme.mobile
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.rafaelboban.activitytracker.R
+import com.rafaelboban.core.theme.R
 
 val Montserrat = FontFamily(
     Font(

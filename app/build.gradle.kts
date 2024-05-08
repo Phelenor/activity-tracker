@@ -135,4 +135,6 @@ dependencies {
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.compose.ui.tooling)
+
+    implementation(projects.core.theme)
 }

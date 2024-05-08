@@ -33,8 +33,8 @@ import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
-import com.rafaelboban.activitytracker.ui.theme.Typography
 import com.rafaelboban.activitytracker.ui.util.UiText
+import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.serialization.Serializable
 
 sealed interface MainScreenNavigation {

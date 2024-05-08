@@ -19,5 +19,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Activity Tracker"
+rootProject.name = "ActivityTracker"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
+include(":wear:app")
+include(":core:theme")

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class ActivityTracker(
     applicationScope: CoroutineScope,
@@ -48,7 +49,7 @@ class ActivityTracker(
     val currentLocation = isTrackingLocation
         .flatMapLatest { isObservingLocation ->
             if (isObservingLocation) {
-                locationObserver.observeLocation(2000L)
+                locationObserver.observeLocation((1.5).seconds.inWholeMilliseconds)
             } else {
                 flowOf()
             }

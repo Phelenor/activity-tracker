@@ -18,7 +18,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.R
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 
 @Composable
 fun ActivityFloatingActionButton(

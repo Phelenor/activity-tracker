@@ -24,8 +24,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
-import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Typography
 
 @Composable
 fun ActivityDataColumn(

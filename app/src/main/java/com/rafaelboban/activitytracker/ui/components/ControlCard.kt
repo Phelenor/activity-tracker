@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardControl
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
-import com.rafaelboban.activitytracker.ui.theme.Typography
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Typography
 
 @Composable
 fun ControlCard(

@@ -11,7 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.rafaelboban.activitytracker.ui.navigation.RootNavigation
-import com.rafaelboban.activitytracker.ui.theme.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

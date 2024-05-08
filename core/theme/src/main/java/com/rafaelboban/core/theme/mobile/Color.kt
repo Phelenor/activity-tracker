@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.theme
+package com.rafaelboban.core.theme.mobile
 
 import androidx.compose.ui.graphics.Color
 
