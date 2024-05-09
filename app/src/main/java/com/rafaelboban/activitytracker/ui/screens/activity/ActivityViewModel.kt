@@ -7,9 +7,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
-import com.rafaelboban.core.tracker.model.ActivityStatus
-import com.rafaelboban.core.tracker.model.ActivityStatus.Companion.isRunning
-import com.rafaelboban.core.tracker.tracking.ActivityTracker
+import com.rafaelboban.core.shared.model.ActivityStatus
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.shared.tracking.ActivityTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted

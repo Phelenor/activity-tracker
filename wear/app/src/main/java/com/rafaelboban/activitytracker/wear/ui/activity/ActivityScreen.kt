@@ -26,8 +26,8 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
+import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
-import com.rafaelboban.core.tracker.utils.F
 import kotlin.time.Duration
 
 @OptIn(ExperimentalPermissionsApi::class)

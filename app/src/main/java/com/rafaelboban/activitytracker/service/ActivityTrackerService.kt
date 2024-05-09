@@ -13,9 +13,9 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.MainActivity
-import com.rafaelboban.core.tracker.tracking.ActivityTracker
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
+import com.rafaelboban.core.shared.tracking.ActivityTracker
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine

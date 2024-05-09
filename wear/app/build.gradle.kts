@@ -98,5 +98,5 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(projects.core.theme)
-    implementation(projects.core.tracker)
+    implementation(projects.core.shared)
 }

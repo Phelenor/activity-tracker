@@ -1,6 +1,6 @@
 package com.rafaelboban.activitytracker.wear.tracker
 
-import com.rafaelboban.core.tracker.utils.Error
+import com.rafaelboban.core.shared.utils.Error
 
 enum class ExerciseError : Error {
     TRACKING_NOT_SUPPORTED,

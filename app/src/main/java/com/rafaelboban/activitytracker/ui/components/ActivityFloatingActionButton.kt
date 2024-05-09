@@ -51,7 +51,7 @@ fun ActivityFloatingActionButton(
 private fun ActivityFloatingActionButtonPreview() {
     ActivityTrackerTheme {
         ActivityFloatingActionButton(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+            icon = ImageVector.vectorResource(id = com.rafaelboban.core.theme.R.drawable.ic_finish_flag),
             onClick = {}
         )
     }

@@ -24,8 +24,8 @@ import androidx.health.services.client.pauseExercise
 import androidx.health.services.client.prepareExercise
 import androidx.health.services.client.resumeExercise
 import androidx.health.services.client.startExercise
-import com.rafaelboban.core.tracker.utils.EmptyResult
-import com.rafaelboban.core.tracker.utils.Result
+import com.rafaelboban.core.shared.utils.EmptyResult
+import com.rafaelboban.core.shared.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

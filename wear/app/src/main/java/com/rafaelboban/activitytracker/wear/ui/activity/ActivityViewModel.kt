@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.wear.tracker.HealthServicesExerciseTracker
+import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val exerciseTracker: HealthServicesExerciseTracker
+    private val exerciseTracker: HealthServicesExerciseTracker,
+    private val phoneConnector: WatchToPhoneConnector
 ) : ViewModel() {
 
     var state by mutableStateOf(ActivityState())

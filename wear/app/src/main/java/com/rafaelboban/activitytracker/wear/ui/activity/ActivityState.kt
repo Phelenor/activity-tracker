@@ -1,6 +1,6 @@
 package com.rafaelboban.activitytracker.wear.ui.activity
 
-import com.rafaelboban.core.tracker.model.ActivityStatus
+import com.rafaelboban.core.shared.model.ActivityStatus
 import kotlin.time.Duration
 
 data class ActivityState(

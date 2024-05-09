@@ -29,11 +29,11 @@ import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.rafaelboban.activitytracker.wear.ui.activity.ActivityState
 import com.rafaelboban.activitytracker.wear.ui.components.ActivityActionButton
 import com.rafaelboban.activitytracker.wear.ui.components.StatisticItem
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.roundToDecimals
 
 @Composable
 fun MainExercisePage(

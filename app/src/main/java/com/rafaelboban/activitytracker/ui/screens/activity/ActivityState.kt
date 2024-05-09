@@ -1,8 +1,8 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
-import com.rafaelboban.core.tracker.model.ActivityData
-import com.rafaelboban.core.tracker.model.ActivityStatus
-import com.rafaelboban.core.tracker.model.location.Location
+import com.rafaelboban.core.shared.model.ActivityData
+import com.rafaelboban.core.shared.model.ActivityStatus
+import com.rafaelboban.core.shared.model.location.Location
 import kotlin.time.Duration
 
 data class ActivityState(

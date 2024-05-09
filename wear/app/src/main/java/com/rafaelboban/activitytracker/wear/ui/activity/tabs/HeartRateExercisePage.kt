@@ -22,8 +22,8 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.rafaelboban.activitytracker.wear.ui.activity.ActivityState
 import com.rafaelboban.activitytracker.wear.ui.components.StatisticItem
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import kotlin.time.Duration
 
 @Composable
