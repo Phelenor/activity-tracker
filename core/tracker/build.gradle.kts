@@ -57,7 +57,6 @@ dependencies {
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
 
-    implementation(libs.hilt.work)
     implementation(libs.timber)
 
     implementation(libs.google.android.gms.play.services.location)

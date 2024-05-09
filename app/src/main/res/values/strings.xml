@@ -48,4 +48,7 @@
     <string name="discard">Discard</string>
     <string name="discard_activity_info">Activity won\'t be saved in your activity log.</string>
     <string name="now_running">Now Running</string>
+    <string name="permissions">Permissions</string>
+    <string name="permissions_rationale_location">Activity Tracker requires location permission for tracking your activities.</string>
+    <string name="ok">OK</string>
 </resources>

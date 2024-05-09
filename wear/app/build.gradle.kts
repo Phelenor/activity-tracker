@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.material.icons.extended)
     implementation(libs.lifecycle.compose)
+    implementation(libs.navigation.compose.wear)
 
     implementation(libs.preferences)
 
@@ -72,6 +73,14 @@ dependencies {
     implementation(libs.wear.compose.foundation)
     implementation(libs.wear.compose.material)
 
+    implementation(libs.core)
+    implementation(libs.androidx.wear.ongoing)
+    implementation(libs.horologist.compose.layout)
+    implementation(libs.horologist.compose.material)
+    implementation(libs.horologist.health.composables)
+    implementation(libs.horologist.health.service)
+
+    implementation(libs.constraintlayout.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.play.services.wearable)
     implementation(libs.compose.ui)
@@ -88,4 +97,5 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(projects.core.theme)
+    implementation(projects.core.tracker)
 }

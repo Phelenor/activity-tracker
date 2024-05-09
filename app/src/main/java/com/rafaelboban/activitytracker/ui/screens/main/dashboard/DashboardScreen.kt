@@ -20,6 +20,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -95,9 +96,9 @@ fun DashboardScreen(
         onDismiss = { onAction(DashboardAction.DismissRationaleDialog) }
     ) {
         InfoDialog(
-            title = "Permissions",
-            subtitle = "Activity Tracker requires location permission for tracking your activities.",
-            actionText = "Okay",
+            title = stringResource(id = R.string.permissions),
+            subtitle = stringResource(id = R.string.permissions_rationale_location),
+            actionText = stringResource(id = R.string.ok),
             onActionClick = { onAction(DashboardAction.RequestPermissions) },
             onDismissClick = { onAction(DashboardAction.DismissRationaleDialog) }
         )

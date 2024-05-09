@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.util
+package com.rafaelboban.core.tracker.utils
 
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours

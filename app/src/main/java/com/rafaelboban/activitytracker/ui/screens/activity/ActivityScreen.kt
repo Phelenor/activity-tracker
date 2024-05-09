@@ -46,7 +46,6 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.ActivityType
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
@@ -56,14 +55,15 @@ import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
-import com.rafaelboban.activitytracker.util.ActivityDataFormatter
-import com.rafaelboban.activitytracker.util.ActivityDataFormatter.formatElapsedTimeDisplay
-import com.rafaelboban.activitytracker.util.ActivityDataFormatter.roundToDecimals
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.tracker.model.ActivityData
 import com.rafaelboban.core.tracker.model.ActivityStatus
 import com.rafaelboban.core.tracker.model.ActivityStatus.Companion.isRunning
 import kotlin.time.Duration
+import com.rafaelboban.core.theme.R
 
 @Composable
 fun ActivityScreenRoot(
@@ -124,9 +124,9 @@ fun ActivityScreen(
         onDismiss = { onAction(ActivityAction.DismissDiscardDialog) }
     ) {
         InfoDialog(
-            title = stringResource(id = R.string.discard_activity),
-            subtitle = stringResource(id = R.string.discard_activity_info),
-            actionText = stringResource(id = R.string.discard),
+            title = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity),
+            subtitle = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity_info),
+            actionText = stringResource(id = com.rafaelboban.activitytracker.R.string.discard),
             actionButtonColor = MaterialTheme.colorScheme.error,
             actionButtonTextColor = MaterialTheme.colorScheme.onError,
             onDismissClick = { onAction(ActivityAction.DismissDiscardDialog) },
@@ -176,7 +176,7 @@ fun ActivityScreen(
                 ) {
                     ActivityDataColumn(
                         modifier = Modifier.weight(1f),
-                        title = stringResource(id = R.string.duration),
+                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.duration),
                         value = state.duration.formatElapsedTimeDisplay(),
                         icon = Icons.Outlined.Timer
                     )
@@ -185,7 +185,7 @@ fun ActivityScreen(
 
                     ActivityDataColumn(
                         modifier = Modifier.weight(1f),
-                        title = stringResource(id = R.string.distance),
+                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.distance),
                         value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.distanceMeters),
                         unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
                         icon = Icons.AutoMirrored.Outlined.TrendingUp
@@ -195,7 +195,7 @@ fun ActivityScreen(
 
                     ActivityDataColumn(
                         modifier = Modifier.weight(1f),
-                        title = stringResource(id = R.string.speed),
+                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
                         value = state.activityData.speed.roundToDecimals(1),
                         unit = "km/h",
                         icon = Icons.Outlined.Speed

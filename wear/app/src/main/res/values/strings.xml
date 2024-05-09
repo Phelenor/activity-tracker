@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
+    <string name="connect_your_phone">This app requires the Activity Tracker phone app to be installed and connected.</string>
 </resources>
