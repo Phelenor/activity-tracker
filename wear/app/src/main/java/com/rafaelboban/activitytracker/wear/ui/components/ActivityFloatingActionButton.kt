@@ -25,7 +25,7 @@ fun ActivityActionButton(
         shape = CircleShape,
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary
         )
     ) {
         Icon(

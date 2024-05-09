@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.runtime.Composable
@@ -28,10 +26,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.rafaelboban.core.theme.R
 import com.rafaelboban.activitytracker.wear.ui.activity.ActivityState
 import com.rafaelboban.activitytracker.wear.ui.components.ActivityActionButton
 import com.rafaelboban.activitytracker.wear.ui.components.StatisticItem
+import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
 import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
 import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay

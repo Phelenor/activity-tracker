@@ -55,15 +55,15 @@ import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
-import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.roundToDecimals
+import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.tracker.model.ActivityData
 import com.rafaelboban.core.tracker.model.ActivityStatus
 import com.rafaelboban.core.tracker.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.formatElapsedTimeDisplay
+import com.rafaelboban.core.tracker.utils.ActivityDataFormatter.roundToDecimals
 import kotlin.time.Duration
-import com.rafaelboban.core.theme.R
 
 @Composable
 fun ActivityScreenRoot(

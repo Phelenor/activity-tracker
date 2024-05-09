@@ -14,6 +14,5 @@ class ActivityViewModel @Inject constructor() : ViewModel() {
         private set
 
     fun onAction(action: ActivityAction) {
-
     }
 }
