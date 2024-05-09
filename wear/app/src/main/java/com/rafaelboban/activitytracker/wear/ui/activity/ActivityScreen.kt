@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.wear.ui.activity
 
 import android.Manifest
+import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +22,7 @@ import androidx.wear.compose.material3.HorizontalPageIndicator
 import androidx.wear.compose.material3.rememberPageIndicatorState
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
@@ -35,18 +35,23 @@ import kotlin.time.Duration
 fun ActivityScreenRoot(
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
-    val bodySensorsPermission = rememberPermissionState(
-        permission = Manifest.permission.BODY_SENSORS,
-        onPermissionResult = { granted ->
-            if (granted) {
+    val bodySensorsPermissions = rememberMultiplePermissionsState(
+        permissions = listOfNotNull(
+            Manifest.permission.BODY_SENSORS,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
+        ),
+        onPermissionsResult = { result ->
+            if (result[Manifest.permission.BODY_SENSORS] == true) {
                 viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
             }
         }
     )
 
     LaunchedEffect(Unit) {
-        if (bodySensorsPermission.status.isGranted.not()) {
-            bodySensorsPermission.launchPermissionRequest()
+        if (bodySensorsPermissions.allPermissionsGranted) {
+            viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
+        } else {
+            bodySensorsPermissions.launchMultiplePermissionRequest()
         }
     }
 
