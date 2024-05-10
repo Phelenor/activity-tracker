@@ -48,8 +48,6 @@ class LoginViewModel @Inject constructor(
                 eventChannel.send(LoginEvent.Error(UiText.DynamicString(message())))
             }.suspendOnException {
                 isLoading = false
-                Log.d("MARIN", "50: login $message")
-                Log.d("MARIN", "52: login")
                 eventChannel.send(LoginEvent.Error(UiText.StringResource(R.string.login_error)))
             }
         }

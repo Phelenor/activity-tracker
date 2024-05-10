@@ -12,7 +12,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.rafaelboban.activitytracker.wear"
+        applicationId = "com.rafaelboban.activitytracker"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
