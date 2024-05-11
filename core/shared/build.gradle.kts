@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.immutable.collection)
     implementation(libs.kotlin.serialization)
+    implementation(libs.lifecycle.compose)
 
     implementation(libs.androidx.startup.runtime)
 

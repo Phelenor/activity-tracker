@@ -1,6 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.login
 
-import com.rafaelboban.activitytracker.ui.util.UiText
+import com.rafaelboban.core.shared.ui.util.UiText
 
 sealed interface LoginEvent {
 

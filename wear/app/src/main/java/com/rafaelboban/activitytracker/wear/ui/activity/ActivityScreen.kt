@@ -2,6 +2,8 @@ package com.rafaelboban.activitytracker.wear.ui.activity
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material3.ExperimentalWearMaterial3Api
@@ -26,6 +29,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
+import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
 import kotlin.time.Duration
@@ -35,6 +39,8 @@ import kotlin.time.Duration
 fun ActivityScreenRoot(
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     val bodySensorsPermissions = rememberMultiplePermissionsState(
         permissions = listOfNotNull(
             Manifest.permission.BODY_SENSORS,
@@ -47,23 +53,29 @@ fun ActivityScreenRoot(
         }
     )
 
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            is ActivityEvent.Error -> Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     LaunchedEffect(Unit) {
-        if (bodySensorsPermissions.allPermissionsGranted) {
-            viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
-        } else {
+        if (bodySensorsPermissions.allPermissionsGranted.not()) {
             bodySensorsPermissions.launchMultiplePermissionRequest()
         }
     }
 
     ActivityScreen(
-        state = viewModel.state
+        state = viewModel.state,
+        onAction = viewModel::onAction
     )
 }
 
 @OptIn(ExperimentalWearMaterial3Api::class)
 @Composable
 private fun ActivityScreen(
-    state: ActivityState
+    state: ActivityState,
+    onAction: (ActivityAction) -> Unit
 ) {
     val pageCount = if (state.canTrackHeartRate) 2 else 1
     var selectedPage by remember { mutableIntStateOf(0) }
@@ -84,9 +96,11 @@ private fun ActivityScreen(
                 state = pagerState
             ) { page ->
                 when (page) {
-                    0 -> MainExercisePage(state = state)
                     1 -> HeartRateExercisePage(state = state)
-                    else -> MainExercisePage(state = state)
+                    else -> MainExercisePage(
+                        state = state,
+                        onAction = onAction
+                    )
                 }
             }
 
@@ -105,6 +119,7 @@ private fun ActivityScreen(
 private fun ActivityScreenPreview() {
     ActivityTrackerWearTheme {
         ActivityScreen(
+            onAction = {},
             state = ActivityState(
                 isConnectedPhoneNearby = true,
                 canTrackHeartRate = true,

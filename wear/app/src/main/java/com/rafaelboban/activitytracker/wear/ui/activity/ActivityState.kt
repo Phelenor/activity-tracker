@@ -8,7 +8,7 @@ data class ActivityState(
     val speed: Float = 0f,
     val distanceMeters: Int = 0,
     val heartRate: Int = 0,
-    val isTrackable: Boolean = false,
+    val canTrack: Boolean = false,
     val activityStatus: ActivityStatus = ActivityStatus.NOT_STARTED,
     val isActive: Boolean = false,
     val canTrackHeartRate: Boolean = false,

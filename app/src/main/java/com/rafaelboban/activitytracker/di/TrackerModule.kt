@@ -26,8 +26,9 @@ object TrackerModule {
     @Singleton
     fun getActivityTracker(
         applicationScope: CoroutineScope,
-        locationObserver: LocationObserver
-    ) = ActivityTracker(applicationScope, locationObserver)
+        locationObserver: LocationObserver,
+        watchConnector: PhoneToWatchConnector
+    ) = ActivityTracker(applicationScope, locationObserver, watchConnector)
 
     @Provides
     @Singleton

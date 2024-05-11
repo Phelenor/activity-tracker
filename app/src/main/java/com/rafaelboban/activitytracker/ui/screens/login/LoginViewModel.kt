@@ -11,7 +11,7 @@ import com.rafaelboban.activitytracker.data.session.AuthInfo
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.repository.UserRepository
-import com.rafaelboban.activitytracker.ui.util.UiText
+import com.rafaelboban.core.shared.ui.util.UiText
 import com.rafaelboban.activitytracker.util.UserData
 import com.skydoves.sandwich.message
 import com.skydoves.sandwich.suspendOnError

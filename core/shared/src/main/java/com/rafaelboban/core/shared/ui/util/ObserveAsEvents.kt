@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.util
+package com.rafaelboban.core.shared.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

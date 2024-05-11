@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.wear.di
 
 import android.content.Context
+import com.rafaelboban.activitytracker.wear.tracker.ActivityTracker
 import com.rafaelboban.activitytracker.wear.tracker.HealthServicesExerciseTracker
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery
@@ -28,4 +29,12 @@ object TrackerModule {
         messagingClient: WearMessagingClient,
         nodeDiscovery: WearNodeDiscovery
     ) = WatchToPhoneConnector(applicationScope, nodeDiscovery, messagingClient)
+
+    @Provides
+    @Singleton
+    fun getActivityTracker(
+        applicationScope: CoroutineScope,
+        phoneConnector: WatchToPhoneConnector,
+        healthServicesTracker: HealthServicesExerciseTracker
+    ) = ActivityTracker(applicationScope, phoneConnector, healthServicesTracker)
 }

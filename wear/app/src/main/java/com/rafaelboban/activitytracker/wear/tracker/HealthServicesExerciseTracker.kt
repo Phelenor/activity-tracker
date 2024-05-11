@@ -54,7 +54,9 @@ class HealthServicesExerciseTracker(private val context: Context) {
                     }
                 }
 
-                override fun onAvailabilityChanged(dataType: DataType<*, *>, availability: Availability) = Unit
+                override fun onAvailabilityChanged(dataType: DataType<*, *>, availability: Availability) {
+                    Timber.i("Health Services availability = $availability")
+                }
 
                 override fun onLapSummaryReceived(lapSummary: ExerciseLapSummary) = Unit
 

@@ -2,6 +2,9 @@
 
 package com.rafaelboban.core.shared.tracking
 
+import android.util.Log
+import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
+import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityData
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.location.LocationTimestamp
@@ -15,12 +18,17 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
@@ -29,7 +37,8 @@ import kotlin.time.Duration.Companion.seconds
 
 class ActivityTracker(
     applicationScope: CoroutineScope,
-    private val locationObserver: LocationObserver
+    private val locationObserver: LocationObserver,
+    private val watchConnector: PhoneToWatchConnector
 ) {
 
     private val _activityData = MutableStateFlow(ActivityData())
@@ -60,6 +69,17 @@ class ActivityTracker(
             null
         )
 
+    private val heartRates = watchConnector.messages
+        .filterIsInstance<MessagingAction.HeartRateUpdate>()
+        .map { it.heartRate }
+        .runningFold(initial = emptyList<Int>()) { currentHeartRates, newHeartRate ->
+            currentHeartRates + newHeartRate
+        }.stateIn(
+            applicationScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
+
     init {
         _isActive.onEach { isActive ->
             if (!isActive) {
@@ -84,7 +104,7 @@ class ActivityTracker(
                     location = location,
                     durationTimestamp = duration
                 )
-            }.onEach { location ->
+            }.combine(heartRates) { location, heartRates ->
                 _activityData.update { data ->
                     val currentSpeed = location.location.speed ?: Float.MAX_VALUE
                     val distanceFromLastLocation = data.locations.lastOrNull()?.lastOrNull()?.latLong?.distanceTo(location.latLong) ?: Float.MAX_VALUE
@@ -99,9 +119,21 @@ class ActivityTracker(
                     ActivityData(
                         locations = data.locations.replaceLastSublist(currentLocationSequence).map { it.toImmutableList() }.toImmutableList(),
                         distanceMeters = data.locations.distanceSequenceMeters,
-                        speed = location.location.speed ?: currentLocationSequence.currentSpeed
+                        speed = location.location.speed ?: currentLocationSequence.currentSpeed,
+                        heartRates = heartRates.toImmutableList()
                     )
                 }
+            }.launchIn(applicationScope)
+
+        duration.onEach {
+            watchConnector.sendMessageToWatch(MessagingAction.DurationUpdate(it))
+        }.launchIn(applicationScope)
+
+        activityData
+            .map { it.distanceMeters }
+            .distinctUntilChanged()
+            .onEach {
+                watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(it))
             }.launchIn(applicationScope)
     }
 
@@ -115,10 +147,12 @@ class ActivityTracker(
 
     fun startTrackingLocation() {
         isTrackingLocation.value = true
+        watchConnector.setIsTrackable(true)
     }
 
     private fun stopTrackingLocation() {
         isTrackingLocation.value = false
+        watchConnector.setIsTrackable(false)
     }
 
     fun stop() {

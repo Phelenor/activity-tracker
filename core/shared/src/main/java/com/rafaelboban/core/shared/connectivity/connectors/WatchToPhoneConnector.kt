@@ -1,5 +1,6 @@
 package com.rafaelboban.core.shared.connectivity.connectors
 
+import android.util.Log
 import com.google.android.gms.wearable.Node
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery

@@ -17,18 +17,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,9 +43,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -54,7 +60,7 @@ import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
-import com.rafaelboban.activitytracker.ui.util.ObserveAsEvents
+import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.model.ActivityData
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
@@ -63,6 +69,9 @@ import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTime
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Montserrat
+import com.rafaelboban.core.theme.mobile.Typography
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.time.Duration
 
 @Composable
@@ -150,7 +159,7 @@ fun ActivityScreen(
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val (infoCard, map, controls) = createRefs()
+            val (infoCard, map, controls, heart) = createRefs()
 
             Column(
                 modifier = Modifier
@@ -280,6 +289,32 @@ fun ActivityScreen(
                     }
                 }
             }
+
+            state.activityData.heartRates.lastOrNull()?.let { heartRate ->
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.constrainAs(heart) {
+                        top.linkTo(infoCard.bottom, margin = 8.dp)
+                        start.linkTo(parent.start, margin = 8.dp)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(56.dp),
+                        imageVector = Icons.Filled.Favorite,
+                        tint = MaterialTheme.colorScheme.error,
+                        contentDescription = null
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = heartRate.toString(),
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onError
+                    )
+                }
+            }
         }
     }
 }
@@ -294,7 +329,7 @@ private fun ActivityScreenPreview() {
             toggleTrackerService = {},
             state = ActivityState(
                 duration = Duration.parse("1h 30m 52s"),
-                activityData = ActivityData(distanceMeters = 1925, speed = 9.2f)
+                activityData = ActivityData(distanceMeters = 1925, speed = 9.2f, heartRates = persistentListOf(142))
             )
         )
     }

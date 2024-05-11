@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
     <string name="connect_your_phone">This app requires the Activity Tracker phone app to be installed and connected.</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="error_ongoing_exercise">Exercise already in progress</string>
+    <string name="error_exercise_already_ended">Exercise already ended</string>
 </resources>

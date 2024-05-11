@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.util
+package com.rafaelboban.core.shared.ui.util
 
 import android.content.Context
 import androidx.annotation.StringRes

@@ -1,3 +1,8 @@
 package com.rafaelboban.activitytracker.wear.ui.activity
 
-sealed interface ActivityEvent
+import com.rafaelboban.core.shared.ui.util.UiText
+
+sealed interface ActivityEvent {
+
+    data class Error(val message: UiText): ActivityEvent
+}
