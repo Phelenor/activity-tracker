@@ -32,8 +32,8 @@ class ActivityViewModel @Inject constructor(
 
     var state by mutableStateOf(
         ActivityState(
-            isActive = ActivityTrackerService.isActive && tracker.isActive.value,
-            activityStatus = if (ActivityTrackerService.isActive) tracker.activityStatus.value else ActivityStatus.NOT_STARTED
+            isTracking = ActivityTrackerService.isActive && tracker.isTracking.value,
+            activityStatus = tracker.activityStatus.value
         )
     )
         private set
@@ -41,9 +41,9 @@ class ActivityViewModel @Inject constructor(
     private val eventChannel = Channel<ActivityEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val isActive = snapshotFlow {
-        state.isActive
-    }.stateIn(viewModelScope, SharingStarted.Lazily, state.isActive)
+    private val isTracking = snapshotFlow {
+        state.isTracking
+    }.stateIn(viewModelScope, SharingStarted.Lazily, state.isTracking)
 
     private val activityStatus = snapshotFlow {
         state.activityStatus
@@ -52,8 +52,8 @@ class ActivityViewModel @Inject constructor(
     init {
         tracker.startTrackingLocation()
 
-        isActive.onEach { isActive ->
-            tracker.setIsActive(isActive)
+        isTracking.onEach { isTracking ->
+            tracker.setIsTracking(isTracking)
         }.launchIn(viewModelScope)
 
         activityStatus.onEach { status ->
@@ -83,23 +83,23 @@ class ActivityViewModel @Inject constructor(
         when (action) {
             ActivityAction.OnStartClick -> state = state.copy(
                 activityStatus = ActivityStatus.IN_PROGRESS,
-                isActive = true
+                isTracking = true
             )
 
             ActivityAction.OnPauseClick -> state = state.copy(
                 activityStatus = ActivityStatus.PAUSED,
-                isActive = false
+                isTracking = false
             )
 
             ActivityAction.OnResumeClick -> state = state.copy(
                 activityStatus = ActivityStatus.IN_PROGRESS,
-                isActive = true
+                isTracking = true
             )
 
             ActivityAction.OnFinishClick -> {
                 state = state.copy(
                     activityStatus = ActivityStatus.FINISHED,
-                    isActive = false
+                    isTracking = false
                 )
 
                 tracker.stop()
@@ -130,7 +130,7 @@ class ActivityViewModel @Inject constructor(
                     MessagingAction.Resume -> onAction(ActivityAction.OnResumeClick, fromWatch = true)
                     MessagingAction.Start -> onAction(ActivityAction.OnStartClick, fromWatch = true)
                     MessagingAction.ConnectionRequest -> {
-                        if (isActive.value) {
+                        if (activityStatus.value.isRunning) {
                             watchConnector.sendMessageToWatch(MessagingAction.Start)
                         }
                     }

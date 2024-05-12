@@ -46,8 +46,8 @@ class ActivityTracker(
     private val _duration = MutableStateFlow(Duration.ZERO)
     val duration = _duration.asStateFlow()
 
-    private val _isActive = MutableStateFlow(false)
-    val isActive = _isActive.asStateFlow()
+    private val _isTracking = MutableStateFlow(false)
+    val isTracking = _isTracking.asStateFlow()
 
     private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
     val activityStatus = _activityStatus.asStateFlow()
@@ -80,21 +80,21 @@ class ActivityTracker(
         )
 
     init {
-        _isActive.onEach { isActive ->
-            if (!isActive) {
+        _isTracking.onEach { isTracking ->
+            if (isTracking.not()) {
                 _activityData.update { data ->
                     data.copy(locations = (data.locations + listOf(persistentListOf())).toImmutableList())
                 }
             }
-        }.flatMapLatest { isActive ->
-            if (isActive) Timer.time() else flowOf()
+        }.flatMapLatest { isTracking ->
+            if (isTracking) Timer.time() else flowOf()
         }.onEach { interval ->
             _duration.update { it + interval }
         }.launchIn(applicationScope)
 
         currentLocation
             .filterNotNull()
-            .combineTransform(_isActive) { location, isActive ->
+            .combineTransform(_isTracking) { location, isActive ->
                 if (isActive) {
                     emit(location)
                 }
@@ -136,8 +136,8 @@ class ActivityTracker(
             }.launchIn(applicationScope)
     }
 
-    fun setIsActive(active: Boolean) {
-        _isActive.value = active
+    fun setIsTracking(active: Boolean) {
+        _isTracking.value = active
     }
 
     fun setStatus(status: ActivityStatus) {
@@ -156,7 +156,7 @@ class ActivityTracker(
 
     fun stop() {
         stopTrackingLocation()
-        setIsActive(false)
+        setIsTracking(false)
     }
 
     fun clear() {

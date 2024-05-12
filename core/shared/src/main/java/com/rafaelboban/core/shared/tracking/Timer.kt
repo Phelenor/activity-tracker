@@ -14,7 +14,7 @@ object Timer {
             var timerTime = Instant.now().toEpochMilli()
 
             while (true) {
-                delay(200L)
+                delay(500)
                 val currentTime = Instant.now().toEpochMilli()
                 val elapsedTime = currentTime - timerTime
                 emit(elapsedTime.milliseconds)
