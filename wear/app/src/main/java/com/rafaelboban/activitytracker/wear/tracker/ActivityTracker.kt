@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -65,13 +64,11 @@ class ActivityTracker(
                 }
             }.launchIn(applicationScope)
 
-        phoneConnector.connectedNode
-            .filterNotNull()
-            .onEach {
-                exerciseTracker.prepareExercise()
-            }.launchIn(applicationScope)
-
         canTrack.flatMapLatest { canTrack ->
+            if (canTrack) {
+                exerciseTracker.prepareExercise()
+            }
+
             if (canTrack) {
                 exerciseTracker.heartRate
             } else {
@@ -89,5 +86,13 @@ class ActivityTracker(
 
     fun setStatus(status: ActivityStatus) {
         _activityStatus.value = status
+    }
+
+    fun reset() {
+        setIsActive(false)
+        setStatus(ActivityStatus.NOT_STARTED)
+
+        _canTrack.value = false
+        _heartRate.value = 0
     }
 }

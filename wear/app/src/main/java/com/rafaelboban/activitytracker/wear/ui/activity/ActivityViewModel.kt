@@ -75,7 +75,7 @@ class ActivityViewModel @Inject constructor(
             .onEach { node ->
                 state = state.copy(isConnectedPhoneNearby = node.isNearby)
             }.combine(isActive) { _, isActive ->
-                if (!isActive) {
+                if (isActive.not()) {
                     phoneConnector.sendMessageToPhone(MessagingAction.ConnectionRequest)
                 }
             }.launchIn(viewModelScope)
@@ -134,7 +134,8 @@ class ActivityViewModel @Inject constructor(
         when (action) {
             ActivityAction.GrantBodySensorsPermission -> {
                 viewModelScope.launch {
-                    state = state.copy(canTrackHeartRate = exerciseTracker.isHeartRateTrackingSupported())
+                    val canTrackHeartRate = exerciseTracker.isHeartRateTrackingSupported()
+                    state = state.copy(canTrackHeartRate = canTrackHeartRate)
                 }
             }
 
@@ -145,8 +146,6 @@ class ActivityViewModel @Inject constructor(
             }
 
             ActivityAction.OnFinishClick -> {
-                // TODO: overview
-
                 state = state.copy(
                     isActive = false,
                     activityStatus = ActivityStatus.FINISHED
@@ -197,9 +196,23 @@ class ActivityViewModel @Inject constructor(
                         }
                     }
 
-                    MessagingAction.Finish -> onAction(ActivityAction.OnFinishClick, fromPhone = true)
-                    MessagingAction.CanTrack -> state = state.copy(canTrack = true)
-                    MessagingAction.CanNotTrack -> state = state.copy(canTrack = false)
+                    MessagingAction.Finish -> {
+                        onAction(ActivityAction.OnFinishClick, fromPhone = true)
+                    }
+
+                    MessagingAction.CanTrack -> {
+                        state = state.copy(canTrack = true)
+                    }
+
+                    MessagingAction.CanNotTrack -> {
+                        state = ActivityState(
+                            canTrackHeartRate = state.canTrackHeartRate,
+                            isConnectedPhoneNearby = state.isConnectedPhoneNearby
+                        )
+
+                        activityTracker.reset()
+                    }
+
                     else -> Unit
                 }
             }.launchIn(viewModelScope)
