@@ -24,9 +24,6 @@ class ActivityTracker(
     private val phoneConnector: WatchToPhoneConnector,
     private val exerciseTracker: HealthServicesExerciseTracker
 ) {
-    private val _isActive = MutableStateFlow(false)
-    val isActive = _isActive.asStateFlow()
-
     private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
     val activityStatus = _activityStatus.asStateFlow()
 
@@ -80,16 +77,11 @@ class ActivityTracker(
         }.launchIn(applicationScope)
     }
 
-    fun setIsActive(active: Boolean) {
-        _isActive.value = active
-    }
-
     fun setStatus(status: ActivityStatus) {
         _activityStatus.value = status
     }
 
     fun reset() {
-        setIsActive(false)
         setStatus(ActivityStatus.NOT_STARTED)
 
         _canTrack.value = false

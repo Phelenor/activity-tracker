@@ -13,6 +13,7 @@ import com.rafaelboban.activitytracker.wear.tracker.toUiText
 import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
 import com.rafaelboban.core.shared.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,7 +40,6 @@ class ActivityViewModel @Inject constructor(
 
     var state by mutableStateOf(
         ActivityState(
-            isActive = ActivityTrackerService.isActive && activityTracker.isActive.value,
             activityStatus = activityTracker.activityStatus.value,
             canTrack = ActivityTrackerService.isActive
         )
@@ -49,10 +49,6 @@ class ActivityViewModel @Inject constructor(
     private val canTrackHeartRate = snapshotFlow {
         state.canTrackHeartRate && state.canTrack
     }.stateIn(viewModelScope, SharingStarted.Lazily, state.canTrackHeartRate && state.canTrack)
-
-    private val isActive = snapshotFlow {
-        state.isActive && state.canTrack && state.isConnectedPhoneNearby
-    }.stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     private val activityStatus = snapshotFlow {
         state.activityStatus
@@ -74,8 +70,8 @@ class ActivityViewModel @Inject constructor(
             .filterNotNull()
             .onEach { node ->
                 state = state.copy(isConnectedPhoneNearby = node.isNearby)
-            }.combine(isActive) { _, isActive ->
-                if (isActive.not()) {
+            }.combine(activityStatus) { _, status ->
+                if (status.isRunning.not()) {
                     phoneConnector.sendMessageToPhone(MessagingAction.ConnectionRequest)
                 }
             }.launchIn(viewModelScope)
@@ -88,10 +84,6 @@ class ActivityViewModel @Inject constructor(
             if (canTrack) activityTracker.heartRate else flowOf()
         }.onEach { heartRate ->
             state = state.copy(heartRate = heartRate)
-        }.launchIn(viewModelScope)
-
-        isActive.onEach { isActive ->
-            activityTracker.setIsActive(isActive)
         }.launchIn(viewModelScope)
 
         activityStatus.onEach { status ->
@@ -145,25 +137,10 @@ class ActivityViewModel @Inject constructor(
                 }
             }
 
-            ActivityAction.OnFinishClick -> {
-                state = state.copy(
-                    isActive = false,
-                    activityStatus = ActivityStatus.FINISHED
-                )
-            }
-
-            ActivityAction.OnPauseClick -> state = state.copy(
-                activityStatus = ActivityStatus.PAUSED
-            )
-
-            ActivityAction.OnResumeClick -> state = state.copy(
-                activityStatus = ActivityStatus.IN_PROGRESS
-            )
-
-            ActivityAction.OnStartClick -> state = state.copy(
-                isActive = true,
-                activityStatus = ActivityStatus.IN_PROGRESS
-            )
+            ActivityAction.OnFinishClick -> state = state.copy(activityStatus = ActivityStatus.FINISHED)
+            ActivityAction.OnPauseClick -> state = state.copy(activityStatus = ActivityStatus.PAUSED)
+            ActivityAction.OnResumeClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+            ActivityAction.OnStartClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
         }
     }
 
@@ -173,18 +150,13 @@ class ActivityViewModel @Inject constructor(
                 when (message) {
                     MessagingAction.Start -> {
                         if (state.canTrack) {
-                            state = state.copy(
-                                isActive = true,
-                                activityStatus = ActivityStatus.IN_PROGRESS
-                            )
+                            state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
                         }
                     }
 
                     MessagingAction.Pause -> {
                         if (state.canTrack) {
-                            state = state.copy(
-                                activityStatus = ActivityStatus.PAUSED
-                            )
+                            state = state.copy(activityStatus = ActivityStatus.PAUSED)
                         }
                     }
 

@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -84,6 +85,10 @@ fun ActivityScreenRoot(
         when (event) {
             ActivityEvent.NavigateBack -> navigateUp()
         }
+    }
+
+    BackHandler(enabled = viewModel.state.activityStatus.isRunning) {
+        viewModel.onAction(ActivityAction.OnBackClick)
     }
 
     ActivityScreen(
@@ -289,7 +294,7 @@ fun ActivityScreen(
                 }
             }
 
-            state.activityData.heartRates.lastOrNull()?.takeIf { state.isActive }?.let { heartRate ->
+            state.activityData.heartRates.lastOrNull()?.takeIf { state.activityStatus.isRunning }?.let { heartRate ->
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.constrainAs(heart) {

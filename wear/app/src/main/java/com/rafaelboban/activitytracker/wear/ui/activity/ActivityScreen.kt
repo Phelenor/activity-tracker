@@ -33,6 +33,7 @@ import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePa
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.OpenActivityOnPhonePage
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
@@ -70,12 +71,12 @@ fun ActivityScreenRoot(
         }
     }
 
-    LaunchedEffect(viewModel.state.isActive) {
-        if (viewModel.state.isActive && ActivityTrackerService.isActive.not()) {
+    LaunchedEffect(viewModel.state.activityStatus) {
+        if (viewModel.state.activityStatus.isRunning && ActivityTrackerService.isActive.not()) {
             toggleTrackerService(true)
         }
 
-        if (viewModel.state.isActive.not() && ActivityTrackerService.isActive) {
+        if (viewModel.state.activityStatus.isRunning.not() && ActivityTrackerService.isActive) {
             toggleTrackerService(false)
         }
     }
