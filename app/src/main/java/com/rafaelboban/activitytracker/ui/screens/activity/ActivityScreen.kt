@@ -289,7 +289,7 @@ fun ActivityScreen(
                 }
             }
 
-            state.activityData.heartRates.lastOrNull()?.let { heartRate ->
+            state.activityData.heartRates.lastOrNull()?.takeIf { state.isActive }?.let { heartRate ->
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.constrainAs(heart) {
