@@ -1,4 +1,4 @@
-package com.rafaelboban.core.shared.tracking
+package com.rafaelboban.activitytracker.tracking
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

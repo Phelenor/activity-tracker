@@ -1,6 +1,6 @@
 @file:SuppressLint("MissingPermission")
 
-package com.rafaelboban.core.shared.tracking
+package com.rafaelboban.activitytracker.tracking
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,7 +12,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.rafaelboban.core.shared.utils.toLocationWithAltitude
+import com.rafaelboban.activitytracker.util.toLocationWithAltitude
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow

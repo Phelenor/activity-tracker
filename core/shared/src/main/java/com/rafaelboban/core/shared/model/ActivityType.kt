@@ -1,8 +1,8 @@
-package com.rafaelboban.activitytracker.model
+package com.rafaelboban.core.shared.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.rafaelboban.activitytracker.R
+import com.rafaelboban.core.shared.R
 
 enum class ActivityType(@StringRes val titleRes: Int, @DrawableRes val drawableRes: Int) {
     RUN(R.string.running, R.drawable.ic_run),

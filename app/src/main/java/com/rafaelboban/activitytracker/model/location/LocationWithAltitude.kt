@@ -1,4 +1,4 @@
-package com.rafaelboban.core.shared.model.location
+package com.rafaelboban.activitytracker.model.location
 
 data class LocationWithAltitude(
     val location: Location,

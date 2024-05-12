@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="now_running">Now running</string>
+    <string name="running">Running</string>
+    <string name="other">Other</string>
+    <string name="walking">Walking</string>
+    <string name="cycling">Cycling</string>
 </resources>

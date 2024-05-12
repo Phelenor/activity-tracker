@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.R
-import com.rafaelboban.activitytracker.model.ActivityType
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
 

@@ -34,13 +34,15 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.rafaelboban.activitytracker.R
+import com.rafaelboban.activitytracker.model.location.Location
+import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.core.shared.utils.F
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ActivityTrackerMap(
-    currentLocation: com.rafaelboban.core.shared.model.location.Location?,
-    locations: ImmutableList<ImmutableList<com.rafaelboban.core.shared.model.location.LocationTimestamp>>,
+    currentLocation: Location?,
+    locations: ImmutableList<ImmutableList<LocationTimestamp>>,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current

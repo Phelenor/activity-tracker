@@ -1,4 +1,4 @@
-package com.rafaelboban.core.shared.model.location
+package com.rafaelboban.activitytracker.model.location
 
 import android.location.Location
 import kotlin.time.Duration

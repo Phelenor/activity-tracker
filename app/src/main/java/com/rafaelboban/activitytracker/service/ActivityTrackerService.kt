@@ -12,8 +12,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.rafaelboban.activitytracker.R
+import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.activitytracker.ui.MainActivity
-import com.rafaelboban.core.shared.tracking.ActivityTracker
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import dagger.hilt.android.AndroidEntryPoint

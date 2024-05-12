@@ -1,6 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.main.dashboard
 
-import com.rafaelboban.activitytracker.model.ActivityType
+import com.rafaelboban.core.shared.model.ActivityType
 
 sealed interface DashboardAction {
     data object DismissBottomSheet : DashboardAction

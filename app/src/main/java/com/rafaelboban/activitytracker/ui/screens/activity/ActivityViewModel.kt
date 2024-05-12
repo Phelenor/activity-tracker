@@ -1,17 +1,16 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
+import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
-import com.rafaelboban.core.shared.tracking.ActivityTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -142,7 +141,6 @@ class ActivityViewModel @Inject constructor(
             tracker.clear()
 
             applicationScope.launch {
-                Log.d("MARIN", "143: onCleared send")
                 watchConnector.sendMessageToWatch(MessagingAction.CanNotTrack)
             }
         }

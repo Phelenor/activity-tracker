@@ -1,7 +1,6 @@
 package com.rafaelboban.core.shared.connectivity.clients
 
 import android.content.Context
-import android.util.Log
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
@@ -27,9 +26,6 @@ class WearMessagingClient(context: Context) {
                 if (event.path.startsWith(BASE_PATH_MESSAGING_ACTION)) {
                     val json = event.data.decodeToString()
                     val action = Json.decodeFromString<MessagingAction>(json)
-                    if (action !is MessagingAction.DurationUpdate && action !is MessagingAction.HeartRateUpdate && action !is MessagingAction.DistanceUpdate) {
-                        Log.d("MARIN", "30: $nodeId - receive $action")
-                    }
                     trySend(action)
                 }
             }

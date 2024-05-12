@@ -1,14 +1,14 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.rafaelboban.core.shared.tracking
+package com.rafaelboban.activitytracker.tracking
 
+import com.rafaelboban.activitytracker.model.ActivityData
+import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.util.currentSpeed
+import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
-import com.rafaelboban.core.shared.model.ActivityData
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.location.LocationTimestamp
-import com.rafaelboban.core.shared.utils.currentSpeed
-import com.rafaelboban.core.shared.utils.distanceSequenceMeters
 import com.rafaelboban.core.shared.utils.replaceLastSublist
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList

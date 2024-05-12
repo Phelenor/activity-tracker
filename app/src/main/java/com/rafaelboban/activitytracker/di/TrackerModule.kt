@@ -1,11 +1,11 @@
 package com.rafaelboban.activitytracker.di
 
 import android.content.Context
+import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.tracking.LocationObserver
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
-import com.rafaelboban.core.shared.tracking.ActivityTracker
-import com.rafaelboban.core.shared.tracking.LocationObserver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

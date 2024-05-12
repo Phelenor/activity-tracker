@@ -1,6 +1,6 @@
-package com.rafaelboban.core.shared.utils
+package com.rafaelboban.activitytracker.util
 
-import com.rafaelboban.core.shared.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
