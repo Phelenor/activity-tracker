@@ -13,7 +13,7 @@ import com.rafaelboban.activitytracker.wear.tracker.toUiText
 import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +71,7 @@ class ActivityViewModel @Inject constructor(
             .onEach { node ->
                 state = state.copy(isConnectedPhoneNearby = node.isNearby)
             }.combine(activityStatus) { _, status ->
-                if (status.isRunning.not()) {
+                if (status.isActive.not() && status != ActivityStatus.FINISHED) {
                     phoneConnector.sendMessageToPhone(MessagingAction.ConnectionRequest)
                 }
             }.launchIn(viewModelScope)

@@ -1,25 +1,23 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.tracking.ActivityTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,35 +28,14 @@ class ActivityViewModel @Inject constructor(
     private val watchConnector: PhoneToWatchConnector
 ) : ViewModel() {
 
-    var state by mutableStateOf(
-        ActivityState(
-            isTracking = ActivityTrackerService.isActive && tracker.isTracking.value,
-            activityStatus = tracker.activityStatus.value
-        )
-    )
+    var state by mutableStateOf(ActivityState(activityStatus = tracker.activityStatus.value))
         private set
 
     private val eventChannel = Channel<ActivityEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val isTracking = snapshotFlow {
-        state.isTracking
-    }.stateIn(viewModelScope, SharingStarted.Lazily, state.isTracking)
-
-    private val activityStatus = snapshotFlow {
-        state.activityStatus
-    }.stateIn(viewModelScope, SharingStarted.Lazily, state.activityStatus)
-
     init {
         tracker.startTrackingLocation()
-
-        isTracking.onEach { isTracking ->
-            tracker.setIsTracking(isTracking)
-        }.launchIn(viewModelScope)
-
-        activityStatus.onEach { status ->
-            tracker.setStatus(status)
-        }.launchIn(viewModelScope)
 
         tracker.currentLocation.onEach { currentLocation ->
             state = state.copy(currentLocation = currentLocation?.location)
@@ -81,37 +58,38 @@ class ActivityViewModel @Inject constructor(
         }
 
         when (action) {
-            ActivityAction.OnStartClick -> state = state.copy(
-                activityStatus = ActivityStatus.IN_PROGRESS,
-                isTracking = true
-            )
-
-            ActivityAction.OnPauseClick -> state = state.copy(
-                activityStatus = ActivityStatus.PAUSED,
-                isTracking = false
-            )
-
-            ActivityAction.OnResumeClick -> state = state.copy(
-                activityStatus = ActivityStatus.IN_PROGRESS,
-                isTracking = true
-            )
-
-            ActivityAction.OnFinishClick -> {
-                state = state.copy(
-                    activityStatus = ActivityStatus.FINISHED,
-                    isTracking = false
-                )
-
-                tracker.stop()
+            ActivityAction.OnStartClick -> {
+                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+                tracker.setIsTrackingActivity(true)
+                tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
             }
 
-            ActivityAction.OnBackClick -> state = state.copy(
-                showDiscardDialog = state.activityStatus.isRunning
-            )
+            ActivityAction.OnPauseClick -> {
+                state = state.copy(activityStatus = ActivityStatus.PAUSED)
+                tracker.setIsTrackingActivity(false)
+                tracker.setActivityStatus(ActivityStatus.PAUSED)
+            }
 
-            ActivityAction.DismissDiscardDialog -> state = state.copy(
-                showDiscardDialog = false
-            )
+            ActivityAction.OnResumeClick -> {
+                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+                tracker.setIsTrackingActivity(true)
+                tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
+            }
+
+            ActivityAction.OnFinishClick -> {
+                state = state.copy(activityStatus = ActivityStatus.FINISHED)
+                tracker.setIsTrackingActivity(false)
+                tracker.setActivityStatus(ActivityStatus.FINISHED)
+                tracker.stopTrackingLocation()
+            }
+
+            ActivityAction.OnBackClick -> {
+                state = state.copy(showDiscardDialog = state.activityStatus.isActive)
+            }
+
+            ActivityAction.DismissDiscardDialog -> {
+                state = state.copy(showDiscardDialog = false)
+            }
 
             ActivityAction.DiscardActivity -> {
                 viewModelScope.launch {
@@ -130,7 +108,7 @@ class ActivityViewModel @Inject constructor(
                     MessagingAction.Resume -> onAction(ActivityAction.OnResumeClick, fromWatch = true)
                     MessagingAction.Start -> onAction(ActivityAction.OnStartClick, fromWatch = true)
                     MessagingAction.ConnectionRequest -> {
-                        if (activityStatus.value.isRunning) {
+                        if (state.activityStatus.isActive) {
                             watchConnector.sendMessageToWatch(MessagingAction.Start)
                         }
                     }
@@ -164,6 +142,7 @@ class ActivityViewModel @Inject constructor(
             tracker.clear()
 
             applicationScope.launch {
+                Log.d("MARIN", "143: onCleared send")
                 watchConnector.sendMessageToWatch(MessagingAction.CanNotTrack)
             }
         }

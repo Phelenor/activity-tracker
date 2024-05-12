@@ -63,7 +63,7 @@ import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.core.shared.model.ActivityData
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
@@ -87,7 +87,7 @@ fun ActivityScreenRoot(
         }
     }
 
-    BackHandler(enabled = viewModel.state.activityStatus.isRunning) {
+    BackHandler(enabled = viewModel.state.activityStatus.isActive) {
         viewModel.onAction(ActivityAction.OnBackClick)
     }
 
@@ -102,7 +102,7 @@ fun ActivityScreenRoot(
         },
         onAction = { action ->
             if (action == ActivityAction.OnBackClick) {
-                if (viewModel.state.activityStatus.isRunning.not()) {
+                if (viewModel.state.activityStatus.isActive.not()) {
                     navigateUp()
                 }
             }
@@ -178,7 +178,7 @@ fun ActivityScreen(
                 ActivityTopAppBar(
                     activityType = ActivityType.RUN,
                     onBackClick = { onAction(ActivityAction.OnBackClick) },
-                    gpsOk = state.currentLocation != null
+                    gpsOk = if (state.activityStatus != ActivityStatus.FINISHED) state.currentLocation != null else null
                 )
 
                 Row(
@@ -294,7 +294,7 @@ fun ActivityScreen(
                 }
             }
 
-            state.activityData.heartRates.lastOrNull()?.takeIf { state.activityStatus.isRunning }?.let { heartRate ->
+            state.activityData.heartRates.lastOrNull()?.takeIf { state.activityStatus.isActive }?.let { heartRate ->
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.constrainAs(heart) {

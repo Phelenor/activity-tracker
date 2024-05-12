@@ -1,16 +1,20 @@
 package com.rafaelboban.activitytracker.ui.screens.activity.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.GpsFixed
@@ -35,7 +39,7 @@ import com.rafaelboban.core.theme.mobile.Typography
 @Composable
 fun ActivityTopAppBar(
     activityType: ActivityType,
-    gpsOk: Boolean,
+    gpsOk: Boolean?,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -77,16 +81,23 @@ fun ActivityTopAppBar(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Icon(
-            imageVector = if (gpsOk) Icons.Default.GpsFixed else Icons.Default.GpsNotFixed,
-            contentDescription = null,
-            tint = if (gpsOk) Color(0xFF0da63b) else MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .size(18.dp)
-                .alpha(gpsBlinkAnimation)
-        )
-
-        Spacer(modifier = Modifier.width(4.dp))
+        AnimatedVisibility(
+            visible = gpsOk != null,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
+            Icon(
+                imageVector = if (gpsOk == true) Icons.Default.GpsFixed else Icons.Default.GpsNotFixed,
+                contentDescription = null,
+                tint = if (gpsOk == true) Color(0xFF0da63b) else MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .padding(end = 4.dp)
+                    .background(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .padding(3.dp)
+                    .size(16.dp)
+                    .alpha(gpsBlinkAnimation)
+            )
+        }
     }
 }
 

@@ -46,12 +46,10 @@ class ActivityTracker(
     private val _duration = MutableStateFlow(Duration.ZERO)
     val duration = _duration.asStateFlow()
 
-    private val _isTracking = MutableStateFlow(false)
-    val isTracking = _isTracking.asStateFlow()
-
     private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
     val activityStatus = _activityStatus.asStateFlow()
 
+    private val isTrackingActivity = MutableStateFlow(false)
     private val isTrackingLocation = MutableStateFlow(false)
 
     val currentLocation = isTrackingLocation
@@ -80,7 +78,7 @@ class ActivityTracker(
         )
 
     init {
-        _isTracking.onEach { isTracking ->
+        isTrackingActivity.onEach { isTracking ->
             if (isTracking.not()) {
                 _activityData.update { data ->
                     data.copy(locations = (data.locations + listOf(persistentListOf())).toImmutableList())
@@ -94,8 +92,8 @@ class ActivityTracker(
 
         currentLocation
             .filterNotNull()
-            .combineTransform(_isTracking) { location, isActive ->
-                if (isActive) {
+            .combineTransform(isTrackingActivity) { location, isTracking ->
+                if (isTracking) {
                     emit(location)
                 }
             }.zip(_duration) { location, duration ->
@@ -136,11 +134,11 @@ class ActivityTracker(
             }.launchIn(applicationScope)
     }
 
-    fun setIsTracking(active: Boolean) {
-        _isTracking.value = active
+    fun setIsTrackingActivity(active: Boolean) {
+        isTrackingActivity.value = active
     }
 
-    fun setStatus(status: ActivityStatus) {
+    fun setActivityStatus(status: ActivityStatus) {
         _activityStatus.value = status
     }
 
@@ -149,18 +147,15 @@ class ActivityTracker(
         watchConnector.setCanTrack(true)
     }
 
-    private fun stopTrackingLocation() {
+    fun stopTrackingLocation() {
         isTrackingLocation.value = false
         watchConnector.setCanTrack(false)
     }
 
-    fun stop() {
-        stopTrackingLocation()
-        setIsTracking(false)
-    }
-
     fun clear() {
-        stop()
+        stopTrackingLocation()
+        setIsTrackingActivity(false)
+        setActivityStatus(ActivityStatus.NOT_STARTED)
 
         _duration.value = Duration.ZERO
         _activityData.value = ActivityData()
