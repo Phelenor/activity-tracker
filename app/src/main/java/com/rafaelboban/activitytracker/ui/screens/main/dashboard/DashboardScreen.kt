@@ -31,13 +31,14 @@ import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomShe
 import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DashboardScreenRoot(
-    navigateToActivity: () -> Unit,
+    navigateToActivity: (ActivityType) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val locationTrackingPermissions = rememberMultiplePermissionsState(
@@ -67,7 +68,7 @@ fun DashboardScreenRoot(
 
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
-                    navigateToActivity()
+                    navigateToActivity(action.type)
                 }
             }
         }

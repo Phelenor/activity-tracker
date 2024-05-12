@@ -1,8 +1,10 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
@@ -24,8 +26,11 @@ import javax.inject.Inject
 class ActivityViewModel @Inject constructor(
     private val applicationScope: CoroutineScope,
     private val tracker: ActivityTracker,
-    private val watchConnector: PhoneToWatchConnector
+    private val watchConnector: PhoneToWatchConnector,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    val activityType = checkNotNull(savedStateHandle["activityTypeOrdinal"]).let {  }
 
     var state by mutableStateOf(ActivityState(activityStatus = tracker.activityStatus.value))
         private set
@@ -34,6 +39,7 @@ class ActivityViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
+        Log.d("MARIN", "39: ${savedStateHandle.keys()}")
         tracker.startTrackingLocation()
 
         tracker.currentLocation.onEach { currentLocation ->

@@ -5,9 +5,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
+import com.rafaelboban.core.shared.model.ActivityType
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -33,8 +35,8 @@ fun RootNavigation(
 
         composableSlide<NavigationGraph.Main> {
             MainScreen(
-                navigateToActivity = {
-                    navHostController.navigate(NavigationGraph.Activity)
+                navigateToActivity = { type ->
+                    navHostController.navigate(NavigationGraph.Activity(type.ordinal))
                 },
                 onLogout = {
                     navHostController.navigate(NavigationGraph.Auth) {
@@ -49,11 +51,15 @@ fun RootNavigation(
         composableSlide<NavigationGraph.Activity>(
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "activity_tracker://current_activity"
+                    uriPattern = "activity_tracker://current_activity/{activityTypeOrdinal}"
                 }
             )
-        ) {
+        ) { backStackEntry ->
+            val activityTypeOrdinal = backStackEntry.toRoute<NavigationGraph.Activity>().activityTypeOrdinal
+            val activityType = ActivityType.entries[activityTypeOrdinal]
+
             ActivityScreenRoot(
+                activityType = activityType,
                 navigateUp = { navHostController.navigateUp() }
             )
         }
@@ -69,5 +75,5 @@ sealed interface NavigationGraph {
     data object Main : NavigationGraph
 
     @Serializable
-    data object Activity : NavigationGraph
+    data class Activity(val activityTypeOrdinal: Int) : NavigationGraph
 }

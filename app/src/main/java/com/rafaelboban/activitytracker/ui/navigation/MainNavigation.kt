@@ -33,6 +33,7 @@ import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.ui.util.UiText
 import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.serialization.Serializable
@@ -70,7 +71,7 @@ sealed class MainScreenBottomBarItem(val route: MainScreenNavigation, val select
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
-    navigateToActivity: () -> Unit,
+    navigateToActivity: (ActivityType) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -132,7 +133,7 @@ fun MainScreen(
 fun MainNavigationGraph(
     navController: NavHostController,
     navigateToLogin: () -> Unit,
-    navigateToActivity: () -> Unit,
+    navigateToActivity: (ActivityType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(

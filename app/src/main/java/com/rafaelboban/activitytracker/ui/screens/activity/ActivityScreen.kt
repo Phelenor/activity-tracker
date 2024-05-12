@@ -76,6 +76,7 @@ import kotlin.time.Duration
 
 @Composable
 fun ActivityScreenRoot(
+    activityType: ActivityType,
     navigateUp: () -> Boolean,
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
