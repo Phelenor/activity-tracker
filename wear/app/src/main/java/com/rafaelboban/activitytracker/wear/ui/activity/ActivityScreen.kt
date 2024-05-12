@@ -2,9 +2,10 @@ package com.rafaelboban.activitytracker.wear.ui.activity
 
 import android.Manifest
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,7 @@ import com.rafaelboban.activitytracker.wear.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
+import com.rafaelboban.activitytracker.wear.ui.activity.tabs.OpenActivityOnPhonePage
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
@@ -67,14 +70,12 @@ fun ActivityScreenRoot(
         }
     }
 
-    LaunchedEffect(viewModel.state) {
+    LaunchedEffect(viewModel.state.isActive) {
         if (viewModel.state.isActive && ActivityTrackerService.isActive.not()) {
-            Log.d("MARIN", "73: service on")
             toggleTrackerService(true)
         }
 
         if (viewModel.state.isActive.not() && ActivityTrackerService.isActive) {
-            Log.d("MARIN", "77: service off")
             toggleTrackerService(false)
         }
     }
@@ -97,34 +98,58 @@ private fun ActivityScreen(
     val animatedSelectedPage by animateFloatAsState(targetValue = selectedPage.F, label = "page_animation")
     val pageIndicatorState = rememberPageIndicatorState(pageCount) { animatedSelectedPage }
 
+    val startPage by remember(state.isConnectedPhoneNearby, state.canTrack) {
+        derivedStateOf {
+            when {
+                !state.isConnectedPhoneNearby -> 0
+                !state.canTrack -> 1
+                else -> 2
+            }
+        }
+    }
+
     LaunchedEffect(pagerState.currentPage) {
         selectedPage = pagerState.currentPage
     }
 
-    if (state.isConnectedPhoneNearby) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
-                state = pagerState
-            ) { page ->
-                when (page) {
-                    1 -> HeartRateExercisePage(state = state)
-                    else -> MainExercisePage(
-                        state = state,
-                        onAction = onAction
+    Crossfade(
+        targetState = startPage,
+        animationSpec = tween(350),
+        label = "main_screen_crossfade"
+    ) { key ->
+        when (key) {
+            0 -> {
+                NoPhoneNearbyPage()
+            }
+
+            1 -> {
+                OpenActivityOnPhonePage(
+                    openOnPhone = { onAction(ActivityAction.OpenAppOnPhone) }
+                )
+            }
+
+            else -> {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    HorizontalPager(
+                        modifier = Modifier.fillMaxSize(),
+                        state = pagerState
+                    ) { page ->
+                        when (page) {
+                            1 -> HeartRateExercisePage(state = state)
+                            else -> MainExercisePage(
+                                state = state,
+                                onAction = onAction
+                            )
+                        }
+                    }
+
+                    HorizontalPageIndicator(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        pageIndicatorState = pageIndicatorState
                     )
                 }
             }
-
-            HorizontalPageIndicator(
-                modifier = Modifier.padding(bottom = 4.dp),
-                pageIndicatorState = pageIndicatorState
-            )
         }
-    } else {
-        NoPhoneNearbyPage()
     }
 }
 

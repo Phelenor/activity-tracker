@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.google.maps.android.compose)
     implementation(libs.google.maps.android.utils.ktx)
     implementation(libs.play.services.maps)
+    implementation(libs.play.services.wearable)
 
     debugImplementation(libs.chucker)
     releaseImplementation(libs.chucker.no.op)

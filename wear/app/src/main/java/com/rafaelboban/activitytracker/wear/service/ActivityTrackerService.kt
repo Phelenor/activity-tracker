@@ -10,6 +10,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,12 +42,16 @@ class ActivityTrackerService : LifecycleService() {
 
         startForeground(NOTIFICATION_ID, notificationManager.buildNotification())
         startNotificationUpdates()
+
+        Timber.i("Tracker Service started.")
     }
 
     private fun stop() {
         isActive = false
         lifecycleScope.cancel()
         stopSelf()
+
+        Timber.i("Tracker Service stopped.")
     }
 
     private fun startNotificationUpdates() {

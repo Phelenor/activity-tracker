@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -69,11 +71,16 @@ class ActivityTracker(
                 exerciseTracker.prepareExercise()
             }.launchIn(applicationScope)
 
-        exerciseTracker.heartRate
-            .onEach { heartRate ->
-                phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
-                _heartRate.value = heartRate
-            }.launchIn(applicationScope)
+        canTrack.flatMapLatest { canTrack ->
+            if (canTrack) {
+                exerciseTracker.heartRate
+            } else {
+                flowOf()
+            }
+        }.onEach { heartRate ->
+            phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
+            _heartRate.value = heartRate
+        }.launchIn(applicationScope)
     }
 
     fun setIsActive(active: Boolean) {

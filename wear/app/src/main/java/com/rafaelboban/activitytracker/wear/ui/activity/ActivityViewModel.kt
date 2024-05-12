@@ -47,8 +47,8 @@ class ActivityViewModel @Inject constructor(
         private set
 
     private val canTrackHeartRate = snapshotFlow {
-        state.canTrackHeartRate
-    }.stateIn(viewModelScope, SharingStarted.Lazily, state.canTrackHeartRate)
+        state.canTrackHeartRate && state.canTrack
+    }.stateIn(viewModelScope, SharingStarted.Lazily, state.canTrackHeartRate && state.canTrack)
 
     private val isActive = snapshotFlow {
         state.isActive && state.canTrack && state.isConnectedPhoneNearby
@@ -135,6 +135,12 @@ class ActivityViewModel @Inject constructor(
             ActivityAction.GrantBodySensorsPermission -> {
                 viewModelScope.launch {
                     state = state.copy(canTrackHeartRate = exerciseTracker.isHeartRateTrackingSupported())
+                }
+            }
+
+            ActivityAction.OpenAppOnPhone -> {
+                viewModelScope.launch {
+                    phoneConnector.sendMessageToPhone(MessagingAction.OpenAppOnPhone)
                 }
             }
 

@@ -55,17 +55,17 @@ class HealthServicesExerciseTracker(private val context: Context) {
                 }
 
                 override fun onAvailabilityChanged(dataType: DataType<*, *>, availability: Availability) {
-                    Timber.i("Health Services availability = $availability")
+                    Timber.tag("HEALTH_SERVICES").i("Health Services availability = $availability")
                 }
 
                 override fun onLapSummaryReceived(lapSummary: ExerciseLapSummary) = Unit
 
                 override fun onRegistered() {
-                    Timber.i("Health Services registered.")
+                    Timber.tag("HEALTH_SERVICES").i("Health Services registered.")
                 }
 
                 override fun onRegistrationFailed(throwable: Throwable) {
-                    Timber.e(throwable.message)
+                    Timber.tag("HEALTH_SERVICES").e(throwable)
                 }
             }
 

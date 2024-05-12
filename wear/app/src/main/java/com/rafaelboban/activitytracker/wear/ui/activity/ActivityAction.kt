@@ -7,4 +7,5 @@ sealed interface ActivityAction {
     data object OnPauseClick : ActivityAction
     data object OnResumeClick : ActivityAction
     data object OnFinishClick : ActivityAction
+    data object OpenAppOnPhone : ActivityAction
 }

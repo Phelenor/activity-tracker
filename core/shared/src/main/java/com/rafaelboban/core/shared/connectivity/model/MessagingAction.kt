@@ -35,4 +35,7 @@ sealed interface MessagingAction {
 
     @Serializable
     data class DurationUpdate(val duration: Duration) : MessagingAction
+
+    @Serializable
+    data object OpenAppOnPhone : MessagingAction
 }
