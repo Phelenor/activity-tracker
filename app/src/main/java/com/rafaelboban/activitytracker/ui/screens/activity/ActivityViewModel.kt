@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +12,7 @@ import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
+import com.rafaelboban.core.shared.model.ActivityType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -30,16 +30,16 @@ class ActivityViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val activityType = checkNotNull(savedStateHandle["activityTypeOrdinal"]).let {  }
+    private val activityType = checkNotNull(savedStateHandle.get<Int>("activityTypeOrdinal")).let { ordinal -> ActivityType.entries[ordinal] }
 
-    var state by mutableStateOf(ActivityState(activityStatus = tracker.activityStatus.value))
+    var state by mutableStateOf(ActivityState(activityStatus = tracker.activityStatus.value, activityType = activityType))
         private set
 
     private val eventChannel = Channel<ActivityEvent>()
     val events = eventChannel.receiveAsFlow()
 
     init {
-        Log.d("MARIN", "39: ${savedStateHandle.keys()}")
+        tracker.setActivityType(activityType)
         tracker.startTrackingLocation()
 
         tracker.currentLocation.onEach { currentLocation ->

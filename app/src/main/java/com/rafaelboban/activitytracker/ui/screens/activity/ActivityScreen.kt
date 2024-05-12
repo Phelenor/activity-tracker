@@ -76,7 +76,6 @@ import kotlin.time.Duration
 
 @Composable
 fun ActivityScreenRoot(
-    activityType: ActivityType,
     navigateUp: () -> Boolean,
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
@@ -177,7 +176,7 @@ fun ActivityScreen(
                     }
             ) {
                 ActivityTopAppBar(
-                    activityType = ActivityType.RUN,
+                    activityType = state.activityType,
                     onBackClick = { onAction(ActivityAction.OnBackClick) },
                     gpsOk = if (state.activityStatus != ActivityStatus.FINISHED) state.currentLocation != null else null
                 )
@@ -333,8 +332,13 @@ private fun ActivityScreenPreview() {
             onAction = {},
             toggleTrackerService = {},
             state = ActivityState(
+                activityType = ActivityType.WALK,
                 duration = Duration.parse("1h 30m 52s"),
-                activityData = ActivityData(distanceMeters = 1925, speed = 9.2f, heartRates = persistentListOf(142))
+                activityData = ActivityData(
+                    distanceMeters = 1925,
+                    speed = 9.2f,
+                    heartRates = persistentListOf(142)
+                )
             )
         )
     }

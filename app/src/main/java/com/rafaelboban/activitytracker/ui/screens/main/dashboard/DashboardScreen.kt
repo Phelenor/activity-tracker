@@ -1,7 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.main.dashboard
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

@@ -65,7 +65,7 @@ fun ActivityTypeSelectBottomSheetBody(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = stringResource(id = type.titleRes),
+                        text = stringResource(id = type.nameRes),
                         style = Typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,

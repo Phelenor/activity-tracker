@@ -9,6 +9,7 @@ import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.replaceLastSublist
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -39,6 +40,9 @@ class ActivityTracker(
     private val locationObserver: LocationObserver,
     private val watchConnector: PhoneToWatchConnector
 ) {
+
+    lateinit var activityType: ActivityType
+        private set
 
     private val _activityData = MutableStateFlow(ActivityData())
     val activityData = _activityData.asStateFlow()
@@ -132,6 +136,10 @@ class ActivityTracker(
             .onEach {
                 watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(it))
             }.launchIn(applicationScope)
+    }
+
+    fun setActivityType(activityType: ActivityType) {
+        this.activityType = activityType
     }
 
     fun setIsTrackingActivity(active: Boolean) {

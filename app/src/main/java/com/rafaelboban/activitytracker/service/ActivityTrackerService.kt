@@ -54,7 +54,7 @@ class ActivityTrackerService : LifecycleService() {
         createNotificationChannel()
 
         val activityIntent = Intent(applicationContext, MainActivity::class.java).apply {
-            data = "activity_tracker://current_activity".toUri()
+            data = "activity_tracker://current_activity/${tracker.activityType}".toUri()
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
 

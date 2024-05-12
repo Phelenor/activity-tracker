@@ -5,11 +5,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
 import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
-import com.rafaelboban.core.shared.model.ActivityType
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -54,12 +52,8 @@ fun RootNavigation(
                     uriPattern = "activity_tracker://current_activity/{activityTypeOrdinal}"
                 }
             )
-        ) { backStackEntry ->
-            val activityTypeOrdinal = backStackEntry.toRoute<NavigationGraph.Activity>().activityTypeOrdinal
-            val activityType = ActivityType.entries[activityTypeOrdinal]
-
+        ) {
             ActivityScreenRoot(
-                activityType = activityType,
                 navigateUp = { navHostController.navigateUp() }
             )
         }
