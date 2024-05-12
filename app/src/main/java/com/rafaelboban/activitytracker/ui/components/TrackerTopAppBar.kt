@@ -52,7 +52,7 @@ fun TrackerTopAppBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.app_logo_main),
+                    painter = painterResource(id = com.rafaelboban.core.shared.R.drawable.app_logo_main),
                     contentDescription = null,
                     tint = Color.Unspecified
                 )

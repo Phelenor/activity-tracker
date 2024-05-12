@@ -1,6 +1,5 @@
 package com.rafaelboban.core.shared.connectivity.connectors
 
-import android.util.Log
 import com.google.android.gms.wearable.Node
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery
@@ -10,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -24,11 +22,8 @@ class PhoneToWatchConnector(
     nodeDiscovery: WearNodeDiscovery,
     private val messagingClient: WearMessagingClient
 ) {
-
-    private val _connectedNode = MutableStateFlow<Node?>(null)
-    val connectedDevice = _connectedNode.asStateFlow()
-
-    private val isTrackable = MutableStateFlow(false)
+    private val connectedNode = MutableStateFlow<Node?>(null)
+    private val canTrack = MutableStateFlow(false)
 
     val messages = nodeDiscovery
         .observeConnectedDevices(DeviceType.PHONE)
@@ -36,18 +31,15 @@ class PhoneToWatchConnector(
             val node = connectedDevices.firstOrNull()
 
             if (node != null && node.isNearby) {
-                _connectedNode.value = node
+                connectedNode.value = node
                 messagingClient.connectToNode(node.id)
             } else {
                 flowOf()
             }
         }.onEach { action ->
             if (action == MessagingAction.ConnectionRequest) {
-                if (isTrackable.value) {
-                    sendMessageToWatch(MessagingAction.CanTrack)
-                } else {
-                    sendMessageToWatch(MessagingAction.CanNotTrack)
-                }
+                val message = if (canTrack.value) MessagingAction.CanTrack else MessagingAction.CanNotTrack
+                sendMessageToWatch(message)
             }
         }.shareIn(
             applicationScope,
@@ -55,13 +47,13 @@ class PhoneToWatchConnector(
         )
 
     init {
-        _connectedNode
+        connectedNode
             .filterNotNull()
-            .flatMapLatest { isTrackable }
-            .onEach { isTrackable ->
+            .flatMapLatest { canTrack }
+            .onEach { canTrack ->
                 sendMessageToWatch(MessagingAction.ConnectionRequest)
-                val action = if (isTrackable) MessagingAction.CanTrack else MessagingAction.CanNotTrack
-                sendMessageToWatch(action)
+                val message = if (canTrack) MessagingAction.CanTrack else MessagingAction.CanNotTrack
+                sendMessageToWatch(message)
             }.launchIn(applicationScope)
     }
 
@@ -69,7 +61,7 @@ class PhoneToWatchConnector(
         messagingClient.sendOrQueueAction(action)
     }
 
-    fun setIsTrackable(isTrackable: Boolean) {
-        this.isTrackable.value = isTrackable
+    fun setCanTrack(canTrack: Boolean) {
+        this.canTrack.value = canTrack
     }
 }

@@ -27,8 +27,8 @@ class WearMessagingClient(context: Context) {
                 if (event.path.startsWith(BASE_PATH_MESSAGING_ACTION)) {
                     val json = event.data.decodeToString()
                     val action = Json.decodeFromString<MessagingAction>(json)
-                    if (action !is MessagingAction.DurationUpdate) {
-                        Log.d("MARIN", "30: ${this.hashCode()} -  try receive $action")
+                    if (action !is MessagingAction.DurationUpdate && action !is MessagingAction.HeartRateUpdate && action !is MessagingAction.DistanceUpdate) {
+                        Log.d("MARIN", "30: $nodeId - receive $action")
                     }
                     trySend(action)
                 }

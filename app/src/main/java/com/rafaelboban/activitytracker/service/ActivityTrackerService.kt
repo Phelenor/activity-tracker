@@ -32,7 +32,7 @@ class ActivityTrackerService : LifecycleService() {
 
     private val notificationBuilder by lazy {
         NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.app_logo_main)
+            .setSmallIcon(com.rafaelboban.core.shared.R.drawable.app_logo_main)
             .setContentTitle(getString(R.string.now_running))
     }
 

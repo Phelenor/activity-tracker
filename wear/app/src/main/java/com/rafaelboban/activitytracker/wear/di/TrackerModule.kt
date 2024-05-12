@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.wear.di
 
 import android.content.Context
+import com.rafaelboban.activitytracker.wear.service.ActivityOngoingNotificationManager
 import com.rafaelboban.activitytracker.wear.tracker.ActivityTracker
 import com.rafaelboban.activitytracker.wear.tracker.HealthServicesExerciseTracker
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
@@ -37,4 +38,10 @@ object TrackerModule {
         phoneConnector: WatchToPhoneConnector,
         healthServicesTracker: HealthServicesExerciseTracker
     ) = ActivityTracker(applicationScope, phoneConnector, healthServicesTracker)
+
+    @Provides
+    @Singleton
+    fun getActivityNotificationManager(
+        @ApplicationContext context: Context
+    ) = ActivityOngoingNotificationManager(context)
 }

@@ -2,9 +2,9 @@
 
 package com.rafaelboban.activitytracker.wear.tracker
 
-import android.util.Log
 import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
+import com.rafaelboban.core.shared.model.ActivityStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,11 +23,17 @@ class ActivityTracker(
     private val phoneConnector: WatchToPhoneConnector,
     private val exerciseTracker: HealthServicesExerciseTracker
 ) {
-    private val _heartRate = MutableStateFlow(0)
-    val heartRate = _heartRate.asStateFlow()
+    private val _isActive = MutableStateFlow(false)
+    val isActive = _isActive.asStateFlow()
+
+    private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
+    val activityStatus = _activityStatus.asStateFlow()
 
     private val _canTrack = MutableStateFlow(false)
     val canTrack = _canTrack.asStateFlow()
+
+    private val _heartRate = MutableStateFlow(0)
+    val heartRate = _heartRate.asStateFlow()
 
     val distanceMeters = phoneConnector.messages
         .filterIsInstance<MessagingAction.DistanceUpdate>()
@@ -65,9 +71,16 @@ class ActivityTracker(
 
         exerciseTracker.heartRate
             .onEach { heartRate ->
-                Log.d("MARIN", "69: sending hr=$heartRate")
                 phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
                 _heartRate.value = heartRate
             }.launchIn(applicationScope)
+    }
+
+    fun setIsActive(active: Boolean) {
+        _isActive.value = active
+    }
+
+    fun setStatus(status: ActivityStatus) {
+        _activityStatus.value = status
     }
 }

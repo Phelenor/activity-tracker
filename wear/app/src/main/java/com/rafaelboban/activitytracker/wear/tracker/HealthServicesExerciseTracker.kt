@@ -125,6 +125,7 @@ class HealthServicesExerciseTracker(private val context: Context) {
             .build()
 
         client.startExercise(config)
+        Timber.tag("HEALTH_SERVICES").i("Exercise Started")
 
         return Result.Success(Unit)
     }
@@ -141,6 +142,7 @@ class HealthServicesExerciseTracker(private val context: Context) {
 
         return try {
             client.resumeExercise()
+            Timber.tag("HEALTH_SERVICES").i("Exercise Resumed")
             Result.Success(Unit)
         } catch (e: HealthServicesException) {
             Result.Error(ExerciseError.EXERCISE_ALREADY_ENDED)
@@ -159,6 +161,7 @@ class HealthServicesExerciseTracker(private val context: Context) {
 
         return try {
             client.pauseExercise()
+            Timber.tag("HEALTH_SERVICES").i("Exercise Paused")
             Result.Success(Unit)
         } catch (e: HealthServicesException) {
             Result.Error(ExerciseError.EXERCISE_ALREADY_ENDED)
@@ -177,6 +180,7 @@ class HealthServicesExerciseTracker(private val context: Context) {
 
         return try {
             client.endExercise()
+            Timber.tag("HEALTH_SERVICES").i("Exercise Stopped")
             Result.Success(Unit)
         } catch (e: HealthServicesException) {
             Result.Error(ExerciseError.EXERCISE_ALREADY_ENDED)

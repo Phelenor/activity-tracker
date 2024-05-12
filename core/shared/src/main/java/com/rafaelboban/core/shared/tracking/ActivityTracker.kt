@@ -2,7 +2,6 @@
 
 package com.rafaelboban.core.shared.tracking
 
-import android.util.Log
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityData
@@ -147,12 +146,12 @@ class ActivityTracker(
 
     fun startTrackingLocation() {
         isTrackingLocation.value = true
-        watchConnector.setIsTrackable(true)
+        watchConnector.setCanTrack(true)
     }
 
     private fun stopTrackingLocation() {
         isTrackingLocation.value = false
-        watchConnector.setIsTrackable(false)
+        watchConnector.setCanTrack(false)
     }
 
     fun stop() {

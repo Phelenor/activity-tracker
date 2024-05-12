@@ -1,6 +1,5 @@
 package com.rafaelboban.core.shared.connectivity.connectors
 
-import android.util.Log
 import com.google.android.gms.wearable.Node
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery
@@ -21,7 +20,6 @@ class WatchToPhoneConnector(
     nodeDiscovery: WearNodeDiscovery,
     private val messagingClient: WearMessagingClient
 ) {
-
     private val _connectedNode = MutableStateFlow<Node?>(null)
     val connectedNode = _connectedNode.asStateFlow()
 

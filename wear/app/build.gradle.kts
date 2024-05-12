@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.wear.compose.ui.tooling)
     implementation(libs.wear.compose.foundation)
     implementation(libs.wear.compose.material)
+    implementation(libs.androidx.lifecycle.service)
 
     implementation(libs.core)
     implementation(libs.androidx.wear.ongoing)

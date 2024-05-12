@@ -26,6 +26,7 @@ import androidx.wear.compose.material3.rememberPageIndicatorState
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.rafaelboban.activitytracker.wear.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
@@ -37,7 +38,8 @@ import kotlin.time.Duration
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ActivityScreenRoot(
-    viewModel: ActivityViewModel = hiltViewModel()
+    viewModel: ActivityViewModel = hiltViewModel(),
+    toggleTrackerService: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -62,6 +64,18 @@ fun ActivityScreenRoot(
     LaunchedEffect(Unit) {
         if (bodySensorsPermissions.allPermissionsGranted.not()) {
             bodySensorsPermissions.launchMultiplePermissionRequest()
+        }
+    }
+
+    LaunchedEffect(viewModel.state) {
+        if (viewModel.state.isActive && ActivityTrackerService.isActive.not()) {
+            Log.d("MARIN", "73: service on")
+            toggleTrackerService(true)
+        }
+
+        if (viewModel.state.isActive.not() && ActivityTrackerService.isActive) {
+            Log.d("MARIN", "77: service off")
+            toggleTrackerService(false)
         }
     }
 

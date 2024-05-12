@@ -144,7 +144,7 @@ private fun DashboardScreenPreview() {
 
 enum class DashboardControl(@StringRes val titleRes: Int, @DrawableRes val icon: Int, val offline: Boolean = false) {
     INDIVIDUAL_ACTIVITY(R.string.individual_activity_label, R.drawable.ic_run, true),
-    GROUP_ACTIVITY(R.string.create_group_activity, R.drawable.app_logo_main),
+    GROUP_ACTIVITY(R.string.create_group_activity, com.rafaelboban.core.shared.R.drawable.app_logo_main),
     JOIN_GROUP_ACTIVITY(R.string.join_group_activity, R.drawable.ic_person_add),
     JOIN_GYM_ACTIVITY(R.string.join_gym_activity, R.drawable.ic_treadmill_run),
     SCAN_GYM_EQUIPMENT(R.string.get_equipment_info, R.drawable.ic_qr_scanner)

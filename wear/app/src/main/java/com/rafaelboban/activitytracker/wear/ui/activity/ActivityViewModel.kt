@@ -1,12 +1,12 @@
 package com.rafaelboban.activitytracker.wear.ui.activity
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rafaelboban.activitytracker.wear.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.wear.tracker.ActivityTracker
 import com.rafaelboban.activitytracker.wear.tracker.HealthServicesExerciseTracker
 import com.rafaelboban.activitytracker.wear.tracker.toUiText
@@ -37,7 +37,13 @@ class ActivityViewModel @Inject constructor(
     private val activityTracker: ActivityTracker
 ) : ViewModel() {
 
-    var state by mutableStateOf(ActivityState())
+    var state by mutableStateOf(
+        ActivityState(
+            isActive = ActivityTrackerService.isActive && activityTracker.isActive.value,
+            activityStatus = activityTracker.activityStatus.value,
+            canTrack = ActivityTrackerService.isActive
+        )
+    )
         private set
 
     private val canTrackHeartRate = snapshotFlow {
@@ -74,27 +80,38 @@ class ActivityViewModel @Inject constructor(
                 }
             }.launchIn(viewModelScope)
 
+        activityTracker.canTrack.onEach { canTrack ->
+            state = state.copy(canTrack = canTrack)
+        }.launchIn(viewModelScope)
+
         canTrackHeartRate.flatMapLatest { canTrack ->
             if (canTrack) activityTracker.heartRate else flowOf()
         }.onEach { heartRate ->
             state = state.copy(heartRate = heartRate)
         }.launchIn(viewModelScope)
 
-        activityStatus
-            .onEach { status ->
-                val result = when (status) {
-                    ActivityStatus.IN_PROGRESS -> exerciseTracker.startExercise()
-                    ActivityStatus.PAUSED -> exerciseTracker.pauseExercise()
-                    ActivityStatus.FINISHED -> exerciseTracker.stopExercise()
-                    ActivityStatus.NOT_STARTED -> Result.Success(Unit)
-                }
+        isActive.onEach { isActive ->
+            activityTracker.setIsActive(isActive)
+        }.launchIn(viewModelScope)
 
-                if (result is Result.Error) {
-                    result.error.toUiText()?.let {
-                        eventChannel.send(ActivityEvent.Error(it))
-                    }
+        activityStatus.onEach { status ->
+            val previousStatus = activityTracker.activityStatus.value
+
+            val result = when (status) {
+                ActivityStatus.IN_PROGRESS -> if (previousStatus == ActivityStatus.NOT_STARTED) exerciseTracker.startExercise() else exerciseTracker.resumeExercise()
+                ActivityStatus.PAUSED -> exerciseTracker.pauseExercise()
+                ActivityStatus.FINISHED -> exerciseTracker.stopExercise()
+                ActivityStatus.NOT_STARTED -> Result.Success(Unit)
+            }
+
+            if (result is Result.Error) {
+                result.error.toUiText()?.let {
+                    eventChannel.send(ActivityEvent.Error(it))
                 }
             }
+
+            activityTracker.setStatus(status)
+        }.launchIn(viewModelScope)
 
         activityTracker.distanceMeters
             .onEach { distanceMeters ->
@@ -122,11 +139,7 @@ class ActivityViewModel @Inject constructor(
             }
 
             ActivityAction.OnFinishClick -> {
-                viewModelScope.launch {
-                    exerciseTracker.stopExercise()
-                }
-
-                // Navigate to overview or smtn
+                // TODO: overview
 
                 state = state.copy(
                     isActive = false,

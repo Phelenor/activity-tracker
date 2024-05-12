@@ -60,17 +60,16 @@ import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
-import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.model.ActivityData
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isRunning
+import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Montserrat
-import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.time.Duration
 

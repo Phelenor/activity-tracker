@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.screens.login
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,8 +10,8 @@ import com.rafaelboban.activitytracker.data.session.AuthInfo
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.repository.UserRepository
-import com.rafaelboban.core.shared.ui.util.UiText
 import com.rafaelboban.activitytracker.util.UserData
+import com.rafaelboban.core.shared.ui.util.UiText
 import com.skydoves.sandwich.message
 import com.skydoves.sandwich.suspendOnError
 import com.skydoves.sandwich.suspendOnException
