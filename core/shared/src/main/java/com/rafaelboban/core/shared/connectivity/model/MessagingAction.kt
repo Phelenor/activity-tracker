@@ -1,5 +1,6 @@
 package com.rafaelboban.core.shared.connectivity.model
 
+import com.rafaelboban.core.shared.model.ActivityType
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
@@ -23,6 +24,9 @@ sealed interface MessagingAction {
 
     @Serializable
     data object CanNotTrack : MessagingAction
+
+    @Serializable
+    data class SetActivityType(val activityType: ActivityType?) : MessagingAction
 
     @Serializable
     data object ConnectionRequest : MessagingAction

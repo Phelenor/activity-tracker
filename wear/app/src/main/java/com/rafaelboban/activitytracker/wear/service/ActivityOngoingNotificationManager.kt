@@ -15,6 +15,7 @@ import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
 import com.rafaelboban.activitytracker.wear.R
 import com.rafaelboban.activitytracker.wear.ui.MainActivity
+import com.rafaelboban.core.shared.model.ActivityType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -27,7 +28,6 @@ class ActivityOngoingNotificationManager @Inject constructor(
     private val notificationBuilder by lazy {
         NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(com.rafaelboban.core.shared.R.drawable.app_logo_main)
-            .setContentTitle(context.getString(com.rafaelboban.core.shared.R.string.now_running))
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -43,7 +43,7 @@ class ActivityOngoingNotificationManager @Inject constructor(
         manager.createNotificationChannel(notificationChannel)
     }
 
-    fun buildNotification(): Notification {
+    fun buildNotification(activityType: ActivityType): Notification {
         val activityIntent = Intent(context, MainActivity::class.java).apply {
             data = "activity_tracker://current_activity".toUri()
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -54,24 +54,27 @@ class ActivityOngoingNotificationManager @Inject constructor(
             getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        val notificationBuilder = notificationBuilder.setContentIntent(pendingIntent)
+        val builder = notificationBuilder
+            .setContentIntent(pendingIntent)
+            .setContentTitle(context.getString(activityType.titleRes))
 
-        val startMillis = SystemClock.elapsedRealtime() - Duration.ZERO.inWholeMilliseconds
+        val startMillis = SystemClock.elapsedRealtime()
         val ongoingActivityStatus = Status.Builder()
             .addTemplate(ONGOING_STATUS_TEMPLATE)
             .addPart("duration", Status.StopwatchPart(startMillis))
             .build()
 
-        val ongoingActivity = OngoingActivity.Builder(context, NOTIFICATION_ID, notificationBuilder)
+        val ongoingActivity = OngoingActivity.Builder(context, NOTIFICATION_ID, builder)
             .setAnimatedIcon(com.rafaelboban.core.shared.R.drawable.app_logo_main)
             .setStaticIcon(com.rafaelboban.core.shared.R.drawable.app_logo_main)
             .setTouchIntent(pendingIntent)
             .setStatus(ongoingActivityStatus)
+            .setOngoingActivityId(ONGOING_ACTIVITY_ID)
             .build()
 
         ongoingActivity.apply(context)
 
-        return notificationBuilder.build()
+        return builder.build()
     }
 
     fun updateNotification(duration: Duration, isPaused: Boolean = false) {
@@ -83,7 +86,7 @@ class ActivityOngoingNotificationManager @Inject constructor(
             .addPart("duration", statusPart)
             .build()
 
-        OngoingActivity.recoverOngoingActivity(context)?.update(context, ongoingActivityStatus)
+        OngoingActivity.recoverOngoingActivity(context, ONGOING_ACTIVITY_ID)?.update(context, ongoingActivityStatus)
     }
 
     companion object {
@@ -93,5 +96,6 @@ class ActivityOngoingNotificationManager @Inject constructor(
         private const val NOTIFICATION_CHANNEL_NAME = "Activity Tracker"
 
         private const val ONGOING_STATUS_TEMPLATE = "#duration#"
+        private const val ONGOING_ACTIVITY_ID = 14231212
     }
 }

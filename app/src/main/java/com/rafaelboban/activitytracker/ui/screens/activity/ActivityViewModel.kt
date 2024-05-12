@@ -39,8 +39,7 @@ class ActivityViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
-        tracker.setActivityType(activityType)
-        tracker.startTrackingLocation()
+        tracker.startTrackingLocation(activityType)
 
         tracker.currentLocation.onEach { currentLocation ->
             state = state.copy(currentLocation = currentLocation?.location)
@@ -126,7 +125,7 @@ class ActivityViewModel @Inject constructor(
     private fun sendActionToWatch(action: ActivityAction) {
         viewModelScope.launch {
             val message = when (action) {
-                ActivityAction.DiscardActivity -> MessagingAction.Finish // TODO: Handle clear
+                ActivityAction.DiscardActivity -> MessagingAction.Finish
                 ActivityAction.OnFinishClick -> MessagingAction.Finish
                 ActivityAction.OnPauseClick -> MessagingAction.Pause
                 ActivityAction.OnResumeClick -> MessagingAction.Resume

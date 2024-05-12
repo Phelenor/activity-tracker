@@ -5,6 +5,7 @@ package com.rafaelboban.activitytracker.wear.tracker
 import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
+import com.rafaelboban.core.shared.model.ActivityType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,9 @@ class ActivityTracker(
 ) {
     private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
     val activityStatus = _activityStatus.asStateFlow()
+
+    private val _activityType = MutableStateFlow<ActivityType?>(null)
+    val activityType = _activityType.asStateFlow()
 
     private val _canTrack = MutableStateFlow(false)
     val canTrack = _canTrack.asStateFlow()
@@ -57,6 +61,7 @@ class ActivityTracker(
                 when (action) {
                     is MessagingAction.CanTrack -> _canTrack.value = true
                     is MessagingAction.CanNotTrack -> _canTrack.value = false
+                    is MessagingAction.SetActivityType -> _activityType.value = action.activityType
                     else -> Unit
                 }
             }.launchIn(applicationScope)
@@ -84,6 +89,7 @@ class ActivityTracker(
     fun reset() {
         setStatus(ActivityStatus.NOT_STARTED)
 
+        _activityType.value = null
         _canTrack.value = false
         _heartRate.value = 0
     }

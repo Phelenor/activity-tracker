@@ -33,14 +33,15 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val phoneConnector: WatchToPhoneConnector,
+    private val activityTracker: ActivityTracker,
     private val exerciseTracker: HealthServicesExerciseTracker,
-    private val activityTracker: ActivityTracker
+    private val phoneConnector: WatchToPhoneConnector
 ) : ViewModel() {
 
     var state by mutableStateOf(
         ActivityState(
             activityStatus = activityTracker.activityStatus.value,
+            activityType = activityTracker.activityType.value,
             canTrack = ActivityTrackerService.isActive
         )
     )
@@ -78,6 +79,10 @@ class ActivityViewModel @Inject constructor(
 
         activityTracker.canTrack.onEach { canTrack ->
             state = state.copy(canTrack = canTrack)
+        }.launchIn(viewModelScope)
+
+        activityTracker.activityType.onEach { type ->
+            state = state.copy(activityType = type)
         }.launchIn(viewModelScope)
 
         canTrackHeartRate.flatMapLatest { canTrack ->

@@ -41,8 +41,8 @@ class ActivityTracker(
     private val watchConnector: PhoneToWatchConnector
 ) {
 
-    lateinit var activityType: ActivityType
-        private set
+    private val _activityType = MutableStateFlow<ActivityType?>(null)
+    val activityType = _activityType.asStateFlow()
 
     private val _activityData = MutableStateFlow(ActivityData())
     val activityData = _activityData.asStateFlow()
@@ -136,10 +136,11 @@ class ActivityTracker(
             .onEach {
                 watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(it))
             }.launchIn(applicationScope)
-    }
 
-    fun setActivityType(activityType: ActivityType) {
-        this.activityType = activityType
+        _activityType
+            .onEach {
+                watchConnector.sendMessageToWatch(MessagingAction.SetActivityType(it))
+            }.launchIn(applicationScope)
     }
 
     fun setIsTrackingActivity(active: Boolean) {
@@ -150,7 +151,8 @@ class ActivityTracker(
         _activityStatus.value = status
     }
 
-    fun startTrackingLocation() {
+    fun startTrackingLocation(type: ActivityType) {
+        _activityType.value = type
         isTrackingLocation.value = true
         watchConnector.setCanTrack(true)
     }
@@ -165,6 +167,7 @@ class ActivityTracker(
         setIsTrackingActivity(false)
         setActivityStatus(ActivityStatus.NOT_STARTED)
 
+        _activityType.value = null
         _duration.value = Duration.ZERO
         _activityData.value = ActivityData()
     }

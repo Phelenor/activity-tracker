@@ -40,7 +40,10 @@ class ActivityTrackerService : LifecycleService() {
 
         notificationManager.createNotificationChannel()
 
-        startForeground(NOTIFICATION_ID, notificationManager.buildNotification())
+        val activityType = tracker.activityType.value ?: return
+        val notification = notificationManager.buildNotification(activityType)
+
+        startForeground(NOTIFICATION_ID, notification)
         startNotificationUpdates()
 
         Timber.i("Tracker Service started.")
