@@ -35,7 +35,6 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
-@SuppressLint("InlinedApi")
 @Composable
 fun DashboardScreenRoot(
     navigateToActivity: () -> Unit,
