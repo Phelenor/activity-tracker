@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.wear.ui.activity
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
@@ -46,6 +47,7 @@ fun ActivityScreenRoot(
     toggleTrackerService: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    Log.d("MARIN", "49: ActivityScreenRoot ${viewModel.hashCode()}")
 
     val bodySensorsPermissions = rememberMultiplePermissionsState(
         permissions = listOfNotNull(
