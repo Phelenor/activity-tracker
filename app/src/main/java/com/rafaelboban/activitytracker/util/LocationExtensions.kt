@@ -29,3 +29,12 @@ val List<LocationTimestamp>.currentSpeed: Float
 
         return distance / interval.inWholeSeconds * 3.6f
     }
+
+val List<List<LocationTimestamp>>.elevationGain: Int
+    get() = sumOf { sequence ->
+        sequence.zipWithNext { location1, location2 ->
+            val elevation1 = location1.location.altitude
+            val elevation2 = location2.location.altitude
+            (elevation2 - elevation1).takeIf { it > 0 } ?: 0.0
+        }.sum()
+    }.roundToInt()

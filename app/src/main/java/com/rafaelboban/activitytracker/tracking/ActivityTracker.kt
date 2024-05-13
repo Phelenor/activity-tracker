@@ -6,6 +6,7 @@ import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
+import com.rafaelboban.activitytracker.util.elevationGain
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
@@ -120,6 +121,7 @@ class ActivityTracker(
                     ActivityData(
                         locations = data.locations.replaceLastSublist(currentLocationSequence).map { it.toImmutableList() }.toImmutableList(),
                         distanceMeters = data.locations.distanceSequenceMeters,
+                        elevationGain = data.locations.elevationGain,
                         speed = location.location.speed ?: currentLocationSequence.currentSpeed,
                         heartRates = heartRates.toImmutableList()
                     )
