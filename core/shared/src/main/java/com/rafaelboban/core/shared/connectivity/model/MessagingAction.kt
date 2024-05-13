@@ -35,6 +35,9 @@ sealed interface MessagingAction {
     data class HeartRateUpdate(val heartRate: Int) : MessagingAction
 
     @Serializable
+    data class CaloriesUpdate(val calories: Int) : MessagingAction
+
+    @Serializable
     data class DistanceUpdate(val distanceMeters: Int) : MessagingAction
 
     @Serializable
@@ -42,4 +45,7 @@ sealed interface MessagingAction {
 
     @Serializable
     data object OpenAppOnPhone : MessagingAction
+
+    @Serializable
+    data object WakeUpWatch : MessagingAction
 }

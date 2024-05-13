@@ -133,6 +133,10 @@ class ActivityViewModel @Inject constructor(
                 else -> null
             }
 
+            if (message == MessagingAction.Pause) {
+                watchConnector.sendMessageToWatch(MessagingAction.WakeUpWatch)
+            }
+
             message?.let {
                 watchConnector.sendMessageToWatch(it)
             }

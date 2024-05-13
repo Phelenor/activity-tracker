@@ -54,7 +54,7 @@ class ActivityTrackerService : LifecycleService() {
         createNotificationChannel()
 
         val activityIntent = Intent(applicationContext, MainActivity::class.java).apply {
-            data = "activity_tracker://current_activity/${tracker.activityType}".toUri()
+            data = "activity_tracker://current_activity/${tracker.activityType.value?.ordinal}".toUri()
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
 
@@ -82,7 +82,7 @@ class ActivityTrackerService : LifecycleService() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             NOTIFICATION_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         )
 
         notificationManager.createNotificationChannel(channel)

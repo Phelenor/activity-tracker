@@ -8,4 +8,7 @@ sealed interface ActivityAction {
     data object OnResumeClick : ActivityAction
     data object OnFinishClick : ActivityAction
     data object OpenAppOnPhone : ActivityAction
+
+    data class OnEnterAmbientMode(val isBurnInProtectionRequired: Boolean) : ActivityAction
+    data object OnExitAmbientMode : ActivityAction
 }

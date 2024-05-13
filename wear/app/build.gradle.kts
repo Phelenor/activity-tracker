@@ -70,6 +70,7 @@ dependencies {
 
     implementation(libs.health.services.client)
 
+    implementation(libs.wear)
     implementation(libs.wear.compose.ui.tooling)
     implementation(libs.wear.compose.foundation)
     implementation(libs.wear.compose.material)

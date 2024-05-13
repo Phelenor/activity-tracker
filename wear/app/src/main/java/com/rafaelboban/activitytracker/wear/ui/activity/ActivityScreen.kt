@@ -1,8 +1,8 @@
 package com.rafaelboban.activitytracker.wear.ui.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,18 +28,23 @@ import androidx.wear.compose.material3.HorizontalPageIndicator
 import androidx.wear.compose.material3.rememberPageIndicatorState
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.rafaelboban.activitytracker.wear.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.HeartRateExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.MainExercisePage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.NoPhoneNearbyPage
 import com.rafaelboban.activitytracker.wear.ui.activity.tabs.OpenActivityOnPhonePage
+import com.rafaelboban.activitytracker.wear.ui.ambient.AmbientObserver
+import com.rafaelboban.activitytracker.wear.ui.ambient.ambientMode
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
 import kotlin.time.Duration
 
+@SuppressLint("InlinedApi")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ActivityScreenRoot(
@@ -47,16 +52,29 @@ fun ActivityScreenRoot(
     toggleTrackerService: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
-    Log.d("MARIN", "49: ActivityScreenRoot ${viewModel.hashCode()}")
 
-    val bodySensorsPermissions = rememberMultiplePermissionsState(
+    val bodySensorsBackgroundPermission = rememberPermissionState(
+        permission = Manifest.permission.BODY_SENSORS_BACKGROUND,
+        onPermissionResult = { granted ->
+            if (granted) {
+                viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
+            }
+        }
+    )
+
+    val permissions = rememberMultiplePermissionsState(
         permissions = listOfNotNull(
             Manifest.permission.BODY_SENSORS,
+            Manifest.permission.ACTIVITY_RECOGNITION,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
         ),
         onPermissionsResult = { result ->
             if (result[Manifest.permission.BODY_SENSORS] == true) {
-                viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    bodySensorsBackgroundPermission.launchPermissionRequest()
+                } else {
+                    viewModel.onAction(ActivityAction.GrantBodySensorsPermission)
+                }
             }
         }
     )
@@ -68,8 +86,10 @@ fun ActivityScreenRoot(
     }
 
     LaunchedEffect(Unit) {
-        if (bodySensorsPermissions.allPermissionsGranted.not()) {
-            bodySensorsPermissions.launchMultiplePermissionRequest()
+        if (permissions.allPermissionsGranted.not()) {
+            permissions.launchMultiplePermissionRequest()
+        } else if (bodySensorsBackgroundPermission.status.isGranted.not()) {
+            bodySensorsBackgroundPermission.launchPermissionRequest()
         }
     }
 
@@ -115,6 +135,11 @@ private fun ActivityScreen(
         selectedPage = pagerState.currentPage
     }
 
+    AmbientObserver(
+        onEnterAmbient = { details -> onAction(ActivityAction.OnEnterAmbientMode(details.burnInProtectionRequired)) },
+        onExitAmbient = { onAction(ActivityAction.OnExitAmbientMode) }
+    )
+
     Crossfade(
         targetState = startPage,
         animationSpec = tween(350),
@@ -132,7 +157,14 @@ private fun ActivityScreen(
             }
 
             else -> {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .ambientMode(
+                            isAmbientMode = state.isInAmbientMode,
+                            isBurnInProtectionRequired = state.isBurnInProtectionRequired
+                        )
+                ) {
                     HorizontalPager(
                         modifier = Modifier.fillMaxSize(),
                         state = pagerState

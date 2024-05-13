@@ -10,8 +10,12 @@ data class ActivityState(
     val speed: Float = 0f,
     val distanceMeters: Int = 0,
     val heartRate: Int = 0,
+    val totalCaloriesBurned: Int = 0,
     val canTrack: Boolean = false,
     val activityType: ActivityType? = null,
     val canTrackHeartRate: Boolean = false,
-    val isConnectedPhoneNearby: Boolean = false
+    val canTrackCalories: Boolean = false,
+    val isConnectedPhoneNearby: Boolean = false,
+    val isInAmbientMode: Boolean = false,
+    val isBurnInProtectionRequired: Boolean = false
 )

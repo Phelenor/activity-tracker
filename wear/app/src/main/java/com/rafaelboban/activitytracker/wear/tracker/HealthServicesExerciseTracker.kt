@@ -10,6 +10,7 @@ import androidx.health.services.client.HealthServices
 import androidx.health.services.client.HealthServicesException
 import androidx.health.services.client.clearUpdateCallback
 import androidx.health.services.client.data.Availability
+import androidx.health.services.client.data.BatchingMode
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.ExerciseConfig
 import androidx.health.services.client.data.ExerciseLapSummary
@@ -41,16 +42,24 @@ class HealthServicesExerciseTracker(private val context: Context) {
 
     private var exerciseType = ExerciseType.RUNNING
 
-    val heartRate: Flow<Int>
+    val healthData: Flow<HealthData>
         get() = callbackFlow {
             val callback = object : ExerciseUpdateCallback {
 
                 override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
                     val heartRates = update.latestMetrics.getData(DataType.HEART_RATE_BPM)
-                    val currentHeartRate = heartRates.firstOrNull()?.value
+                    val calories = update.latestMetrics.getData(DataType.CALORIES_TOTAL)
 
-                    currentHeartRate?.let {
-                        trySend(currentHeartRate.roundToInt())
+                    val currentHeartRate = heartRates.lastOrNull()?.value?.roundToInt()
+                    val totalCaloriesBurned = calories?.total?.roundToInt()
+
+                    if (currentHeartRate != null || totalCaloriesBurned != null) {
+                        trySend(
+                            HealthData(
+                                heartRate = currentHeartRate,
+                                calories = totalCaloriesBurned
+                            )
+                        )
                     }
                 }
 
@@ -89,7 +98,20 @@ class HealthServicesExerciseTracker(private val context: Context) {
         }.getOrDefault(false)
     }
 
-    suspend fun prepareExercise(): EmptyResult<ExerciseError> {
+    suspend fun isCalorieTrackingSupported(): Boolean {
+        return hasActivityRecognitionPermission() && runCatching {
+            val capabilities = client.getCapabilities()
+            val supportedDataTypes = capabilities
+                .typeToCapabilities[exerciseType]
+                ?.supportedDataTypes ?: setOf()
+
+            DataType.CALORIES_TOTAL in supportedDataTypes
+        }.getOrDefault(false)
+    }
+
+    suspend fun prepareExercise(exerciseType: ExerciseType): EmptyResult<ExerciseError> {
+        this.exerciseType = exerciseType
+
         if (isHeartRateTrackingSupported().not()) {
             return Result.Error(ExerciseError.TRACKING_NOT_SUPPORTED)
         }
@@ -101,7 +123,7 @@ class HealthServicesExerciseTracker(private val context: Context) {
 
         val config = WarmUpConfig(
             exerciseType = exerciseType,
-            dataTypes = setOf(DataType.HEART_RATE_BPM)
+            dataTypes = setOfNotNull(DataType.HEART_RATE_BPM)
         )
 
         client.prepareExercise(config)
@@ -109,7 +131,9 @@ class HealthServicesExerciseTracker(private val context: Context) {
         return Result.Success(Unit)
     }
 
-    suspend fun startExercise(): EmptyResult<ExerciseError> {
+    suspend fun startExercise(exerciseType: ExerciseType): EmptyResult<ExerciseError> {
+        this.exerciseType = exerciseType
+
         if (isHeartRateTrackingSupported().not()) {
             return Result.Error(ExerciseError.TRACKING_NOT_SUPPORTED)
         }
@@ -119,13 +143,19 @@ class HealthServicesExerciseTracker(private val context: Context) {
             return result
         }
 
+        val dataTypes = setOfNotNull(
+            DataType.HEART_RATE_BPM,
+            DataType.CALORIES_TOTAL.takeIf { isCalorieTrackingSupported() }
+        )
+
         val config = ExerciseConfig.builder(exerciseType)
-            .setDataTypes(setOf(DataType.HEART_RATE_BPM))
+            .setDataTypes(dataTypes)
             .setIsAutoPauseAndResumeEnabled(false)
+            .setBatchingModeOverrides(setOf(BatchingMode.HEART_RATE_5_SECONDS))
             .build()
 
         client.startExercise(config)
-        Timber.tag("HEALTH_SERVICES").i("Exercise Started")
+        Timber.tag("HEALTH_SERVICES").i("Exercise Started - $exerciseType")
 
         return Result.Success(Unit)
     }
@@ -203,6 +233,13 @@ class HealthServicesExerciseTracker(private val context: Context) {
         return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.BODY_SENSORS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasActivityRecognitionPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACTIVITY_RECOGNITION
         ) == PackageManager.PERMISSION_GRANTED
     }
 }

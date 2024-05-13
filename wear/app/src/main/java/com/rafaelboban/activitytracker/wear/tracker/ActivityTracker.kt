@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -36,6 +37,9 @@ class ActivityTracker(
 
     private val _heartRate = MutableStateFlow(0)
     val heartRate = _heartRate.asStateFlow()
+
+    private val _calories = MutableStateFlow(0)
+    val calories = _calories.asStateFlow()
 
     val distanceMeters = phoneConnector.messages
         .filterIsInstance<MessagingAction.DistanceUpdate>()
@@ -66,19 +70,28 @@ class ActivityTracker(
                 }
             }.launchIn(applicationScope)
 
+        canTrack.combine(activityType) { canTrack, activityType ->
+            if (canTrack && activityType != null) {
+                exerciseTracker.prepareExercise(activityType.toExerciseType())
+            }
+        }
+
         canTrack.flatMapLatest { canTrack ->
             if (canTrack) {
-                exerciseTracker.prepareExercise()
-            }
-
-            if (canTrack) {
-                exerciseTracker.heartRate
+                exerciseTracker.healthData
             } else {
                 flowOf()
             }
-        }.onEach { heartRate ->
-            phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
-            _heartRate.value = heartRate
+        }.onEach { data ->
+            data.heartRate?.let { heartRate ->
+                phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
+                _heartRate.value = heartRate
+            }
+
+            data.calories?.let { calories ->
+                phoneConnector.sendMessageToPhone(MessagingAction.CaloriesUpdate(calories))
+                _calories.value = calories
+            }
         }.launchIn(applicationScope)
     }
 

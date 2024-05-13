@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +37,7 @@ fun HeartRateExercisePage(
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (time, heartRateTop) = createRefs()
+        val (time, heartRateTop, caloriesBottom) = createRefs()
 
         Box(
             contentAlignment = Alignment.Center,
@@ -72,6 +73,24 @@ fun HeartRateExercisePage(
                     width = Dimension.matchParent
                 }
         )
+
+        if (state.canTrackCalories) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(horizontal = if (isCircleShape) 24.dp else 8.dp)
+                    .constrainAs(caloriesBottom) {
+                        top.linkTo(time.bottom, margin = 8.dp)
+                        width = Dimension.matchParent
+                    }
+            ) {
+                StatisticItem(
+                    value = state.totalCaloriesBurned.toString(),
+                    unit = "kcal",
+                    icon = Icons.Default.LocalFireDepartment
+                )
+            }
+        }
     }
 }
 
@@ -82,7 +101,9 @@ private fun HeartRateExercisePagePreview() {
         HeartRateExercisePage(
             state = ActivityState(
                 heartRate = 122,
-                duration = Duration.parse("1h 20m 32s")
+                duration = Duration.parse("1h 20m 32s"),
+                canTrackCalories = true,
+                totalCaloriesBurned = 123
             )
         )
     }

@@ -1,3 +1,5 @@
+@file:OptIn(FlowPreview::class)
+
 package com.rafaelboban.activitytracker.wear.ui.activity
 
 import androidx.compose.runtime.getValue
@@ -9,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.wear.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.wear.tracker.ActivityTracker
 import com.rafaelboban.activitytracker.wear.tracker.HealthServicesExerciseTracker
+import com.rafaelboban.activitytracker.wear.tracker.toExerciseType
 import com.rafaelboban.activitytracker.wear.tracker.toUiText
 import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
@@ -17,18 +20,22 @@ import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -47,10 +54,6 @@ class ActivityViewModel @Inject constructor(
     )
         private set
 
-    private val canTrackHeartRate = snapshotFlow {
-        state.canTrackHeartRate && state.canTrack
-    }.stateIn(viewModelScope, SharingStarted.Lazily, state.canTrackHeartRate && state.canTrack)
-
     private val activityStatus = snapshotFlow {
         state.activityStatus
     }.stateIn(viewModelScope, SharingStarted.Lazily, state.activityStatus)
@@ -59,13 +62,7 @@ class ActivityViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
-        viewModelScope.launch {
-            val isHeartRateSupported = exerciseTracker.isHeartRateTrackingSupported()
-
-            state = state.copy(
-                canTrackHeartRate = isHeartRateSupported
-            )
-        }
+        checkSupportedTrackingTypes()
 
         phoneConnector.connectedNode
             .filterNotNull()
@@ -85,20 +82,21 @@ class ActivityViewModel @Inject constructor(
             state = state.copy(activityType = type)
         }.launchIn(viewModelScope)
 
-        canTrackHeartRate.flatMapLatest { canTrack ->
-            if (canTrack) activityTracker.heartRate else flowOf()
-        }.onEach { heartRate ->
-            state = state.copy(heartRate = heartRate)
-        }.launchIn(viewModelScope)
-
         activityStatus.onEach { status ->
             val previousStatus = activityTracker.activityStatus.value
 
             val result = when (status) {
-                ActivityStatus.IN_PROGRESS -> if (previousStatus == ActivityStatus.NOT_STARTED) exerciseTracker.startExercise() else exerciseTracker.resumeExercise()
+                ActivityStatus.NOT_STARTED -> Result.Success(Unit)
                 ActivityStatus.PAUSED -> exerciseTracker.pauseExercise()
                 ActivityStatus.FINISHED -> exerciseTracker.stopExercise()
-                ActivityStatus.NOT_STARTED -> Result.Success(Unit)
+                ActivityStatus.IN_PROGRESS -> {
+                    if (previousStatus == ActivityStatus.NOT_STARTED) {
+                        val exerciseType = state.activityType?.toExerciseType() ?: return@onEach
+                        exerciseTracker.startExercise(exerciseType)
+                    } else {
+                        exerciseTracker.resumeExercise()
+                    }
+                }
             }
 
             if (result is Result.Error) {
@@ -110,15 +108,63 @@ class ActivityViewModel @Inject constructor(
             activityTracker.setStatus(status)
         }.launchIn(viewModelScope)
 
-        activityTracker.distanceMeters
-            .onEach { distanceMeters ->
-                state = state.copy(distanceMeters = distanceMeters)
-            }.launchIn(viewModelScope)
+        val isInAmbientMode = snapshotFlow { state.isInAmbientMode }
 
-        activityTracker.duration
-            .onEach { duration ->
-                state = state.copy(duration = duration)
-            }.launchIn(viewModelScope)
+        isInAmbientMode.flatMapLatest { inAmbientMode ->
+            if (inAmbientMode) {
+                activityTracker.heartRate.sample(10.seconds)
+            } else {
+                activityTracker.heartRate
+            }
+        }.onEach { heartRate ->
+            state = state.copy(heartRate = heartRate)
+        }.launchIn(viewModelScope)
+
+        isInAmbientMode.flatMapLatest { inAmbientMode ->
+            if (inAmbientMode) {
+                activityTracker.calories.sample(10.seconds)
+            } else {
+                activityTracker.calories
+            }
+        }.onEach { calories ->
+            state = state.copy(totalCaloriesBurned = calories)
+        }.launchIn(viewModelScope)
+
+        isInAmbientMode.flatMapLatest { inAmbientMode ->
+            if (inAmbientMode) {
+                activityTracker.distanceMeters.sample(10.seconds)
+            } else {
+                activityTracker.distanceMeters
+            }
+        }.onEach { distanceMeters ->
+            state = state.copy(distanceMeters = distanceMeters)
+        }.launchIn(viewModelScope)
+
+        isInAmbientMode.flatMapLatest { inAmbientMode ->
+            if (inAmbientMode) {
+                activityTracker.duration.sample(10.seconds)
+            } else {
+                activityTracker.duration
+            }
+        }.onEach { duration ->
+            state = state.copy(duration = duration)
+        }.launchIn(viewModelScope)
+
+//        canTrackHeartRate.flatMapLatest { canTrack ->
+//            if (canTrack) activityTracker.heartRate else flowOf()
+//        }.onEach { heartRate ->
+//            state = state.copy(heartRate = heartRate)
+//        }.launchIn(viewModelScope)
+//
+//        activityTracker.distanceMeters
+//            .onEach { distanceMeters ->
+//                state = state.copy(distanceMeters = distanceMeters)
+//            }.launchIn(viewModelScope)
+//
+//        activityTracker.duration
+//            .onEach { duration ->
+//                state = state.copy(duration = duration)
+//            }.launchIn(viewModelScope)
 
         listenToPhoneMessages()
     }
@@ -129,23 +175,22 @@ class ActivityViewModel @Inject constructor(
         }
 
         when (action) {
-            ActivityAction.GrantBodySensorsPermission -> {
-                viewModelScope.launch {
-                    val canTrackHeartRate = exerciseTracker.isHeartRateTrackingSupported()
-                    state = state.copy(canTrackHeartRate = canTrackHeartRate)
-                }
-            }
-
+            ActivityAction.OnFinishClick -> state = state.copy(activityStatus = ActivityStatus.FINISHED)
+            ActivityAction.OnPauseClick -> state = state.copy(activityStatus = ActivityStatus.PAUSED)
+            ActivityAction.OnResumeClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+            ActivityAction.OnStartClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+            ActivityAction.OnExitAmbientMode -> state = state.copy(isInAmbientMode = false)
+            ActivityAction.GrantBodySensorsPermission -> checkSupportedTrackingTypes()
             ActivityAction.OpenAppOnPhone -> {
                 viewModelScope.launch {
                     phoneConnector.sendMessageToPhone(MessagingAction.OpenAppOnPhone)
                 }
             }
 
-            ActivityAction.OnFinishClick -> state = state.copy(activityStatus = ActivityStatus.FINISHED)
-            ActivityAction.OnPauseClick -> state = state.copy(activityStatus = ActivityStatus.PAUSED)
-            ActivityAction.OnResumeClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
-            ActivityAction.OnStartClick -> state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+            is ActivityAction.OnEnterAmbientMode -> state = state.copy(
+                isInAmbientMode = true,
+                isBurnInProtectionRequired = action.isBurnInProtectionRequired
+            )
         }
     }
 
@@ -208,6 +253,20 @@ class ActivityViewModel @Inject constructor(
             message?.let {
                 phoneConnector.sendMessageToPhone(it)
             }
+        }
+    }
+
+    private fun checkSupportedTrackingTypes() {
+        viewModelScope.launch {
+            val (isHeartRateSupported, isCalorieTrackingSupported) = listOf(
+                async { exerciseTracker.isHeartRateTrackingSupported() },
+                async { exerciseTracker.isCalorieTrackingSupported() }
+            ).awaitAll()
+
+            state = state.copy(
+                canTrackHeartRate = isHeartRateSupported,
+                canTrackCalories = isCalorieTrackingSupported
+            )
         }
     }
 }
