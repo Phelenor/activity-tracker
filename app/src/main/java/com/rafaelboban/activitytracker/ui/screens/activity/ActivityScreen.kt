@@ -70,7 +70,6 @@ import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
-import com.rafaelboban.core.shared.utils.HeartRateZone
 import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
@@ -314,8 +313,8 @@ fun ActivityScreen(
                 ?.let { point ->
                     val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, 23)
                     HeartRateZoneIndicatorVertical(
-                        currentZone = zoneData?.zone ?: HeartRateZone.WARM_UP,
-                        ratioInZone = zoneData?.ratioInZone ?: 0f,
+                        currentZone = zoneData.zone,
+                        ratioInZone = zoneData.ratioInZone,
                         modifier = Modifier.constrainAs(zoneIndicator) {
                             start.linkTo(parent.start)
                             top.linkTo(infoCard.bottom, margin = 8.dp)

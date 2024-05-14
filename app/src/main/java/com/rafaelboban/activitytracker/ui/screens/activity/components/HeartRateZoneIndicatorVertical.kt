@@ -31,23 +31,23 @@ fun HeartRateZoneIndicatorVertical(
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val zoneHeightDp = maxHeight / HeartRateZone.entries.size.F
-        val topPadding = zoneHeightDp * currentZone.ordinal + zoneHeightDp * ratioInZone
+        val zoneHeightDp = maxHeight / HeartRateZone.Trackable.size.F
+        val topPadding = zoneHeightDp * (currentZone.ordinal - 1) + zoneHeightDp * ratioInZone
 
         val topPaddingAnimated by animateFloatAsState(
-            targetValue = topPadding.value,
+            targetValue = if (currentZone == HeartRateZone.AT_REST) 0f else topPadding.value,
             animationSpec = tween(durationMillis = 200),
             label = "zone_indicator_animation"
         )
 
         Column {
-            HeartRateZone.entries.forEachIndexed { index, zone ->
+            HeartRateZone.Trackable.forEachIndexed { index, zone ->
                 Box(
                     modifier = Modifier
                         .width(6.dp)
                         .weight(1f)
                         .applyIf(index == 0) { clip(shape = RoundedCornerShape(topEnd = 8.dp)) }
-                        .applyIf(index == HeartRateZone.entries.lastIndex) { clip(shape = RoundedCornerShape(bottomEnd = 8.dp)) }
+                        .applyIf(index == HeartRateZone.Trackable.lastIndex) { clip(shape = RoundedCornerShape(bottomEnd = 8.dp)) }
                         .background(color = zone.color)
                 )
             }
