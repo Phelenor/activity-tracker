@@ -61,13 +61,17 @@ import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
+import com.rafaelboban.activitytracker.ui.screens.activity.components.HeartRateZoneIndicatorVertical
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
+import com.rafaelboban.core.shared.utils.HeartRateZone
+import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Montserrat
@@ -163,7 +167,7 @@ fun ActivityScreen(
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val (infoCard, map, controls, heart) = createRefs()
+            val (infoCard, map, controls, heart, zoneIndicator) = createRefs()
 
             Column(
                 modifier = Modifier
@@ -206,13 +210,23 @@ fun ActivityScreen(
 
                     VerticalDivider(modifier = Modifier.height(24.dp))
 
-                    ActivityDataColumn(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
-                        value = state.activityData.speed.roundToDecimals(1),
-                        unit = "km/h",
-                        icon = Icons.Outlined.Speed
-                    )
+                    if (state.activityType.showPace) {
+                        ActivityDataColumn(
+                            modifier = Modifier.weight(1.2f),
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
+                            value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
+                            unit = "min/km",
+                            icon = Icons.Outlined.Speed
+                        )
+                    } else {
+                        ActivityDataColumn(
+                            modifier = Modifier.weight(1f),
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
+                            value = state.activityData.speed.roundToDecimals(1),
+                            unit = "km/h",
+                            icon = Icons.Outlined.Speed
+                        )
+                    }
                 }
             }
 
@@ -294,31 +308,48 @@ fun ActivityScreen(
                 }
             }
 
-            state.activityData.heartRates.lastOrNull()?.takeIf { state.activityStatus.isActive }?.let { heartRate ->
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.constrainAs(heart) {
-                        top.linkTo(infoCard.bottom, margin = 8.dp)
-                        start.linkTo(parent.start, margin = 8.dp)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(56.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = MaterialTheme.colorScheme.error,
-                        contentDescription = null
+            state.activityData.heartRatePoints
+                .lastOrNull()
+                ?.takeIf { state.activityStatus.isActive }
+                ?.let { point ->
+                    val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, 23)
+                    HeartRateZoneIndicatorVertical(
+                        currentZone = zoneData?.zone ?: HeartRateZone.WARM_UP,
+                        ratioInZone = zoneData?.ratioInZone ?: 0f,
+                        modifier = Modifier.constrainAs(zoneIndicator) {
+                            start.linkTo(parent.start)
+                            top.linkTo(infoCard.bottom, margin = 8.dp)
+                            bottom.linkTo(parent.bottom, margin = 44.dp)
+                            height = Dimension.fillToConstraints
+                        }
                     )
 
-                    Text(
-                        modifier = Modifier.padding(bottom = 4.dp),
-                        text = heartRate.toString(),
-                        fontFamily = Montserrat,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onError
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.constrainAs(heart) {
+                            top.linkTo(infoCard.bottom, margin = 8.dp)
+                            start.linkTo(parent.start, margin = 12.dp)
+                            width = Dimension.value(56.dp)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(56.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = MaterialTheme.colorScheme.error,
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = point.heartRate.toString(),
+                            fontFamily = Montserrat,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 20.sp,
+                            maxLines = 1,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
                 }
-            }
         }
     }
 }
@@ -332,12 +363,13 @@ private fun ActivityScreenPreview() {
             onAction = {},
             toggleTrackerService = {},
             state = ActivityState(
+                activityStatus = ActivityStatus.IN_PROGRESS,
                 activityType = ActivityType.WALK,
                 duration = Duration.parse("1h 30m 52s"),
                 activityData = ActivityData(
                     distanceMeters = 1925,
                     speed = 9.2f,
-                    heartRates = persistentListOf(142)
+                    heartRatePoints = persistentListOf(HeartRatePoint(102, Duration.ZERO))
                 )
             )
         )

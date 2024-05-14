@@ -1,6 +1,7 @@
 package com.rafaelboban.core.shared.connectivity.model
 
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.model.HeartRatePoint
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
@@ -32,13 +33,16 @@ sealed interface MessagingAction {
     data object ConnectionRequest : MessagingAction
 
     @Serializable
-    data class HeartRateUpdate(val heartRate: Int) : MessagingAction
+    data class HeartRateUpdate(val heartRatePoint: HeartRatePoint) : MessagingAction
 
     @Serializable
     data class CaloriesUpdate(val calories: Int) : MessagingAction
 
     @Serializable
     data class DistanceUpdate(val distanceMeters: Int) : MessagingAction
+
+    @Serializable
+    data class SpeedUpdate(val speed: Float) : MessagingAction
 
     @Serializable
     data class DurationUpdate(val duration: Duration) : MessagingAction

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.health.services.client.ExerciseUpdateCallback
 import androidx.health.services.client.HealthServices
@@ -25,6 +26,7 @@ import androidx.health.services.client.pauseExercise
 import androidx.health.services.client.prepareExercise
 import androidx.health.services.client.resumeExercise
 import androidx.health.services.client.startExercise
+import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.utils.EmptyResult
 import com.rafaelboban.core.shared.utils.Result
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import kotlin.math.roundToInt
+import kotlin.time.toKotlinDuration
 
 class HealthServicesExerciseTracker(private val context: Context) {
 
@@ -50,14 +53,19 @@ class HealthServicesExerciseTracker(private val context: Context) {
                     val heartRates = update.latestMetrics.getData(DataType.HEART_RATE_BPM)
                     val calories = update.latestMetrics.getData(DataType.CALORIES_TOTAL)
 
-                    val currentHeartRate = heartRates.lastOrNull()?.value?.roundToInt()
+                    val currentHeartRate = heartRates.lastOrNull()
                     val totalCaloriesBurned = calories?.total?.roundToInt()
 
                     if (currentHeartRate != null || totalCaloriesBurned != null) {
                         trySend(
                             HealthData(
-                                heartRate = currentHeartRate,
-                                calories = totalCaloriesBurned
+                                calories = totalCaloriesBurned,
+                                heartRate = currentHeartRate?.let {
+                                    HeartRatePoint(
+                                        heartRate = currentHeartRate.value.roundToInt(),
+                                        timestamp = currentHeartRate.timeDurationFromBoot.toKotlinDuration()
+                                    )
+                                }
                             )
                         )
                     }
@@ -109,6 +117,15 @@ class HealthServicesExerciseTracker(private val context: Context) {
         }.getOrDefault(false)
     }
 
+    private suspend fun isBatchingModeSupported(): Boolean {
+        return hasBodySensorsBackgroundPermission() && runCatching {
+            val capabilities = client.getCapabilities()
+            val supportedBatchingModes = capabilities.supportedBatchingModeOverrides
+
+            BatchingMode.HEART_RATE_5_SECONDS in supportedBatchingModes
+        }.getOrDefault(false)
+    }
+
     suspend fun prepareExercise(exerciseType: ExerciseType): EmptyResult<ExerciseError> {
         this.exerciseType = exerciseType
 
@@ -148,13 +165,15 @@ class HealthServicesExerciseTracker(private val context: Context) {
             DataType.CALORIES_TOTAL.takeIf { isCalorieTrackingSupported() }
         )
 
-        val config = ExerciseConfig.builder(exerciseType)
+        val configBuilder = ExerciseConfig.builder(exerciseType)
             .setDataTypes(dataTypes)
             .setIsAutoPauseAndResumeEnabled(false)
-            .setBatchingModeOverrides(setOf(BatchingMode.HEART_RATE_5_SECONDS))
-            .build()
 
-        client.startExercise(config)
+        if (isBatchingModeSupported()) {
+            configBuilder.setBatchingModeOverrides(setOf(BatchingMode.HEART_RATE_5_SECONDS))
+        }
+
+        client.startExercise(configBuilder.build())
         Timber.tag("HEALTH_SERVICES").i("Exercise Started - $exerciseType")
 
         return Result.Success(Unit)
@@ -233,6 +252,13 @@ class HealthServicesExerciseTracker(private val context: Context) {
         return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.BODY_SENSORS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBodySensorsBackgroundPermission(): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BODY_SENSORS_BACKGROUND
         ) == PackageManager.PERMISSION_GRANTED
     }
 

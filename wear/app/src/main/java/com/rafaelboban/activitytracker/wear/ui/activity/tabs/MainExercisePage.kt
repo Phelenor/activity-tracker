@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,12 +75,21 @@ fun MainExercisePage(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            StatisticItem(
-                value = state.speed.roundToDecimals(1),
-                unit = "km/h",
-                icon = Icons.Default.Speed,
-                modifier = Modifier.weight(1f)
-            )
+            if (state.activityType?.showPace == true) {
+                StatisticItem(
+                    value = ActivityDataFormatter.convertSpeedToPace(state.speed),
+                    unit = "min/km",
+                    icon = Icons.Default.Speed,
+                    modifier = Modifier.weight(1.2f)
+                )
+            } else {
+                StatisticItem(
+                    value = state.speed.roundToDecimals(1),
+                    unit = "km/h",
+                    icon = Icons.Default.Speed,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         Text(

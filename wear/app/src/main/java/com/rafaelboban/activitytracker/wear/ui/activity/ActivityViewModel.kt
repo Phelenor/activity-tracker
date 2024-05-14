@@ -142,6 +142,16 @@ class ActivityViewModel @Inject constructor(
 
         isInAmbientMode.flatMapLatest { inAmbientMode ->
             if (inAmbientMode) {
+                activityTracker.speed.sample(10.seconds)
+            } else {
+                activityTracker.speed
+            }
+        }.onEach { speed ->
+            state = state.copy(speed = speed)
+        }.launchIn(viewModelScope)
+
+        isInAmbientMode.flatMapLatest { inAmbientMode ->
+            if (inAmbientMode) {
                 activityTracker.duration.sample(10.seconds)
             } else {
                 activityTracker.duration

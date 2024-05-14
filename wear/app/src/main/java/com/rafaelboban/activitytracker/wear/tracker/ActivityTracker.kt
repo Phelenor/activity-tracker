@@ -50,6 +50,15 @@ class ActivityTracker(
             0
         )
 
+    val speed = phoneConnector.messages
+        .filterIsInstance<MessagingAction.SpeedUpdate>()
+        .map { it.speed }
+        .stateIn(
+            applicationScope,
+            SharingStarted.Lazily,
+            0f
+        )
+
     val duration = phoneConnector.messages
         .filterIsInstance<MessagingAction.DurationUpdate>()
         .map { it.duration }
@@ -85,7 +94,7 @@ class ActivityTracker(
         }.onEach { data ->
             data.heartRate?.let { heartRate ->
                 phoneConnector.sendMessageToPhone(MessagingAction.HeartRateUpdate(heartRate))
-                _heartRate.value = heartRate
+                _heartRate.value = heartRate.heartRate
             }
 
             data.calories?.let { calories ->

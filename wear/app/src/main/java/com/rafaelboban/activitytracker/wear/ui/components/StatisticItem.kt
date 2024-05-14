@@ -48,7 +48,7 @@ fun StatisticItem(
         Spacer(modifier = Modifier.height(2.dp))
 
         Text(
-            text = createValueText(value, unit),
+            text = if (value == "-") AnnotatedString(value) else createValueText(value, unit),
             maxLines = 1,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface

@@ -89,7 +89,7 @@ fun ActivityTrackerMap(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        contentPadding = PaddingValues(top = 16.dp, bottom = 36.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 36.dp, start = 6.dp),
         properties = MapProperties(
             mapStyleOptions = mapStyle,
             minZoomPreference = 12f

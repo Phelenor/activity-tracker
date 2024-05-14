@@ -77,7 +77,7 @@ private fun createValueText(value: String, unit: String? = null): AnnotatedStrin
         append(value)
 
         unit?.let {
-            withStyle(SpanStyle(fontSize = 16.sp)) {
+            withStyle(SpanStyle(fontSize = 13.sp)) {
                 append(" $unit")
             }
         }

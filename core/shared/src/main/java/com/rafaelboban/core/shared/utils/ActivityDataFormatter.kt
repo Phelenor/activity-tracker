@@ -1,5 +1,7 @@
 package com.rafaelboban.core.shared.utils
 
+import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -26,5 +28,18 @@ object ActivityDataFormatter {
         } else {
             (meters / 1000f).roundToDecimals(2)
         }
+    }
+
+    fun convertSpeedToPace(speed: Float): String {
+        if (speed < 0.8f) return "-"
+
+        val pace = 60f / speed
+        val minutes = pace.toInt()
+        val seconds = ((pace - minutes) * 60).roundToInt()
+
+        val minutesDisplay = "%d".format(minutes)
+        val secondsDisplay = "%02d".format(seconds)
+
+        return "$minutesDisplay:$secondsDisplay"
     }
 }

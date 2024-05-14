@@ -11,6 +11,7 @@ import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.utils.replaceLastSublist
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -73,8 +74,8 @@ class ActivityTracker(
 
     private val heartRates = watchConnector.messages
         .filterIsInstance<MessagingAction.HeartRateUpdate>()
-        .map { it.heartRate }
-        .runningFold(initial = emptyList<Int>()) { currentHeartRates, newHeartRate ->
+        .map { it.heartRatePoint }
+        .runningFold(initial = emptyList<HeartRatePoint>()) { currentHeartRates, newHeartRate ->
             currentHeartRates + newHeartRate
         }.stateIn(
             applicationScope,
@@ -123,25 +124,32 @@ class ActivityTracker(
                         distanceMeters = data.locations.distanceSequenceMeters,
                         elevationGain = data.locations.elevationGain,
                         speed = location.location.speed ?: currentLocationSequence.currentSpeed,
-                        heartRates = heartRates.toImmutableList()
+                        heartRatePoints = heartRates.toImmutableList()
                     )
                 }
             }.launchIn(applicationScope)
 
-        duration.onEach {
-            watchConnector.sendMessageToWatch(MessagingAction.DurationUpdate(it))
+        duration.onEach { duration ->
+            watchConnector.sendMessageToWatch(MessagingAction.DurationUpdate(duration))
         }.launchIn(applicationScope)
 
         activityData
             .map { it.distanceMeters }
             .distinctUntilChanged()
-            .onEach {
-                watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(it))
+            .onEach { distance ->
+                watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(distance))
+            }.launchIn(applicationScope)
+
+        activityData
+            .map { it.speed }
+            .distinctUntilChanged()
+            .onEach { speed ->
+                watchConnector.sendMessageToWatch(MessagingAction.SpeedUpdate(speed))
             }.launchIn(applicationScope)
 
         _activityType
-            .onEach {
-                watchConnector.sendMessageToWatch(MessagingAction.SetActivityType(it))
+            .onEach { type ->
+                watchConnector.sendMessageToWatch(MessagingAction.SetActivityType(type))
             }.launchIn(applicationScope)
     }
 
