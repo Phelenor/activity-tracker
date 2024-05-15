@@ -53,19 +53,25 @@ class HealthServicesExerciseTracker(private val context: Context) {
                     val heartRates = update.latestMetrics.getData(DataType.HEART_RATE_BPM)
                     val calories = update.latestMetrics.getData(DataType.CALORIES_TOTAL)
 
-                    val currentHeartRate = heartRates.lastOrNull()
                     val totalCaloriesBurned = calories?.total?.roundToInt()
 
-                    if (currentHeartRate != null || totalCaloriesBurned != null) {
+                    heartRates.forEachIndexed { index, heartRate ->
+                        trySend(
+                            HealthData(
+                                calories = if (index == 0) totalCaloriesBurned else null,
+                                heartRate = HeartRatePoint(
+                                    heartRate = heartRate.value.roundToInt(),
+                                    timestamp = heartRate.timeDurationFromBoot.toKotlinDuration()
+                                )
+                            )
+                        )
+                    }
+
+                    if (heartRates.isEmpty()) {
                         trySend(
                             HealthData(
                                 calories = totalCaloriesBurned,
-                                heartRate = currentHeartRate?.let {
-                                    HeartRatePoint(
-                                        heartRate = currentHeartRate.value.roundToInt(),
-                                        timestamp = currentHeartRate.timeDurationFromBoot.toKotlinDuration()
-                                    )
-                                }
+                                heartRate = null
                             )
                         )
                     }
