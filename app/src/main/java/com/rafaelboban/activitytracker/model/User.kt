@@ -19,5 +19,4 @@ data class User(
 
     val age: Int?
         get() = birthTimestamp?.let { DateHelper.getYearsSince(it) }
-
 }

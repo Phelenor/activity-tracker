@@ -53,7 +53,6 @@ fun HeartRateExercisePage(
     state: ActivityState
 ) {
     val isCircleShape = LocalConfiguration.current.isScreenRound
-    val screenSize = LocalConfiguration.current.screenWidthDp
 
     val (zone, ratio) = HeartRateZoneHelper.getHeartRateZone(state.heartRate, state.userAge)
 

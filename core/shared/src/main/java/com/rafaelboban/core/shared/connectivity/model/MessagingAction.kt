@@ -27,7 +27,7 @@ sealed interface MessagingAction {
     data object CanNotTrack : MessagingAction
 
     @Serializable
-    data class SetActivityType(val activityType: ActivityType?) : MessagingAction
+    data class SetActivityData(val activityType: ActivityType?, val userAge: Int?) : MessagingAction
 
     @Serializable
     data object ConnectionRequest : MessagingAction

@@ -4,6 +4,7 @@ package com.rafaelboban.activitytracker.tracking
 
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
 import com.rafaelboban.activitytracker.util.elevationGain
@@ -177,7 +178,7 @@ class ActivityTracker(
 
         _activityType
             .onEach { type ->
-                watchConnector.sendMessageToWatch(MessagingAction.SetActivityType(type))
+                watchConnector.sendMessageToWatch(MessagingAction.SetActivityData(type, UserData.user?.age))
             }.launchIn(applicationScope)
     }
 

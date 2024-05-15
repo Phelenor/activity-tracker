@@ -50,7 +50,6 @@ import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.LabeledItem
 import com.rafaelboban.activitytracker.ui.components.UserImage
 import com.rafaelboban.activitytracker.util.CredentialHelper
-import com.rafaelboban.activitytracker.util.DateHelper
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography

@@ -6,6 +6,7 @@ import com.rafaelboban.core.shared.connectivity.connectors.WatchToPhoneConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,9 @@ class ActivityTracker(
     private val phoneConnector: WatchToPhoneConnector,
     private val exerciseTracker: HealthServicesExerciseTracker
 ) {
+    private val _userAge = MutableStateFlow(DEFAULT_HEART_RATE_TRACKER_AGE)
+    val userAge = _userAge.asStateFlow()
+
     private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
     val activityStatus = _activityStatus.asStateFlow()
 
@@ -74,7 +78,11 @@ class ActivityTracker(
                 when (action) {
                     is MessagingAction.CanTrack -> _canTrack.value = true
                     is MessagingAction.CanNotTrack -> _canTrack.value = false
-                    is MessagingAction.SetActivityType -> _activityType.value = action.activityType
+                    is MessagingAction.SetActivityData -> {
+                        _activityType.value = action.activityType
+                        _userAge.value = action.userAge ?: DEFAULT_HEART_RATE_TRACKER_AGE
+                    }
+
                     else -> Unit
                 }
             }.launchIn(applicationScope)
