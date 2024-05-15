@@ -96,6 +96,21 @@ class ActivityTracker(
             _duration.update { it + interval }
         }.launchIn(applicationScope)
 
+        heartRates.onEach { heartRates ->
+            if (heartRates.isNotEmpty()) {
+                _activityData.update { data ->
+                    data.copy(
+                        currentHeartRate = heartRates.last(),
+                        heartRatePoints = if (isTrackingActivity.value) {
+                            (data.heartRatePoints + heartRates.last()).toImmutableList()
+                        } else {
+                            data.heartRatePoints
+                        }
+                    )
+                }
+            }
+        }.launchIn(applicationScope)
+
         currentLocation
             .filterNotNull()
             .combineTransform(isTrackingActivity) { location, isTracking ->
@@ -107,7 +122,7 @@ class ActivityTracker(
                     location = location,
                     durationTimestamp = duration
                 )
-            }.combine(heartRates) { location, heartRates ->
+            }.map { location ->
                 _activityData.update { data ->
                     val currentSpeed = location.location.speed ?: Float.MAX_VALUE
                     val distanceFromLastLocation = data.locations.lastOrNull()?.lastOrNull()?.latLong?.distanceTo(location.latLong) ?: Float.MAX_VALUE
@@ -124,7 +139,8 @@ class ActivityTracker(
                         distanceMeters = data.locations.distanceSequenceMeters,
                         elevationGain = data.locations.elevationGain,
                         speed = location.location.speed ?: currentLocationSequence.currentSpeed,
-                        heartRatePoints = heartRates.toImmutableList()
+                        heartRatePoints = data.heartRatePoints,
+                        currentHeartRate = data.currentHeartRate
                     )
                 }
             }.launchIn(applicationScope)

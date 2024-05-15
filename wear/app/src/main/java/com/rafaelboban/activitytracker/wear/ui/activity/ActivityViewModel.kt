@@ -76,6 +76,7 @@ class ActivityViewModel @Inject constructor(
 
         activityTracker.canTrack.onEach { canTrack ->
             state = state.copy(canTrack = canTrack)
+            checkSupportedTrackingTypes()
         }.launchIn(viewModelScope)
 
         activityTracker.activityType.onEach { type ->
@@ -159,22 +160,6 @@ class ActivityViewModel @Inject constructor(
         }.onEach { duration ->
             state = state.copy(duration = duration)
         }.launchIn(viewModelScope)
-
-//        canTrackHeartRate.flatMapLatest { canTrack ->
-//            if (canTrack) activityTracker.heartRate else flowOf()
-//        }.onEach { heartRate ->
-//            state = state.copy(heartRate = heartRate)
-//        }.launchIn(viewModelScope)
-//
-//        activityTracker.distanceMeters
-//            .onEach { distanceMeters ->
-//                state = state.copy(distanceMeters = distanceMeters)
-//            }.launchIn(viewModelScope)
-//
-//        activityTracker.duration
-//            .onEach { duration ->
-//                state = state.copy(duration = duration)
-//            }.launchIn(viewModelScope)
 
         listenToPhoneMessages()
     }

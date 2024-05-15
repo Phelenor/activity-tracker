@@ -307,8 +307,7 @@ fun ActivityScreen(
                 }
             }
 
-            state.activityData.heartRatePoints
-                .lastOrNull()
+            state.activityData.currentHeartRate
                 ?.takeIf { state.activityStatus.isActive }
                 ?.let { point ->
                     val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, 23)
@@ -368,7 +367,8 @@ private fun ActivityScreenPreview() {
                 activityData = ActivityData(
                     distanceMeters = 1925,
                     speed = 9.2f,
-                    heartRatePoints = persistentListOf(HeartRatePoint(102, Duration.ZERO))
+                    heartRatePoints = persistentListOf(HeartRatePoint(102, Duration.ZERO)),
+                    currentHeartRate = HeartRatePoint(102, Duration.ZERO)
                 )
             )
         )
