@@ -41,6 +41,7 @@ import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.User
+import com.rafaelboban.activitytracker.ui.components.BirthDatePicker
 import com.rafaelboban.activitytracker.ui.components.ButtonSecondary
 import com.rafaelboban.activitytracker.ui.components.ChangeNameBottomSheet
 import com.rafaelboban.activitytracker.ui.components.ConfirmActionBottomSheet
@@ -49,10 +50,13 @@ import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.LabeledItem
 import com.rafaelboban.activitytracker.ui.components.UserImage
 import com.rafaelboban.activitytracker.util.CredentialHelper
+import com.rafaelboban.activitytracker.util.DateHelper
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.coroutines.launch
+import java.time.Instant
+import kotlin.time.Duration.Companion.days
 
 @Composable
 fun ProfileScreenRoot(
@@ -82,15 +86,17 @@ fun ProfileScreenRoot(
             when (action) {
                 ProfileAction.ConfirmDeleteAccount -> viewModel.deleteAccount()
                 ProfileAction.ConfirmLogout -> viewModel.logout()
-                ProfileAction.DismissBottomSheet -> viewModel.dismissDialogs()
+                ProfileAction.DismissDialog -> viewModel.dismissDialogs()
                 ProfileAction.OnChangeNameClick -> viewModel.showDialog(ProfileDialogType.CHANGE_NAME)
                 ProfileAction.OnDeleteAccountClick -> viewModel.showDialog(ProfileDialogType.DELETE_ACCOUNT)
                 ProfileAction.OnLogoutClick -> viewModel.showDialog(ProfileDialogType.SIGN_OUT)
                 ProfileAction.OnHeightClick -> viewModel.showDialog(ProfileDialogType.UPDATE_HEIGHT)
                 ProfileAction.OnWeightClick -> viewModel.showDialog(ProfileDialogType.UPDATE_WEIGHT)
+                ProfileAction.OnAgeClick -> viewModel.showDialog(ProfileDialogType.UPDATE_AGE)
                 is ProfileAction.ConfirmChangeName -> viewModel.updateUser(name = action.name)
                 is ProfileAction.ConfirmHeightClick -> viewModel.updateUser(height = action.height)
                 is ProfileAction.ConfirmWeightClick -> viewModel.updateUser(weight = action.weight)
+                is ProfileAction.ConfirmBirthDateClick -> viewModel.updateUser(birthTimestamp = action.timestamp)
             }
         }
     )
@@ -109,16 +115,23 @@ private fun ProfileScreen(
     val dismissBottomSheet: () -> Unit = {
         coroutineScope.launch {
             bottomSheetState.hide()
-            onAction(ProfileAction.DismissBottomSheet)
+            onAction(ProfileAction.DismissDialog)
         }
     }
 
     FullScreenLoadingDialog(showDialog = state.submitInProgress)
 
+    BirthDatePicker(
+        showDialog = state.showBirthDateDialog,
+        initialSelectedTimestamp = state.user.birthTimestamp,
+        onConfirm = { timestamp -> onAction(ProfileAction.ConfirmBirthDateClick(timestamp)) },
+        onDismiss = { onAction(ProfileAction.DismissDialog) }
+    )
+
     if (showBottomSheet) {
         ModalBottomSheet(
             sheetState = bottomSheetState,
-            onDismissRequest = { onAction(ProfileAction.DismissBottomSheet) }
+            onDismissRequest = { onAction(ProfileAction.DismissDialog) }
         ) {
             when {
                 state.showChangeNameDialog -> {
@@ -213,34 +226,51 @@ private fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
+        Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
                 .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(16.dp)
         ) {
-            LabeledItem(
-                label = stringResource(id = R.string.height),
-                value = state.user.height?.let { "${it}cm" } ?: stringResource(id = R.string.add),
-                modifier = Modifier
-                    .weight(1f)
-                    .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { onAction(ProfileAction.OnHeightClick) }
-                    .padding(vertical = 6.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            LabeledItem(
-                label = stringResource(id = R.string.weight),
-                value = state.user.weight?.let { "${it}kg" } ?: stringResource(id = R.string.add),
-                modifier = Modifier
-                    .weight(1f)
-                    .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { onAction(ProfileAction.OnWeightClick) }
-                    .padding(vertical = 6.dp)
-            )
+            Row {
+                LabeledItem(
+                    label = stringResource(id = R.string.height),
+                    value = state.user.height?.let { "${it}cm" } ?: stringResource(id = R.string.add),
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { onAction(ProfileAction.OnHeightClick) }
+                        .padding(vertical = 6.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                LabeledItem(
+                    label = stringResource(id = R.string.weight),
+                    value = state.user.weight?.let { "${it}kg" } ?: stringResource(id = R.string.add),
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { onAction(ProfileAction.OnWeightClick) }
+                        .padding(vertical = 6.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row {
+                LabeledItem(
+                    label = stringResource(id = R.string.age),
+                    value = state.user.birthTimestamp?.let { DateHelper.getYearsSince(it).toString() } ?: stringResource(id = R.string.add),
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { onAction(ProfileAction.OnAgeClick) }
+                        .padding(vertical = 6.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -290,7 +320,8 @@ private fun ProfileScreenPreview() {
                     name = "Johnny Silverhand",
                     displayName = "Johnny Silverhand",
                     weight = 83,
-                    height = 192
+                    height = 192,
+                    birthTimestamp = Instant.now().epochSecond - (365.days.inWholeSeconds * 24)
                 )
             )
         )

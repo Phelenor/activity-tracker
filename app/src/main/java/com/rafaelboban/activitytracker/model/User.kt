@@ -11,6 +11,7 @@ data class User(
     val name: String,
     val weight: Int?,
     val height: Int?,
+    val birthTimestamp: Long?,
     @SerialName("display_name")
     val displayName: String
 )

@@ -33,19 +33,16 @@ object HeartRateZoneHelper {
         val timeSpentPerZone = mutableMapOf<HeartRateZone, Duration>()
 
         heartRates.zipWithNext { currentSample, nextSample ->
-            val zoneData = getHeartRateZone(currentSample.heartRate, userAge)
-            val zone = zoneData?.zone ?: return@zipWithNext
+            val zone = getHeartRateZone(currentSample.heartRate, userAge).zone
             val duration = nextSample.timestamp - currentSample.timestamp
             timeSpentPerZone[zone] = timeSpentPerZone.getOrDefault(zone, ZERO) + duration
         }
 
         val lastSample = heartRates.last()
-        val lastZoneData = getHeartRateZone(lastSample.heartRate, userAge)
-        val lastZone = lastZoneData?.zone
-        if (lastZone != null) {
-            val duration = totalDuration - lastSample.timestamp
-            timeSpentPerZone[lastZone] = timeSpentPerZone.getOrDefault(lastZone, ZERO) + duration
-        }
+        val lastZone = getHeartRateZone(lastSample.heartRate, userAge).zone
+        val duration = totalDuration - lastSample.timestamp
+
+        timeSpentPerZone[lastZone] = timeSpentPerZone.getOrDefault(lastZone, ZERO) + duration
 
         return timeSpentPerZone.map { (zone, timeSpent) ->
             zone to (timeSpent / totalDuration).F

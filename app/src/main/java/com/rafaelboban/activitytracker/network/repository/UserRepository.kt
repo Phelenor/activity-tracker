@@ -13,5 +13,10 @@ class UserRepository @Inject constructor(private val api: ApiService) {
 
     suspend fun deleteAccount() = api.deleteAccount()
 
-    suspend fun updateUserData(name: String? = null, height: Int? = null, weight: Int? = null) = api.updateUserData(UpdateUserData(name, height, weight))
+    suspend fun updateUserData(
+        name: String? = null,
+        height: Int? = null,
+        weight: Int? = null,
+        birthTimestamp: Long? = null
+    ) = api.updateUserData(UpdateUserData(name, height, weight, birthTimestamp))
 }

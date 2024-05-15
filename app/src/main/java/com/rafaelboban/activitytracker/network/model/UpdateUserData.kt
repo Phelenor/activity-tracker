@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class UpdateUserData(
     val name: String?,
     val height: Int?,
-    val weight: Int?
+    val weight: Int?,
+    val birthTimestamp: Long?
 )

@@ -53,11 +53,16 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateUser(name: String? = null, height: Int? = null, weight: Int? = null) {
+    fun updateUser(
+        name: String? = null,
+        height: Int? = null,
+        weight: Int? = null,
+        birthTimestamp: Long? = null
+    ) {
         viewModelScope.launch {
             state = state.copy(submitInProgress = true)
 
-            val response = userRepository.updateUserData(name, height, weight)
+            val response = userRepository.updateUserData(name, height, weight, birthTimestamp)
 
             if (response is ApiResponse.Success) {
                 user = response.data
@@ -76,7 +81,8 @@ class ProfileViewModel @Inject constructor(
             showChangeNameDialog = false,
             showDeleteAccountDialog = false,
             showWeightDialog = false,
-            showHeightDialog = false
+            showHeightDialog = false,
+            showBirthDateDialog = false
         )
     }
 
@@ -86,11 +92,12 @@ class ProfileViewModel @Inject constructor(
             showChangeNameDialog = type == ProfileDialogType.CHANGE_NAME,
             showDeleteAccountDialog = type == ProfileDialogType.DELETE_ACCOUNT,
             showWeightDialog = type == ProfileDialogType.UPDATE_WEIGHT,
-            showHeightDialog = type == ProfileDialogType.UPDATE_HEIGHT
+            showHeightDialog = type == ProfileDialogType.UPDATE_HEIGHT,
+            showBirthDateDialog = type == ProfileDialogType.UPDATE_AGE
         )
     }
 }
 
 enum class ProfileDialogType {
-    SIGN_OUT, DELETE_ACCOUNT, CHANGE_NAME, UPDATE_WEIGHT, UPDATE_HEIGHT
+    SIGN_OUT, DELETE_ACCOUNT, CHANGE_NAME, UPDATE_WEIGHT, UPDATE_HEIGHT, UPDATE_AGE
 }

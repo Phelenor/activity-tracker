@@ -9,5 +9,6 @@ data class ProfileState(
     val showDeleteAccountDialog: Boolean = false,
     val submitInProgress: Boolean = false,
     val showWeightDialog: Boolean = false,
-    val showHeightDialog: Boolean = false
+    val showHeightDialog: Boolean = false,
+    val showBirthDateDialog: Boolean = false
 )
