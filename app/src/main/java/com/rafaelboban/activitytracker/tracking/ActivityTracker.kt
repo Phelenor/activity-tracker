@@ -20,7 +20,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
@@ -65,8 +64,15 @@ class ActivityTracker(
             } else {
                 flowOf()
             }
-        }
-        .stateIn(
+        }.onEach { location ->
+            if (location.speed != null && !isTrackingActivity.value) {
+                _activityData.update { data ->
+                    data.copy(
+                        speed = location.speed
+                    )
+                }
+            }
+        }.stateIn(
             applicationScope,
             SharingStarted.Lazily,
             null
@@ -116,6 +122,12 @@ class ActivityTracker(
             .combineTransform(isTrackingActivity) { location, isTracking ->
                 if (isTracking) {
                     emit(location)
+                } else {
+                    if (location.speed == null) {
+                        _activityData.update { data ->
+                            data.copy(speed = 0f)
+                        }
+                    }
                 }
             }.zip(_duration) { location, duration ->
                 LocationTimestamp(
