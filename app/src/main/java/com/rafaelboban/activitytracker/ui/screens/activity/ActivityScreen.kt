@@ -259,6 +259,7 @@ fun ActivityScreen(
                 cameraLocked = state.mapCameraLocked,
                 mapType = state.mapType,
                 activityType = state.activityType,
+                maxSpeed = state.maxSpeed,
                 modifier = Modifier.constrainAs(map) {
                     top.linkTo(infoCard.bottom, margin = (-16).dp)
                     bottom.linkTo(parent.bottom)

@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
@@ -46,7 +47,10 @@ class ActivityViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         tracker.activityData.onEach { data ->
-            state = state.copy(activityData = data)
+            state = state.copy(
+                activityData = data,
+                maxSpeed = max(state.maxSpeed, data.speed).coerceAtMost(state.activityData.speed)
+            )
         }.launchIn(viewModelScope)
 
         tracker.duration.onEach { duration ->

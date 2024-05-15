@@ -16,5 +16,6 @@ data class ActivityState(
     val mapCameraLocked: Boolean = true,
     val showSelectMapTypeDialog: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
+    val maxSpeed: Float = Float.MIN_VALUE,
     val activityType: ActivityType
 )

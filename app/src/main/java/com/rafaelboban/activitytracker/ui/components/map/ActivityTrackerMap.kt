@@ -52,6 +52,7 @@ fun ActivityTrackerMap(
     cameraLocked: Boolean,
     mapType: MapType,
     activityType: ActivityType,
+    maxSpeed: Float,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -116,7 +117,12 @@ fun ActivityTrackerMap(
             scrollGesturesEnabled = cameraLocked.not()
         )
     ) {
-        StandardPolylines(locations = locations)
+        // StandardPolylines(locations = locations)
+        SpeedPolylines(
+            locations = locations,
+            maxSpeed = maxSpeed,
+            minSpeed = activityType.minSpeed
+        )
 
         currentLocation?.let {
             MarkerComposable(

@@ -51,7 +51,9 @@ class WearMessagingClient(context: Context) {
                 client.sendMessage(id, BASE_PATH_MESSAGING_ACTION, json.encodeToByteArray()).await()
             }
         } ?: run {
-            messageQueue.add(action)
+            runCatching {
+                messageQueue.add(action)
+            }
         }
     }
 
