@@ -6,6 +6,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.seconds
 
+const val DEFAULT_HEART_RATE_TRACKER_AGE = 30
+
 enum class HeartRateZone(val range: ClosedFloatingPointRange<Float>) {
     AT_REST(range = 0.0f..0.5f),
     WARM_UP(range = 0.5f..0.6f),

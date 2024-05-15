@@ -62,6 +62,7 @@ import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.screens.activity.components.HeartRateZoneIndicatorVertical
+import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
@@ -70,6 +71,7 @@ import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
+import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
@@ -310,7 +312,8 @@ fun ActivityScreen(
             state.activityData.currentHeartRate
                 ?.takeIf { state.activityStatus.isActive }
                 ?.let { point ->
-                    val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, 23)
+                    val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
+
                     HeartRateZoneIndicatorVertical(
                         currentZone = zoneData.zone,
                         ratioInZone = zoneData.ratioInZone,

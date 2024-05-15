@@ -7,10 +7,10 @@ import java.time.temporal.ChronoUnit
 
 object DateHelper {
 
-    fun getYearsSince(timestamp: Long): Long {
+    fun getYearsSince(timestamp: Long): Int {
         val now = LocalDate.now()
         val then = timestamp.secondsToLocalDate()
-        return ChronoUnit.YEARS.between(then, now)
+        return ChronoUnit.YEARS.between(then, now).toInt()
     }
 
     private fun Long.secondsToLocalDate() = Instant.ofEpochSecond(this).atZone(ZoneId.systemDefault()).toLocalDate()

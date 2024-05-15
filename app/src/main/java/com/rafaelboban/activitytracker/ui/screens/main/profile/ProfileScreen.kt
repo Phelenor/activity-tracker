@@ -262,7 +262,7 @@ private fun ProfileScreen(
             Row {
                 LabeledItem(
                     label = stringResource(id = R.string.age),
-                    value = state.user.birthTimestamp?.let { DateHelper.getYearsSince(it).toString() } ?: stringResource(id = R.string.add),
+                    value = state.user.age?.toString() ?: stringResource(id = R.string.add),
                     modifier = Modifier
                         .weight(1f)
                         .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
