@@ -12,5 +12,6 @@ data class ActivityState(
     val currentLocation: Location? = null,
     val showDiscardDialog: Boolean = false,
     val activityStatus: ActivityStatus = ActivityStatus.NOT_STARTED,
+    val mapCameraLocked: Boolean = true,
     val activityType: ActivityType
 )

@@ -17,7 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,10 +45,12 @@ import kotlinx.collections.immutable.ImmutableList
 fun ActivityTrackerMap(
     currentLocation: Location?,
     locations: ImmutableList<ImmutableList<LocationTimestamp>>,
+    cameraLocked: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
+    var firstComposition by remember { mutableStateOf(true) }
     val isDarkTheme = isSystemInDarkTheme()
     val mapStyle = remember { MapStyleOptions.loadRawResourceStyle(context, if (isDarkTheme) R.raw.map_style_dark else R.raw.map_style_light) }
     val cameraPositionState = rememberCameraPositionState()
@@ -75,28 +79,34 @@ fun ActivityTrackerMap(
         markerState.position = markerPosition
     }
 
-    LaunchedEffect(currentLocation) {
-        if (currentLocation != null) {
+    LaunchedEffect(currentLocation, cameraLocked) {
+        if (currentLocation != null && cameraLocked) {
             cameraPositionState.animate(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(currentLocation.latitude, currentLocation.longitude),
-                    17f
+                    if (firstComposition) 17f else cameraPositionState.position.zoom
                 )
             )
+
+            firstComposition = false
         }
     }
 
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        contentPadding = PaddingValues(top = 16.dp, bottom = 36.dp, start = 6.dp),
+        contentPadding = PaddingValues(top = 72.dp, bottom = 36.dp, start = 8.dp),
         properties = MapProperties(
             mapStyleOptions = mapStyle,
-            minZoomPreference = 12f
+            minZoomPreference = 13f
         ),
         uiSettings = MapUiSettings(
             zoomControlsEnabled = false,
-            tiltGesturesEnabled = false
+            tiltGesturesEnabled = false,
+            mapToolbarEnabled = false,
+            myLocationButtonEnabled = false,
+            zoomGesturesEnabled = true,
+            scrollGesturesEnabled = cameraLocked.not()
         )
     ) {
         StandardPolylines(locations = locations)

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.rafaelboban.activitytracker.ui.screens.activity
 
 import androidx.activity.compose.BackHandler
@@ -21,10 +23,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Speed
@@ -32,10 +39,13 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -168,7 +178,7 @@ fun ActivityScreen(
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val (infoCard, map, controls, heart, zoneIndicator) = createRefs()
+            val (infoCard, map, controls, heart, zoneIndicator, lockCameraButton) = createRefs()
 
             Column(
                 modifier = Modifier
@@ -234,6 +244,7 @@ fun ActivityScreen(
             ActivityTrackerMap(
                 currentLocation = state.currentLocation,
                 locations = state.activityData.locations,
+                cameraLocked = state.mapCameraLocked,
                 modifier = Modifier.constrainAs(map) {
                     top.linkTo(infoCard.bottom, margin = (-16).dp)
                     bottom.linkTo(parent.bottom)
@@ -306,6 +317,24 @@ fun ActivityScreen(
 
                         else -> Unit
                     }
+                }
+            }
+
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 24.dp) {
+                IconButton(
+                    onClick = { onAction(ActivityAction.OnCameraLockToggle) },
+                    modifier = Modifier
+                        .background(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
+                        .constrainAs(lockCameraButton) {
+                            end.linkTo(parent.end, margin = 4.dp)
+                            top.linkTo(infoCard.bottom, margin = 12.dp)
+                        }
+                ) {
+                    Icon(
+                        imageVector = if (state.mapCameraLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        contentDescription = null,
+                    )
                 }
             }
 

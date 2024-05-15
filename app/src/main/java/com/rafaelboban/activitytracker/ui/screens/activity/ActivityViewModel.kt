@@ -95,6 +95,10 @@ class ActivityViewModel @Inject constructor(
                 state = state.copy(showDiscardDialog = false)
             }
 
+            ActivityAction.OnCameraLockToggle -> {
+                state = state.copy(mapCameraLocked = !state.mapCameraLocked)
+            }
+
             ActivityAction.DiscardActivity -> {
                 viewModelScope.launch {
                     eventChannel.trySend(ActivityEvent.NavigateBack)

@@ -8,4 +8,5 @@ sealed interface ActivityAction {
     data object OnFinishClick : ActivityAction
     data object DismissDiscardDialog : ActivityAction
     data object DiscardActivity : ActivityAction
+    data object OnCameraLockToggle : ActivityAction
 }
