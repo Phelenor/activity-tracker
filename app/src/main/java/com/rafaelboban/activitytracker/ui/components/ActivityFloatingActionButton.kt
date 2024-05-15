@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,8 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 fun ActivityFloatingActionButton(
     icon: ImageVector,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showBorder: Boolean = false
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -33,7 +35,8 @@ fun ActivityFloatingActionButton(
             .clip(CircleShape)
             .clickable { onClick() }
             .background(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary.copy(0.3f))
-            .padding(8.dp)
+            .padding(if (showBorder) 6.dp else 8.dp)
+            .applyIf(showBorder) { border(width = 2.dp, shape = CircleShape, color = MaterialTheme.colorScheme.onPrimary) }
             .background(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary)
             .padding(8.dp)
     ) {

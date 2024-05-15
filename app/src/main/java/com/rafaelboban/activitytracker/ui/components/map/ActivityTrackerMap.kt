@@ -3,6 +3,7 @@ package com.rafaelboban.activitytracker.ui.components.map
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,13 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -38,6 +40,8 @@ import com.google.maps.android.compose.rememberMarkerState
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.ui.components.applyIf
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
 import kotlinx.collections.immutable.ImmutableList
 
@@ -46,6 +50,8 @@ fun ActivityTrackerMap(
     currentLocation: Location?,
     locations: ImmutableList<ImmutableList<LocationTimestamp>>,
     cameraLocked: Boolean,
+    mapType: MapType,
+    activityType: ActivityType,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -98,6 +104,7 @@ fun ActivityTrackerMap(
         contentPadding = PaddingValues(top = 72.dp, bottom = 36.dp, start = 8.dp),
         properties = MapProperties(
             mapStyleOptions = mapStyle,
+            mapType = mapType,
             minZoomPreference = 13f
         ),
         uiSettings = MapUiSettings(
@@ -120,13 +127,14 @@ fun ActivityTrackerMap(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
+                        .applyIf(mapType.hardlyVisible) { border(shape = CircleShape, width = 2.dp, color = MaterialTheme.colorScheme.background) }
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary)
                         .padding(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
+                        imageVector = ImageVector.vectorResource(id = activityType.drawableRes),
                         tint = MaterialTheme.colorScheme.onPrimary,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize()
@@ -136,3 +144,6 @@ fun ActivityTrackerMap(
         }
     }
 }
+
+val MapType.hardlyVisible: Boolean
+    get() = this == MapType.SATELLITE || this == MapType.HYBRID

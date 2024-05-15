@@ -26,12 +26,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Speed
@@ -69,7 +69,9 @@ import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
+import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
+import com.rafaelboban.activitytracker.ui.components.map.hardlyVisible
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.screens.activity.components.HeartRateZoneIndicatorVertical
 import com.rafaelboban.activitytracker.util.UserData
@@ -148,21 +150,31 @@ fun ActivityScreen(
     }
 
     DialogScaffold(
-        showDialog = state.showDiscardDialog,
-        onDismiss = { onAction(ActivityAction.DismissDiscardDialog) }
+        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog,
+        onDismiss = { onAction(ActivityAction.DismissDialogs) }
     ) {
-        InfoDialog(
-            title = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity),
-            subtitle = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity_info),
-            actionText = stringResource(id = com.rafaelboban.activitytracker.R.string.discard),
-            actionButtonColor = MaterialTheme.colorScheme.error,
-            actionButtonTextColor = MaterialTheme.colorScheme.onError,
-            onDismissClick = { onAction(ActivityAction.DismissDiscardDialog) },
-            onActionClick = {
-                toggleTrackerService(false)
-                onAction(ActivityAction.DiscardActivity)
+        when {
+            state.showDiscardDialog -> InfoDialog(
+                title = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity),
+                subtitle = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity_info),
+                actionText = stringResource(id = com.rafaelboban.activitytracker.R.string.discard),
+                actionButtonColor = MaterialTheme.colorScheme.error,
+                actionButtonTextColor = MaterialTheme.colorScheme.onError,
+                onDismissClick = { onAction(ActivityAction.DismissDialogs) },
+                onActionClick = {
+                    toggleTrackerService(false)
+                    onAction(ActivityAction.DiscardActivity)
+                }
+            )
+
+            state.showSelectMapTypeDialog -> {
+                SelectMapTypeDialog(
+                    currentType = state.mapType,
+                    onDismissClick = { onAction(ActivityAction.DismissDialogs) },
+                    onConfirmClick = { type -> onAction(ActivityAction.OnSelectMapType(type)) }
+                )
             }
-        )
+        }
     }
 
     BottomSheetScaffold(
@@ -178,7 +190,7 @@ fun ActivityScreen(
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val (infoCard, map, controls, heart, zoneIndicator, lockCameraButton) = createRefs()
+            val (infoCard, map, controls, heart, zoneIndicator, lockCameraButton, mapTypeButton) = createRefs()
 
             Column(
                 modifier = Modifier
@@ -245,6 +257,8 @@ fun ActivityScreen(
                 currentLocation = state.currentLocation,
                 locations = state.activityData.locations,
                 cameraLocked = state.mapCameraLocked,
+                mapType = state.mapType,
+                activityType = state.activityType,
                 modifier = Modifier.constrainAs(map) {
                     top.linkTo(infoCard.bottom, margin = (-16).dp)
                     bottom.linkTo(parent.bottom)
@@ -283,7 +297,8 @@ fun ActivityScreen(
                             ) {
                                 ActivityFloatingActionButton(
                                     icon = Icons.Filled.PlayArrow,
-                                    onClick = { onAction(ActivityAction.OnStartClick) }
+                                    onClick = { onAction(ActivityAction.OnStartClick) },
+                                    showBorder = state.mapType.hardlyVisible
                                 )
                             }
                         }
@@ -294,7 +309,8 @@ fun ActivityScreen(
                             ) {
                                 ActivityFloatingActionButton(
                                     icon = Icons.Filled.Pause,
-                                    onClick = { onAction(ActivityAction.OnPauseClick) }
+                                    onClick = { onAction(ActivityAction.OnPauseClick) },
+                                    showBorder = state.mapType.hardlyVisible
                                 )
                             }
                         }
@@ -303,14 +319,16 @@ fun ActivityScreen(
                             Row {
                                 ActivityFloatingActionButton(
                                     icon = Icons.Filled.PlayArrow,
-                                    onClick = { onAction(ActivityAction.OnResumeClick) }
+                                    onClick = { onAction(ActivityAction.OnResumeClick) },
+                                    showBorder = state.mapType.hardlyVisible
                                 )
 
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 ActivityFloatingActionButton(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                                    onClick = { onAction(ActivityAction.OnFinishClick) }
+                                    onClick = { onAction(ActivityAction.OnFinishClick) },
+                                    showBorder = state.mapType.hardlyVisible
                                 )
                             }
                         }
@@ -321,10 +339,12 @@ fun ActivityScreen(
             }
 
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 24.dp) {
+                val backgroundColor = if (state.mapType.hardlyVisible) MaterialTheme.colorScheme.background.copy(alpha = 0.8f) else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+
                 IconButton(
                     onClick = { onAction(ActivityAction.OnCameraLockToggle) },
                     modifier = Modifier
-                        .background(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
+                        .background(shape = CircleShape, color = backgroundColor)
                         .constrainAs(lockCameraButton) {
                             end.linkTo(parent.end, margin = 4.dp)
                             top.linkTo(infoCard.bottom, margin = 12.dp)
@@ -333,7 +353,23 @@ fun ActivityScreen(
                     Icon(
                         imageVector = if (state.mapCameraLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
                         tint = MaterialTheme.colorScheme.tertiary,
-                        contentDescription = null,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(
+                    onClick = { onAction(ActivityAction.OnOpenSelectMapType) },
+                    modifier = Modifier
+                        .background(shape = CircleShape, color = backgroundColor)
+                        .constrainAs(mapTypeButton) {
+                            end.linkTo(lockCameraButton.end)
+                            top.linkTo(lockCameraButton.bottom, margin = 8.dp)
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Map,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        contentDescription = null
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import com.google.maps.android.compose.MapType
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.core.shared.model.ActivityStatus
@@ -13,5 +14,7 @@ data class ActivityState(
     val showDiscardDialog: Boolean = false,
     val activityStatus: ActivityStatus = ActivityStatus.NOT_STARTED,
     val mapCameraLocked: Boolean = true,
+    val showSelectMapTypeDialog: Boolean = false,
+    val mapType: MapType = MapType.NORMAL,
     val activityType: ActivityType
 )

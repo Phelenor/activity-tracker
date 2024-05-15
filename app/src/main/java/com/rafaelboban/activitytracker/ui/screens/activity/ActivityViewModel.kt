@@ -91,18 +91,29 @@ class ActivityViewModel @Inject constructor(
                 state = state.copy(showDiscardDialog = state.activityStatus.isActive)
             }
 
-            ActivityAction.DismissDiscardDialog -> {
-                state = state.copy(showDiscardDialog = false)
+            ActivityAction.DismissDialogs -> {
+                state = state.copy(
+                    showDiscardDialog = false,
+                    showSelectMapTypeDialog = false
+                )
             }
 
             ActivityAction.OnCameraLockToggle -> {
                 state = state.copy(mapCameraLocked = !state.mapCameraLocked)
             }
 
+            ActivityAction.OnOpenSelectMapType -> {
+                state = state.copy(showSelectMapTypeDialog = true)
+            }
+
             ActivityAction.DiscardActivity -> {
                 viewModelScope.launch {
                     eventChannel.trySend(ActivityEvent.NavigateBack)
                 }
+            }
+
+            is ActivityAction.OnSelectMapType -> {
+                state = state.copy(mapType = action.type)
             }
         }
     }
