@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -44,9 +46,13 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -72,6 +78,7 @@ import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.components.map.hardlyVisible
+import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.ActivityBottomSheetContent
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.screens.activity.components.HeartRateZoneIndicatorVertical
 import com.rafaelboban.activitytracker.util.UserData
@@ -139,6 +146,15 @@ fun ActivityScreen(
     val density = LocalDensity.current
     val navigationBarPadding = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
 
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scrollState = rememberScrollState()
+
+    val canSwipeBottomSheet by remember {
+        derivedStateOf {
+            scrollState.value == 0 || scaffoldState.bottomSheetState.hasExpandedState.not()
+        }
+    }
+
     LaunchedEffect(state.activityStatus) {
         if (state.activityStatus == ActivityStatus.IN_PROGRESS && ActivityTrackerService.isActive.not()) {
             toggleTrackerService(true)
@@ -177,246 +193,256 @@ fun ActivityScreen(
         }
     }
 
-    BottomSheetScaffold(
-        sheetPeekHeight = 36.dp + navigationBarPadding,
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        sheetContent = {
-            Spacer(modifier = Modifier.height(300.dp))
-        }
-    ) {
-        ConstraintLayout(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            val (infoCard, map, controls, heart, zoneIndicator, lockCameraButton, mapTypeButton) = createRefs()
+    BoxWithConstraints {
+        val boxHeight = maxHeight
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
-                    .zIndex(1f)
-                    .constrainAs(infoCard) {
-                        top.linkTo(parent.top)
-                        width = Dimension.matchParent
-                    }
-            ) {
-                ActivityTopAppBar(
-                    activityType = state.activityType,
-                    onBackClick = { onAction(ActivityAction.OnBackClick) },
-                    gpsOk = if (state.activityStatus != ActivityStatus.FINISHED) state.currentLocation != null else null
+        BottomSheetScaffold(
+            sheetSwipeEnabled = canSwipeBottomSheet,
+            scaffoldState = scaffoldState,
+            sheetPeekHeight = 36.dp + navigationBarPadding,
+            sheetContainerColor = MaterialTheme.colorScheme.background,
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            sheetContent = {
+                ActivityBottomSheetContent(
+                    modifier = Modifier.height(boxHeight * 0.6f),
+                    scrollState = scrollState
                 )
+            }
+        ) {
+            ConstraintLayout(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val (infoCard, map, controls, heart, zoneIndicator, lockCameraButton, mapTypeButton) = createRefs()
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp, vertical = 12.dp)
+                        .background(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                        .zIndex(1f)
+                        .constrainAs(infoCard) {
+                            top.linkTo(parent.top)
+                            width = Dimension.matchParent
+                        }
                 ) {
-                    ActivityDataColumn(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.duration),
-                        value = state.duration.formatElapsedTimeDisplay(),
-                        icon = Icons.Outlined.Timer
+                    ActivityTopAppBar(
+                        activityType = state.activityType,
+                        onBackClick = { onAction(ActivityAction.OnBackClick) },
+                        gpsOk = if (state.activityStatus != ActivityStatus.FINISHED) state.currentLocation != null else null
                     )
 
-                    VerticalDivider(modifier = Modifier.height(24.dp))
-
-                    ActivityDataColumn(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(id = com.rafaelboban.activitytracker.R.string.distance),
-                        value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.distanceMeters),
-                        unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
-                        icon = Icons.AutoMirrored.Outlined.TrendingUp
-                    )
-
-                    VerticalDivider(modifier = Modifier.height(24.dp))
-
-                    if (state.activityType.showPace) {
-                        ActivityDataColumn(
-                            modifier = Modifier.weight(1.2f),
-                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
-                            value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
-                            unit = "min/km",
-                            icon = Icons.Outlined.Speed
-                        )
-                    } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 12.dp)
+                    ) {
                         ActivityDataColumn(
                             modifier = Modifier.weight(1f),
-                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
-                            value = state.activityData.speed.roundToDecimals(1),
-                            unit = "km/h",
-                            icon = Icons.Outlined.Speed
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.duration),
+                            value = state.duration.formatElapsedTimeDisplay(),
+                            icon = Icons.Outlined.Timer
                         )
+
+                        VerticalDivider(modifier = Modifier.height(24.dp))
+
+                        ActivityDataColumn(
+                            modifier = Modifier.weight(1f),
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.distance),
+                            value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.distanceMeters),
+                            unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
+                            icon = Icons.AutoMirrored.Outlined.TrendingUp
+                        )
+
+                        VerticalDivider(modifier = Modifier.height(24.dp))
+
+                        if (state.activityType.showPace) {
+                            ActivityDataColumn(
+                                modifier = Modifier.weight(1.2f),
+                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
+                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
+                                unit = "min/km",
+                                icon = Icons.Outlined.Speed
+                            )
+                        } else {
+                            ActivityDataColumn(
+                                modifier = Modifier.weight(1f),
+                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
+                                value = state.activityData.speed.roundToDecimals(1),
+                                unit = "km/h",
+                                icon = Icons.Outlined.Speed
+                            )
+                        }
                     }
                 }
-            }
 
-            ActivityTrackerMap(
-                currentLocation = state.currentLocation,
-                locations = state.activityData.locations,
-                cameraLocked = state.mapCameraLocked,
-                mapType = state.mapType,
-                activityType = state.activityType,
-                maxSpeed = state.maxSpeed,
-                modifier = Modifier.constrainAs(map) {
-                    top.linkTo(infoCard.bottom, margin = (-16).dp)
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.matchParent
-                    height = Dimension.fillToConstraints
-                }
-            )
+                ActivityTrackerMap(
+                    currentLocation = state.currentLocation,
+                    locations = state.activityData.locations,
+                    cameraLocked = state.mapCameraLocked,
+                    mapType = state.mapType,
+                    activityType = state.activityType,
+                    maxSpeed = state.maxSpeed,
+                    modifier = Modifier.constrainAs(map) {
+                        top.linkTo(infoCard.bottom, margin = (-16).dp)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.matchParent
+                        height = Dimension.fillToConstraints
+                    }
+                )
 
-            if (state.activityStatus != ActivityStatus.FINISHED) {
-                AnimatedContent(
-                    targetState = state.activityStatus,
-                    label = "controls",
-                    transitionSpec = {
-                        slideInVertically(
-                            animationSpec = tween(200),
-                            initialOffsetY = { it }
-                        ) togetherWith slideOutVertically(
-                            animationSpec = tween(200),
-                            targetOffsetY = { it }
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(bottom = 42.dp)
-                        .zIndex(1f)
-                        .constrainAs(controls) {
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            width = Dimension.value(152.dp)
-                        }
-                ) { status ->
-                    when (status) {
-                        ActivityStatus.NOT_STARTED -> {
-                            Box(
-                                contentAlignment = Alignment.Center
-                            ) {
-                                ActivityFloatingActionButton(
-                                    icon = Icons.Filled.PlayArrow,
-                                    onClick = { onAction(ActivityAction.OnStartClick) },
-                                    showBorder = state.mapType.hardlyVisible
-                                )
+                if (state.activityStatus != ActivityStatus.FINISHED) {
+                    AnimatedContent(
+                        targetState = state.activityStatus,
+                        label = "controls",
+                        transitionSpec = {
+                            slideInVertically(
+                                animationSpec = tween(200),
+                                initialOffsetY = { it }
+                            ) togetherWith slideOutVertically(
+                                animationSpec = tween(200),
+                                targetOffsetY = { it }
+                            )
+                        },
+                        modifier = Modifier
+                            .padding(bottom = 42.dp)
+                            .zIndex(1f)
+                            .constrainAs(controls) {
+                                bottom.linkTo(parent.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                width = Dimension.value(152.dp)
                             }
-                        }
-
-                        ActivityStatus.IN_PROGRESS -> {
-                            Box(
-                                contentAlignment = Alignment.Center
-                            ) {
-                                ActivityFloatingActionButton(
-                                    icon = Icons.Filled.Pause,
-                                    onClick = { onAction(ActivityAction.OnPauseClick) },
-                                    showBorder = state.mapType.hardlyVisible
-                                )
+                    ) { status ->
+                        when (status) {
+                            ActivityStatus.NOT_STARTED -> {
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    ActivityFloatingActionButton(
+                                        icon = Icons.Filled.PlayArrow,
+                                        onClick = { onAction(ActivityAction.OnStartClick) },
+                                        showBorder = state.mapType.hardlyVisible
+                                    )
+                                }
                             }
-                        }
 
-                        ActivityStatus.PAUSED -> {
-                            Row {
-                                ActivityFloatingActionButton(
-                                    icon = Icons.Filled.PlayArrow,
-                                    onClick = { onAction(ActivityAction.OnResumeClick) },
-                                    showBorder = state.mapType.hardlyVisible
-                                )
-
-                                Spacer(modifier = Modifier.width(8.dp))
-
-                                ActivityFloatingActionButton(
-                                    icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                                    onClick = { onAction(ActivityAction.OnFinishClick) },
-                                    showBorder = state.mapType.hardlyVisible
-                                )
+                            ActivityStatus.IN_PROGRESS -> {
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    ActivityFloatingActionButton(
+                                        icon = Icons.Filled.Pause,
+                                        onClick = { onAction(ActivityAction.OnPauseClick) },
+                                        showBorder = state.mapType.hardlyVisible
+                                    )
+                                }
                             }
-                        }
 
-                        else -> Unit
+                            ActivityStatus.PAUSED -> {
+                                Row {
+                                    ActivityFloatingActionButton(
+                                        icon = Icons.Filled.PlayArrow,
+                                        onClick = { onAction(ActivityAction.OnResumeClick) },
+                                        showBorder = state.mapType.hardlyVisible
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    ActivityFloatingActionButton(
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+                                        onClick = { onAction(ActivityAction.OnFinishClick) },
+                                        showBorder = state.mapType.hardlyVisible
+                                    )
+                                }
+                            }
+
+                            else -> Unit
+                        }
                     }
                 }
-            }
 
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 24.dp) {
-                val backgroundColor = if (state.mapType.hardlyVisible) MaterialTheme.colorScheme.background.copy(alpha = 0.8f) else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 24.dp) {
+                    val backgroundColor = if (state.mapType.hardlyVisible) MaterialTheme.colorScheme.background.copy(alpha = 0.8f) else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
 
-                IconButton(
-                    onClick = { onAction(ActivityAction.OnCameraLockToggle) },
-                    modifier = Modifier
-                        .background(shape = CircleShape, color = backgroundColor)
-                        .constrainAs(lockCameraButton) {
-                            end.linkTo(parent.end, margin = 4.dp)
-                            top.linkTo(infoCard.bottom, margin = 12.dp)
-                        }
-                ) {
-                    Icon(
-                        imageVector = if (state.mapCameraLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        contentDescription = null
-                    )
-                }
-
-                IconButton(
-                    onClick = { onAction(ActivityAction.OnOpenSelectMapType) },
-                    modifier = Modifier
-                        .background(shape = CircleShape, color = backgroundColor)
-                        .constrainAs(mapTypeButton) {
-                            end.linkTo(lockCameraButton.end)
-                            top.linkTo(lockCameraButton.bottom, margin = 8.dp)
-                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Map,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            state.activityData.currentHeartRate
-                ?.takeIf { state.activityStatus.isActive }
-                ?.let { point ->
-                    val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
-
-                    HeartRateZoneIndicatorVertical(
-                        currentZone = zoneData.zone,
-                        ratioInZone = zoneData.ratioInZone,
-                        modifier = Modifier.constrainAs(zoneIndicator) {
-                            start.linkTo(parent.start)
-                            top.linkTo(infoCard.bottom, margin = 8.dp)
-                            bottom.linkTo(parent.bottom, margin = 44.dp)
-                            height = Dimension.fillToConstraints
-                        }
-                    )
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.constrainAs(heart) {
-                            top.linkTo(infoCard.bottom, margin = 8.dp)
-                            start.linkTo(parent.start, margin = 12.dp)
-                            width = Dimension.value(56.dp)
-                        }
+                    IconButton(
+                        onClick = { onAction(ActivityAction.OnCameraLockToggle) },
+                        modifier = Modifier
+                            .background(shape = CircleShape, color = backgroundColor)
+                            .constrainAs(lockCameraButton) {
+                                end.linkTo(parent.end, margin = 4.dp)
+                                top.linkTo(infoCard.bottom, margin = 12.dp)
+                            }
                     ) {
                         Icon(
-                            modifier = Modifier.size(56.dp),
-                            imageVector = Icons.Filled.Favorite,
-                            tint = MaterialTheme.colorScheme.error,
+                            imageVector = if (state.mapCameraLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                            tint = MaterialTheme.colorScheme.tertiary,
                             contentDescription = null
                         )
+                    }
 
-                        Text(
-                            text = point.heartRate.toString(),
-                            fontFamily = Montserrat,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 20.sp,
-                            maxLines = 1,
-                            color = MaterialTheme.colorScheme.onError,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                    IconButton(
+                        onClick = { onAction(ActivityAction.OnOpenSelectMapType) },
+                        modifier = Modifier
+                            .background(shape = CircleShape, color = backgroundColor)
+                            .constrainAs(mapTypeButton) {
+                                end.linkTo(lockCameraButton.end)
+                                top.linkTo(lockCameraButton.bottom, margin = 8.dp)
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Map,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            contentDescription = null
                         )
                     }
                 }
+
+                state.activityData.currentHeartRate
+                    ?.takeIf { state.activityStatus.isActive }
+                    ?.let { point ->
+                        val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
+
+                        HeartRateZoneIndicatorVertical(
+                            currentZone = zoneData.zone,
+                            ratioInZone = zoneData.ratioInZone,
+                            modifier = Modifier.constrainAs(zoneIndicator) {
+                                start.linkTo(parent.start)
+                                top.linkTo(infoCard.bottom, margin = 8.dp)
+                                bottom.linkTo(parent.bottom, margin = 44.dp)
+                                height = Dimension.fillToConstraints
+                            }
+                        )
+
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.constrainAs(heart) {
+                                top.linkTo(infoCard.bottom, margin = 8.dp)
+                                start.linkTo(parent.start, margin = 12.dp)
+                                width = Dimension.value(56.dp)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(56.dp),
+                                imageVector = Icons.Filled.Favorite,
+                                tint = MaterialTheme.colorScheme.error,
+                                contentDescription = null
+                            )
+
+                            Text(
+                                text = point.heartRate.toString(),
+                                fontFamily = Montserrat,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 20.sp,
+                                maxLines = 1,
+                                color = MaterialTheme.colorScheme.onError,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                        }
+                    }
+            }
         }
     }
 }

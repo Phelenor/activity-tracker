@@ -40,7 +40,7 @@ fun SpeedPolylines(
                 jointType = JointType.BEVEL,
                 points = listOf(
                     LatLng(polylineUi.location1.latitude, polylineUi.location1.longitude),
-                    LatLng(polylineUi.location2.latitude, polylineUi.location2.longitude),
+                    LatLng(polylineUi.location2.latitude, polylineUi.location2.longitude)
                 )
             )
         }

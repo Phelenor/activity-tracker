@@ -12,7 +12,7 @@ enum class ActivityType(
     @DrawableRes val drawableRes: Int,
     val showPace: Boolean = false,
     val maxSpeed: Float,
-    val minSpeed: Float,
+    val minSpeed: Float
 ) {
     RUN(R.string.running, R.string.now_running, R.drawable.ic_run, true, 17f, 8f),
     WALK(R.string.walking, R.string.now_walking, R.drawable.ic_walk, true, 7f, 4f),

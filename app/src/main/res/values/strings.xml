@@ -49,4 +49,8 @@
     <string name="ok">OK</string>
     <string name="pace">Pace</string>
     <string name="age">Age</string>
+    <string name="details">Details</string>
+    <string name="heartrate">Heartrate</string>
+    <string name="goals">Goals</string>
+    <string name="weather">Weather</string>
 </resources>
