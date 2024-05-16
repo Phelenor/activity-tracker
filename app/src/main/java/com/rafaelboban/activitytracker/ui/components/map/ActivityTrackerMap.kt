@@ -117,12 +117,7 @@ fun ActivityTrackerMap(
             scrollGesturesEnabled = cameraLocked.not()
         )
     ) {
-        // StandardPolylines(locations = locations)
-        SpeedPolylines(
-            locations = locations,
-            maxSpeed = maxSpeed,
-            minSpeed = activityType.minSpeed
-        )
+        StandardPolylines(locations = locations)
 
         currentLocation?.let {
             MarkerComposable(
