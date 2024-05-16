@@ -3,6 +3,7 @@ package com.rafaelboban.activitytracker.ui.screens.activity
 import com.google.maps.android.compose.MapType
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.Location
+import com.rafaelboban.activitytracker.network.model.weather.WeatherForecast
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import java.time.LocalDateTime
@@ -19,5 +20,6 @@ data class ActivityState(
     val mapType: MapType = MapType.NORMAL,
     val maxSpeed: Float = Float.MIN_VALUE,
     val activityType: ActivityType,
-    val startTimestamp: LocalDateTime? = null
+    val startTimestamp: LocalDateTime? = null,
+    val weather: WeatherForecast? = null
 )

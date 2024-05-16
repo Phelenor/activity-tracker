@@ -1,11 +1,13 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rafaelboban.activitytracker.network.repository.WeatherRepository
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
@@ -13,22 +15,31 @@ import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.utils.F
+import com.skydoves.sandwich.message
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.math.max
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
     private val applicationScope: CoroutineScope,
     private val tracker: ActivityTracker,
     private val watchConnector: PhoneToWatchConnector,
+    private val weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -59,6 +70,7 @@ class ActivityViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         listenToWatchActions()
+        startWeatherUpdates()
     }
 
     fun onAction(action: ActivityAction, fromWatch: Boolean = false) {
@@ -159,6 +171,39 @@ class ActivityViewModel @Inject constructor(
 
             message?.let {
                 watchConnector.sendMessageToWatch(it)
+            }
+        }
+    }
+
+    private fun startWeatherUpdates() {
+        viewModelScope.launch {
+            var canRetry = true
+            var shouldRetry = false
+
+            while (isActive) {
+                var location = state.currentLocation
+                var lockCount = 0
+
+                while (location == null) {
+                    delay(1.seconds * (lockCount + 1))
+                    location = state.currentLocation
+                    lockCount++
+                }
+
+                weatherRepository.getWeatherData(location.latitude.F, location.longitude.F).onSuccess {
+                    state = state.copy(weather = data.copy(hourly = data.hourly.take(5)))
+                    canRetry = true
+                }.onFailure {
+                    shouldRetry = canRetry
+                    canRetry = false
+                }
+
+                if (shouldRetry) {
+                    shouldRetry = false
+                    continue
+                }
+
+                delay(15.minutes)
             }
         }
     }
