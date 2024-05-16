@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet
+package com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background

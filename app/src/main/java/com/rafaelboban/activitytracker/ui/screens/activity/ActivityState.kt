@@ -5,6 +5,7 @@ import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
+import java.time.LocalDateTime
 import kotlin.time.Duration
 
 data class ActivityState(
@@ -17,5 +18,6 @@ data class ActivityState(
     val showSelectMapTypeDialog: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val maxSpeed: Float = Float.MIN_VALUE,
-    val activityType: ActivityType
+    val activityType: ActivityType,
+    val startTimestamp: LocalDateTime? = null
 )

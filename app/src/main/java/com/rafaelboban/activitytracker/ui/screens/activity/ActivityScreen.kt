@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package com.rafaelboban.activitytracker.ui.screens.activity
 
 import androidx.activity.compose.BackHandler
@@ -27,7 +25,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Favorite
@@ -207,8 +204,9 @@ fun ActivityScreen(
                 .navigationBarsPadding(),
             sheetContent = {
                 ActivityBottomSheetContent(
-                    modifier = Modifier.height(boxHeight * 0.6f),
-                    scrollState = scrollState
+                    state = state,
+                    scrollState = scrollState,
+                    modifier = Modifier.height(boxHeight * 0.6f)
                 )
             }
         ) {

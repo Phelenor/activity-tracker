@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.math.max
 
@@ -67,7 +68,7 @@ class ActivityViewModel @Inject constructor(
 
         when (action) {
             ActivityAction.OnStartClick -> {
-                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS, startTimestamp = LocalDateTime.now())
                 tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
             }

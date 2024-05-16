@@ -53,4 +53,9 @@
     <string name="heartrate">Heartrate</string>
     <string name="goals">Goals</string>
     <string name="weather">Weather</string>
+    <string name="elevation_gain">Elevation gain</string>
+    <string name="current_heartrate">Current heartrate</string>
+    <string name="average_heartrate">Average heartrate</string>
+    <string name="max_heartrate">Max. heartrate</string>
+    <string name="calories_estimated">Calories (estimated)</string>
 </resources>

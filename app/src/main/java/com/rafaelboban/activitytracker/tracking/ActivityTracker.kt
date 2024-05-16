@@ -90,6 +90,15 @@ class ActivityTracker(
             emptyList()
         )
 
+    private val calories = watchConnector.messages
+        .filterIsInstance<MessagingAction.CaloriesUpdate>()
+        .map { it.calories }
+        .stateIn(
+            applicationScope,
+            SharingStarted.Lazily,
+            null
+        )
+
     init {
         isTrackingActivity.onEach { isTracking ->
             if (isTracking.not()) {
@@ -117,6 +126,13 @@ class ActivityTracker(
                 }
             }
         }.launchIn(applicationScope)
+
+        calories.filterNotNull()
+            .onEach { calories ->
+                _activityData.update { data ->
+                    data.copy(caloriesBurned = calories)
+                }
+            }.launchIn(applicationScope)
 
         currentLocation
             .filterNotNull()
@@ -153,7 +169,8 @@ class ActivityTracker(
                         elevationGain = data.locations.elevationGain,
                         speed = location.location.speed ?: currentLocationSequence.currentSpeed,
                         heartRatePoints = data.heartRatePoints,
-                        currentHeartRate = data.currentHeartRate
+                        currentHeartRate = data.currentHeartRate,
+                        caloriesBurned = data.caloriesBurned
                     )
                 }
             }.launchIn(applicationScope)
