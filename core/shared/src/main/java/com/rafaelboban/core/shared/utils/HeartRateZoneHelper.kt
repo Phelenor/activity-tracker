@@ -40,11 +40,11 @@ object HeartRateZoneHelper {
             timeSpentPerZone[zone] = timeSpentPerZone.getOrDefault(zone, ZERO) + duration
         }
 
-        val lastSample = heartRates.last()
-        val lastZone = getHeartRateZone(lastSample.heartRate, userAge).zone
-        val duration = totalDuration - lastSample.timestamp
-
-        timeSpentPerZone[lastZone] = timeSpentPerZone.getOrDefault(lastZone, ZERO) + duration
+//        val lastSample = heartRates.last()
+//        val lastZone = getHeartRateZone(lastSample.heartRate, userAge).zone
+//        val duration = totalDuration - lastSample.timestamp
+//
+//        timeSpentPerZone[lastZone] = timeSpentPerZone.getOrDefault(lastZone, ZERO) + duration
 
         return timeSpentPerZone.map { (zone, timeSpent) ->
             zone to (timeSpent / totalDuration).F
@@ -69,7 +69,7 @@ data class HeartRateZoneData(
 
 val HeartRateZone.color: Color
     get() = when (this) {
-        HeartRateZone.AT_REST -> Color.White
+        HeartRateZone.AT_REST -> Color(0xF13800FF)
         HeartRateZone.WARM_UP -> Color(0xffa7b8ab)
         HeartRateZone.FAT_BURN -> Color(0xff6bbdd1)
         HeartRateZone.AEROBIC -> Color(0xff30b88a)
@@ -85,6 +85,16 @@ val HeartRateZone.label: String
         HeartRateZone.AEROBIC -> "Aerobic Zone"
         HeartRateZone.ANAEROBIC -> "Anaerobic Zone"
         HeartRateZone.VO2_MAX -> "VO2 Max Zone"
+    }
+
+val HeartRateZone.labelShort: String
+    get() = when (this) {
+        HeartRateZone.AT_REST -> "At Rest"
+        HeartRateZone.WARM_UP -> "Warm Up"
+        HeartRateZone.FAT_BURN -> "Fat Burn"
+        HeartRateZone.AEROBIC -> "Aerobic"
+        HeartRateZone.ANAEROBIC -> "Anaerobic"
+        HeartRateZone.VO2_MAX -> "VO2 Max"
     }
 
 val HeartRateZone.intensityLabel: String

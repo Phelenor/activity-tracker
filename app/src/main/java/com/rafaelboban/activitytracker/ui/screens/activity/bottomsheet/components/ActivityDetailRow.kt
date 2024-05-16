@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,9 +28,9 @@ import com.rafaelboban.core.theme.mobile.Typography
 fun ActivityDetailsRow(
     label: String,
     value: String,
-    icon: ImageVector,
     modifier: Modifier = Modifier,
-    iconTint: Color = MaterialTheme.colorScheme.onBackground
+    iconTint: Color = MaterialTheme.colorScheme.onBackground,
+    icon: ImageVector? = null
 ) {
     Column {
         Row(
@@ -49,12 +49,14 @@ fun ActivityDetailsRow(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(16.dp)
-            )
+            icon?.let {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -78,7 +80,7 @@ private fun ActivityDetailRowPreview() {
         ActivityDetailsRow(
             label = "Duration",
             value = "01:02:24",
-            icon = Icons.Default.Favorite
+            icon = Icons.Outlined.FavoriteBorder
         )
     }
 }
