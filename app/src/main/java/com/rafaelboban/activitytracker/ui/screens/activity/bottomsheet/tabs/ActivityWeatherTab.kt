@@ -38,7 +38,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ActivityWeatherTab(
-    weather: WeatherForecast?,
+    weather: WeatherForecast?
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
