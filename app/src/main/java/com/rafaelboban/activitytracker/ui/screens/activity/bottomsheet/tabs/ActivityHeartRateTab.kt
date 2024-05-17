@@ -79,9 +79,7 @@ fun ActivityHeartRateTab(
                     iconTint = tint as Color
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -89,8 +87,8 @@ fun ActivityHeartRateTab(
                     .padding(horizontal = 12.dp, vertical = 16.dp)
             ) {
                 Text(
-                    text = "Current Zone:",
-                    style = Typography.displaySmall,
+                    text = "Current HR Zone:",
+                    style = Typography.displayLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
