@@ -24,6 +24,7 @@ import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.component
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityDetailsTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityHeartRateTab
+import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityWeatherTab
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 
@@ -59,7 +60,7 @@ fun ActivityBottomSheetContent(
                     ActivityTabType.DETAILS -> ActivityDetailsTab(state = state)
                     ActivityTabType.HEART -> ActivityHeartRateTab(state = state)
                     ActivityTabType.GOALS -> Box {}
-                    ActivityTabType.WEATHER -> Box {}
+                    ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather)
                 }
             }
         }

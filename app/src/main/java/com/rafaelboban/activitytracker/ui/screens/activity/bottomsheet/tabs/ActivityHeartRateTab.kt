@@ -50,8 +50,7 @@ import kotlin.time.Duration
 
 @Composable
 fun ActivityHeartRateTab(
-    state: ActivityState,
-    modifier: Modifier = Modifier
+    state: ActivityState
 ) {
     val heartRatePoints = state.activityData.heartRatePoints
 
