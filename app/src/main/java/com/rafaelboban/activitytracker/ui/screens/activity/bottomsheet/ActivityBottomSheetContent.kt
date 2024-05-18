@@ -13,8 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,11 +30,11 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 fun ActivityBottomSheetContent(
     state: ActivityState,
     scrollState: ScrollState,
+    selectedTab: ActivityTabType,
+    onTabSelected: (ActivityTabType) -> Unit,
     onLoadWeather: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedTab by remember { mutableStateOf(ActivityTabType.DETAILS) }
-
     LaunchedEffect(selectedTab) {
         scrollState.scrollTo(0)
     }
@@ -44,7 +42,7 @@ fun ActivityBottomSheetContent(
     Column(modifier = modifier.fillMaxWidth()) {
         ActivityChipRow(
             selectedTab = selectedTab,
-            onTabSelected = { tab -> selectedTab = tab }
+            onTabSelected = onTabSelected
         )
 
         Column(
@@ -75,6 +73,8 @@ private fun ActivityBottomSheetContentPreview() {
         ActivityBottomSheetContent(
             state = ActivityState(activityType = ActivityType.WALK),
             scrollState = rememberScrollState(),
+            selectedTab = ActivityTabType.DETAILS,
+            onTabSelected = {},
             onLoadWeather = {}
         )
     }

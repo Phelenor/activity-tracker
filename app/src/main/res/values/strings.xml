@@ -60,4 +60,6 @@
     <string name="calories_estimated">Calories (estimated)</string>
     <string name="average_pace">Average pace</string>
     <string name="average_speed">Average speed</string>
+    <string name="calories">Calories</string>
+    <string name="duration_pct_in_zone">Duration % in HR zone</string>
 </resources>

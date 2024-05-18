@@ -1,14 +1,18 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rafaelboban.activitytracker.di.PreferencesStandard
+import com.rafaelboban.activitytracker.network.model.PREFERENCE_SHOW_GOALS_REMINDER
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.util.edit
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
@@ -39,6 +43,7 @@ class ActivityViewModel @Inject constructor(
     private val tracker: ActivityTracker,
     private val watchConnector: PhoneToWatchConnector,
     private val weatherRepository: WeatherRepository,
+    @PreferencesStandard private val preferences: SharedPreferences,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -69,6 +74,13 @@ class ActivityViewModel @Inject constructor(
         tracker.duration.onEach { duration ->
             state = state.copy(duration = duration)
         }.launchIn(viewModelScope)
+
+        if (preferences.getBoolean(PREFERENCE_SHOW_GOALS_REMINDER, true)) {
+            viewModelScope.launch {
+                delay(2.seconds)
+                state = state.copy(showSetGoalsDialog = true)
+            }
+        }
 
         listenToWatchActions()
         startWeatherUpdates()
@@ -132,6 +144,24 @@ class ActivityViewModel @Inject constructor(
 
             ActivityAction.OnReloadWeather -> {
                 startWeatherUpdates()
+            }
+
+            is ActivityAction.OnTabChanged -> {
+                state = state.copy(selectedBottomSheetTab = action.tab)
+            }
+
+            ActivityAction.OpenGoals -> {
+                viewModelScope.launch {
+                    eventChannel.trySend(ActivityEvent.OpenGoals)
+                }
+            }
+
+            is ActivityAction.DismissGoalsDialog -> {
+                state = state.copy(showSetGoalsDialog = false)
+
+                if (action.doNotShowAgain) {
+                    preferences.edit { putBoolean(PREFERENCE_SHOW_GOALS_REMINDER, false) }
+                }
             }
 
             is ActivityAction.OnSelectMapType -> {

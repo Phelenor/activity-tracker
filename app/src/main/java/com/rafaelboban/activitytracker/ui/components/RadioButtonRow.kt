@@ -2,8 +2,8 @@ package com.rafaelboban.activitytracker.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,19 +14,19 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
 
 @Composable
-fun CheckboxRow(
-    checked: Boolean,
+fun RadioButtonRow(
+    selected: Boolean,
     text: String,
-    onCheckedChange: (Boolean) -> Unit,
+    onSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange
+        RadioButton(
+            selected = selected,
+            onClick = onSelected
         )
 
         Text(
@@ -43,10 +43,10 @@ fun CheckboxRow(
 @Composable
 private fun CheckboxRowPreview() {
     ActivityTrackerTheme {
-        CheckboxRow(
-            checked = true,
+        RadioButtonRow(
+            selected = true,
             text = "Hybrid Map",
-            onCheckedChange = {}
+            onSelected = {}
         )
     }
 }

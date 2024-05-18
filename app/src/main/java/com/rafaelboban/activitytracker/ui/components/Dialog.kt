@@ -51,10 +51,11 @@ fun DialogScaffold(
 
 @Composable
 fun DialogButtonRow(
-    actionText: String,
+    positiveText: String,
     onActionClick: () -> Unit,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
+    negativeText: String = "Cancel",
     actionEnabled: Boolean = true,
     actionButtonColor: Color = MaterialTheme.colorScheme.primaryContainer,
     actionButtonTextColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -64,7 +65,7 @@ fun DialogButtonRow(
         horizontalArrangement = Arrangement.End
     ) {
         ButtonPrimary(
-            text = "Cancel",
+            text = negativeText,
             onClick = onCancelClick,
             containerColor = Color.Transparent
         )
@@ -72,7 +73,7 @@ fun DialogButtonRow(
         Spacer(modifier = Modifier.width(8.dp))
 
         ButtonPrimary(
-            text = actionText,
+            text = positiveText,
             containerColor = actionButtonColor,
             textColor = actionButtonTextColor,
             enabled = actionEnabled,
@@ -122,7 +123,7 @@ fun InfoDialog(
         Spacer(modifier = Modifier.height(36.dp))
 
         DialogButtonRow(
-            actionText = actionText,
+            positiveText = actionText,
             actionButtonColor = actionButtonColor,
             actionButtonTextColor = actionButtonTextColor,
             onCancelClick = onDismissClick,
@@ -166,7 +167,7 @@ fun SelectMapTypeDialog(
             MapType.SATELLITE,
             MapType.TERRAIN
         ).forEach { type ->
-            CheckboxRow(
+            RadioButtonRow(
                 selected = type == mapType,
                 text = type.name.lowercase().capitalize(),
                 onSelected = { mapType = type }
@@ -176,11 +177,65 @@ fun SelectMapTypeDialog(
         Spacer(modifier = Modifier.height(16.dp))
 
         DialogButtonRow(
-            actionText = stringResource(id = R.string.confirm),
+            positiveText = stringResource(id = R.string.confirm),
             onCancelClick = onDismissClick,
             onActionClick = {
                 onConfirmClick(mapType)
                 onDismissClick()
+            }
+        )
+    }
+}
+
+@Composable
+fun SetActivityGoalsDialog(
+    onActionClick: () -> Unit,
+    onDismissClick: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var doNotShowAgain by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth()
+            .background(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surfaceBright)
+            .padding(24.dp)
+    ) {
+        Text(
+            text = "Set goals for this activity?",
+            style = Typography.displayLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "This will take you to goal setup.",
+            style = Typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CheckboxRow(
+            checked = doNotShowAgain,
+            onCheckedChange = { checked -> doNotShowAgain = checked },
+            text = "Don't show this reminder again"
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        DialogButtonRow(
+            positiveText = "Yes",
+            negativeText = "No",
+            onCancelClick = {
+                onDismissClick(doNotShowAgain)
+            },
+            onActionClick = {
+                onActionClick()
+                onDismissClick(doNotShowAgain)
             }
         )
     }
@@ -191,7 +246,7 @@ fun SelectMapTypeDialog(
 private fun DialogButtonRowPreview() {
     ActivityTrackerTheme {
         DialogButtonRow(
-            actionText = "Idemo",
+            positiveText = "Idemo",
             onActionClick = { },
             onCancelClick = { }
         )
@@ -222,6 +277,17 @@ private fun SelectMapTypeDialogPreview() {
             currentType = MapType.NORMAL,
             onDismissClick = {},
             onConfirmClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SetActivityGoalsDialogPreview() {
+    ActivityTrackerTheme {
+        SetActivityGoalsDialog(
+            onActionClick = {},
+            onDismissClick = {}
         )
     }
 }
