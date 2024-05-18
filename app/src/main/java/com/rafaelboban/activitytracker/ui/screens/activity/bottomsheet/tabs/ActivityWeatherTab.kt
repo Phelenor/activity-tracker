@@ -1,6 +1,7 @@
 package com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ import com.rafaelboban.activitytracker.network.model.weather.WeatherAlert
 import com.rafaelboban.activitytracker.network.model.weather.WeatherData
 import com.rafaelboban.activitytracker.network.model.weather.WeatherForecast
 import com.rafaelboban.activitytracker.network.model.weather.WeatherInfo
+import com.rafaelboban.activitytracker.ui.components.ButtonSecondary
 import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.components.WeatherIcon
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.WeatherForecastRow
@@ -38,73 +41,99 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ActivityWeatherTab(
-    weather: WeatherForecast?
+    weather: WeatherForecast?,
+    isLoading: Boolean,
+    onReloadClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        if (weather == null) {
-            LoadingIndicator(modifier = Modifier.fillMaxSize())
-        } else {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+    Box(modifier = Modifier.fillMaxWidth()) {
+        when {
+            weather != null -> {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        WeatherIcon(
-                            code = weather.current.info.first().icon,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(color = MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            WeatherIcon(
+                                code = weather.current.info.first().icon,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(color = MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+                            )
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                        Text(
-                            text = "${weather.current.temp.roundToInt()} \u00B0C",
-                            style = Typography.displayLarge
-                        )
+                            Text(
+                                text = "${weather.current.temp.roundToInt()} \u00B0C",
+                                style = Typography.displayLarge
+                            )
 
-                        Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.weight(1f))
 
-                        Text(
-                            style = Typography.labelLarge,
-                            text = buildAnnotatedString {
-                                append("Humidity: ")
+                            Text(
+                                style = Typography.labelLarge,
+                                text = buildAnnotatedString {
+                                    append("Humidity: ")
 
-                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 16.sp)) {
-                                    append("${weather.current.humidity.roundToInt()}%")
+                                    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 16.sp)) {
+                                        append("${weather.current.humidity.roundToInt()}%")
+                                    }
                                 }
-                            }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = weather.current.info.first().description.capitalize(),
+                            style = Typography.labelLarge
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    HorizontalDivider()
 
                     Text(
-                        text = weather.current.info.first().description.capitalize(),
-                        style = Typography.labelLarge
+                        text = "Forecast",
+                        style = Typography.displayLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+
+                    weather.hourly.forEach { weatherForHour ->
+                        WeatherForecastRow(weather = weatherForHour)
+                    }
+                }
+            }
+
+            isLoading.not() -> {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp, horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = "Weather fetch failed. Please try again.",
+                        style = Typography.labelLarge,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    ButtonSecondary(
+                        text = "Retry",
+                        onClick = onReloadClick
                     )
                 }
+            }
 
-                HorizontalDivider()
-
-                Text(
-                    text = "Forecast",
-                    style = Typography.displayLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-
-                weather.hourly.forEach { weatherForHour ->
-                    WeatherForecastRow(weather = weatherForHour)
-                }
+            else -> {
+                LoadingIndicator(modifier = Modifier.fillMaxSize())
             }
         }
     }
@@ -213,7 +242,9 @@ private fun ActivityWeatherTabPreview() {
 
     ActivityTrackerTheme {
         ActivityWeatherTab(
-            weather = weatherForecast
+            weather = weatherForecast,
+            isLoading = false,
+            onReloadClick = {}
         )
     }
 }

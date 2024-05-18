@@ -32,6 +32,7 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 fun ActivityBottomSheetContent(
     state: ActivityState,
     scrollState: ScrollState,
+    onLoadWeather: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(ActivityTabType.DETAILS) }
@@ -60,7 +61,7 @@ fun ActivityBottomSheetContent(
                     ActivityTabType.DETAILS -> ActivityDetailsTab(state = state)
                     ActivityTabType.HEART -> ActivityHeartRateTab(state = state)
                     ActivityTabType.GOALS -> Box {}
-                    ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather)
+                    ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather, isLoading = state.isWeatherLoading, onReloadClick = onLoadWeather)
                 }
             }
         }
@@ -73,7 +74,8 @@ private fun ActivityBottomSheetContentPreview() {
     ActivityTrackerTheme {
         ActivityBottomSheetContent(
             state = ActivityState(activityType = ActivityType.WALK),
-            scrollState = rememberScrollState()
+            scrollState = rememberScrollState(),
+            onLoadWeather = {}
         )
     }
 }

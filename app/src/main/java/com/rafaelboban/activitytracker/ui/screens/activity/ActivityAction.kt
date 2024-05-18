@@ -12,5 +12,6 @@ sealed interface ActivityAction {
     data object DiscardActivity : ActivityAction
     data object OnCameraLockToggle : ActivityAction
     data object OnOpenSelectMapType : ActivityAction
+    data object OnReloadWeather : ActivityAction
     data class OnSelectMapType(val type: MapType) : ActivityAction
 }

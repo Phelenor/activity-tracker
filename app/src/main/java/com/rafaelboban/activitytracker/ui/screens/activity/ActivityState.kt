@@ -19,7 +19,9 @@ data class ActivityState(
     val showSelectMapTypeDialog: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val maxSpeed: Float = Float.MIN_VALUE,
-    val activityType: ActivityType,
-    val startTimestamp: LocalDateTime? = null,
-    val weather: WeatherForecast? = null
+    val weather: WeatherForecast? = null,
+    val isWeatherLoading: Boolean = false,
+    val startTimestamp: Long? = null,
+    val endTimestamp: Long? = null,
+    val activityType: ActivityType
 )

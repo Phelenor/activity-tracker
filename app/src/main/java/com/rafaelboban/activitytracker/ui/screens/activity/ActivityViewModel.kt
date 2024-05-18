@@ -15,11 +15,11 @@ import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
-import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.time.Duration.Companion.minutes
@@ -49,6 +49,8 @@ class ActivityViewModel @Inject constructor(
 
     private val eventChannel = Channel<ActivityEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    private var weatherUpdateJob: Job? = null
 
     init {
         tracker.startTrackingLocation(activityType)
@@ -79,7 +81,7 @@ class ActivityViewModel @Inject constructor(
 
         when (action) {
             ActivityAction.OnStartClick -> {
-                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS, startTimestamp = LocalDateTime.now())
+                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS, startTimestamp = Instant.now().epochSecond)
                 tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
             }
@@ -97,7 +99,7 @@ class ActivityViewModel @Inject constructor(
             }
 
             ActivityAction.OnFinishClick -> {
-                state = state.copy(activityStatus = ActivityStatus.FINISHED)
+                state = state.copy(activityStatus = ActivityStatus.FINISHED, endTimestamp = Instant.now().epochSecond)
                 tracker.setIsTrackingActivity(false)
                 tracker.setActivityStatus(ActivityStatus.FINISHED)
                 tracker.stopTrackingLocation()
@@ -126,6 +128,10 @@ class ActivityViewModel @Inject constructor(
                 viewModelScope.launch {
                     eventChannel.trySend(ActivityEvent.NavigateBack)
                 }
+            }
+
+            ActivityAction.OnReloadWeather -> {
+                startWeatherUpdates()
             }
 
             is ActivityAction.OnSelectMapType -> {
@@ -175,7 +181,10 @@ class ActivityViewModel @Inject constructor(
     }
 
     private fun startWeatherUpdates() {
-        viewModelScope.launch {
+        state = state.copy(weather = null)
+
+        weatherUpdateJob?.cancel()
+        weatherUpdateJob = viewModelScope.launch {
             var canRetry = true
             var shouldRetry = false
 
@@ -189,10 +198,13 @@ class ActivityViewModel @Inject constructor(
                     lockCount++
                 }
 
+                state = state.copy(isWeatherLoading = true)
+
                 weatherRepository.getWeatherData(location.latitude.F, location.longitude.F).onSuccess {
-                    state = state.copy(weather = data.copy(hourly = data.hourly.take(5)))
+                    state = state.copy(weather = data.copy(hourly = data.hourly.take(5)), isWeatherLoading = false)
                     canRetry = true
                 }.onFailure {
+                    state = state.copy(isWeatherLoading = false)
                     shouldRetry = canRetry
                     canRetry = false
                 }

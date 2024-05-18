@@ -206,6 +206,7 @@ fun ActivityScreen(
                 ActivityBottomSheetContent(
                     state = state,
                     scrollState = scrollState,
+                    onLoadWeather = { onAction(ActivityAction.OnReloadWeather) },
                     modifier = Modifier.height(boxHeight * 0.6f)
                 )
             }
