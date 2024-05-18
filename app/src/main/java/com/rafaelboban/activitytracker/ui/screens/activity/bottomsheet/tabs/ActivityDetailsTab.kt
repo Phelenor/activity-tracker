@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityDetailsRow
+import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.convertSpeedToPace
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatDistanceDisplay
@@ -40,20 +41,31 @@ fun ActivityDetailsTab(
     val heartRatePoints = state.activityData.heartRatePoints
     val maxHeartRate = heartRatePoints.maxOfOrNull { it.heartRate } ?: 0
     val averageHeartRate = if (heartRatePoints.isNotEmpty()) (heartRatePoints.sumOf { it.heartRate } / heartRatePoints.size.F).roundToInt() else 0
+    val averageSpeed = (state.activityData.distanceMeters / ((state.duration.inWholeSeconds.F).takeIf { it > 0 } ?: 1f)) * 3.6f
 
     val distanceUnit = if (state.activityData.distanceMeters < 1000) "m" else "km"
     val elevationUnit = if (state.activityData.elevationGain < 1000) "m" else "km"
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    val speedPaceData = if (state.activityType.showPace) {
+        arrayOf(R.string.pace, "${convertSpeedToPace(state.activityData.speed)} min/km", Icons.Outlined.Speed, MaterialTheme.colorScheme.onBackground)
+    } else {
+        arrayOf(R.string.speed, "${state.activityData.speed.roundToDecimals(1)} km/h", Icons.Default.Speed, MaterialTheme.colorScheme.onBackground)
+    }
+
+    val averageSpeedPaceData = if (state.activityType.showPace) {
+        arrayOf(R.string.average_pace, "${convertSpeedToPace(averageSpeed)} min/km", Icons.Outlined.Speed, MaterialTheme.colorScheme.onBackground)
+    } else {
+        arrayOf(R.string.average_speed, "${averageSpeed.roundToDecimals(1)} km/h", Icons.Default.Speed, MaterialTheme.colorScheme.onBackground)
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
         listOfNotNull(
             arrayOf(R.string.duration, state.duration.formatElapsedTimeDisplay(), Icons.Default.Timer, MaterialTheme.colorScheme.onBackground),
             arrayOf(R.string.distance, "${formatDistanceDisplay(state.activityData.distanceMeters)} $distanceUnit", Icons.AutoMirrored.Filled.TrendingUp, MaterialTheme.colorScheme.onBackground),
-            arrayOf(R.string.speed, "${state.activityData.speed.roundToDecimals(1)} km/h", Icons.Default.Speed, MaterialTheme.colorScheme.onBackground),
-            arrayOf(R.string.pace, "${convertSpeedToPace(state.activityData.speed)} min/km", Icons.Outlined.Speed, MaterialTheme.colorScheme.onBackground),
+            speedPaceData.takeIf { state.activityStatus != ActivityStatus.FINISHED },
+            averageSpeedPaceData,
             arrayOf(R.string.elevation_gain, "${formatDistanceDisplay(state.activityData.elevationGain)} $elevationUnit", Icons.Outlined.Elevator, MaterialTheme.colorScheme.onBackground),
-            arrayOf(R.string.current_heartrate, "${state.activityData.currentHeartRate?.heartRate} bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.activityData.currentHeartRate != null },
+            arrayOf(R.string.current_heartrate, "${state.activityData.currentHeartRate?.heartRate} bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.activityData.currentHeartRate != null && state.activityStatus != ActivityStatus.FINISHED },
             arrayOf(R.string.average_heartrate, "$averageHeartRate bpm", Icons.TwoTone.Favorite, MaterialTheme.colorScheme.error).takeIf { state.activityData.currentHeartRate != null },
             arrayOf(R.string.max_heartrate, "$maxHeartRate bpm", Icons.Filled.Favorite, MaterialTheme.colorScheme.error).takeIf { state.activityData.currentHeartRate != null },
             arrayOf(R.string.calories_estimated, "${state.activityData.caloriesBurned} kcal", Icons.Filled.LocalFireDepartment, MaterialTheme.colorScheme.error).takeIf { state.activityData.caloriesBurned != null }

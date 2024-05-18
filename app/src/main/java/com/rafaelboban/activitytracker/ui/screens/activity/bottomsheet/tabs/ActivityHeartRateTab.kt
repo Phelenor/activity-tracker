@@ -34,6 +34,7 @@ import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityDetailsRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.HeartRateZoneProgressBar
 import com.rafaelboban.activitytracker.util.UserData
+import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
@@ -49,9 +50,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 @Composable
-fun ActivityHeartRateTab(
-    state: ActivityState
-) {
+fun ActivityHeartRateTab(state: ActivityState) {
     val heartRatePoints = state.activityData.heartRatePoints
 
     val currentHeartRate = state.activityData.currentHeartRate?.heartRate
@@ -68,7 +67,7 @@ fun ActivityHeartRateTab(
             modifier = Modifier.fillMaxWidth()
         ) {
             listOfNotNull(
-                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error),
+                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.activityStatus != ActivityStatus.FINISHED },
                 arrayOf(R.string.average_heartrate, "$averageHeartRate bpm", Icons.TwoTone.Favorite, MaterialTheme.colorScheme.error),
                 arrayOf(R.string.max_heartrate, "$maxHeartRate bpm", Icons.Filled.Favorite, MaterialTheme.colorScheme.error)
             ).forEach { (labelRes, value, icon, tint) ->
@@ -79,31 +78,44 @@ fun ActivityHeartRateTab(
                     iconTint = tint as Color
                 )
             }
-            
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 16.dp)
-            ) {
+
+            if (state.activityStatus == ActivityStatus.FINISHED) {
                 Text(
-                    text = "Current HR Zone:",
+                    text = "HR zone analysis:",
                     style = Typography.displayLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 16.dp)
                 )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Current HR Zone:",
+                        style = Typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                Text(
-                    text = "${zoneData.zone.ordinal} (${zoneData.zone.label})",
-                    style = Typography.labelLarge,
-                    color = zoneData.zone.color,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                    Text(
+                        text = "${zoneData.zone.ordinal} (${zoneData.zone.label})",
+                        style = Typography.labelLarge,
+                        color = zoneData.zone.color,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             zoneDistribution?.let { distribution ->

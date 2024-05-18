@@ -11,5 +11,8 @@ fun <T> List<List<T>>.replaceLastSublist(new: List<T>): List<List<T>> {
 val Int.F: Float
     get() = toFloat()
 
+val Long.F: Float
+    get() = toFloat()
+
 val Double.F: Float
     get() = toFloat()
