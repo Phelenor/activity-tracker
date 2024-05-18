@@ -31,6 +31,7 @@ fun BirthDatePicker(
             onDismissRequest = onDismiss,
             confirmButton = {
                 ButtonPrimary(
+                    modifier = Modifier.padding(end = 8.dp),
                     text = stringResource(id = R.string.confirm),
                     enabled = dateState.selectedDateMillis != null && ((dateState.selectedDateMillis ?: 0) / 1000) != initialSelectedTimestamp,
                     onClick = {
