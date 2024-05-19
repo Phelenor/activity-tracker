@@ -31,6 +31,7 @@ fun ActivityBottomSheetContent(
     selectedTab: ActivityTabType,
     onTabSelected: (ActivityTabType) -> Unit,
     onLoadWeather: () -> Unit,
+    onAddGoal: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(selectedTab) {
@@ -56,7 +57,7 @@ fun ActivityBottomSheetContent(
                 when (tab) {
                     ActivityTabType.DETAILS -> ActivityDetailsTab(state = state)
                     ActivityTabType.HEART -> ActivityHeartRateTab(state = state)
-                    ActivityTabType.GOALS -> ActivityGoalsTab(state = state)
+                    ActivityTabType.GOALS -> ActivityGoalsTab(state = state, showAddGoalDialog = onAddGoal)
                     ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather, isLoading = state.isWeatherLoading, onReloadClick = onLoadWeather)
                 }
             }
@@ -73,7 +74,8 @@ private fun ActivityBottomSheetContentPreview() {
             scrollState = rememberScrollState(),
             selectedTab = ActivityTabType.DETAILS,
             onTabSelected = {},
-            onLoadWeather = {}
+            onLoadWeather = {},
+            onAddGoal = {}
         )
     }
 }

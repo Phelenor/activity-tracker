@@ -15,6 +15,7 @@ sealed interface ActivityAction {
     data object OnOpenSelectMapType : ActivityAction
     data object OnReloadWeather : ActivityAction
     data object OpenGoals : ActivityAction
+    data object OnAddGoalClick : ActivityAction
     data class OnTabChanged(val tab: ActivityTabType) : ActivityAction
     data class DismissGoalsDialog(val doNotShowAgain: Boolean) : ActivityAction
     data class OnSelectMapType(val type: MapType) : ActivityAction

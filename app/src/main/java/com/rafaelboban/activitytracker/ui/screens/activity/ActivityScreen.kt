@@ -71,9 +71,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.ActivityData
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
+import com.rafaelboban.activitytracker.ui.components.AddActivityGoalDialog
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
@@ -99,6 +101,7 @@ import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Montserrat
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
 
@@ -178,7 +181,7 @@ fun ActivityScreen(
     }
 
     DialogScaffold(
-        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showSetGoalsDialog,
+        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showSetGoalsDialog || state.showAddGoalDialog,
         onDismiss = { onAction(ActivityAction.DismissDialogs) }
     ) {
         when {
@@ -211,6 +214,14 @@ fun ActivityScreen(
                     }
                 )
             }
+
+            state.showAddGoalDialog -> {
+                AddActivityGoalDialog(
+                    goalTypes = (ActivityGoalType.entries - state.goals.map { it.goal.type }.toSet()).toImmutableList(),
+                    onDismissClick = { onAction(ActivityAction.DismissDialogs) },
+                    onActionClick = { }
+                )
+            }
         }
     }
 
@@ -233,6 +244,7 @@ fun ActivityScreen(
                     selectedTab = state.selectedBottomSheetTab,
                     onTabSelected = { tab -> onAction(ActivityAction.OnTabChanged(tab)) },
                     onLoadWeather = { onAction(ActivityAction.OnReloadWeather) },
+                    onAddGoal = { onAction(ActivityAction.OnAddGoalClick) },
                     modifier = Modifier.height(boxHeight * 0.6f)
                 )
             }

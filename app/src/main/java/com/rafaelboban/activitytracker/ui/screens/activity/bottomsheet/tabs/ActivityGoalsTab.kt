@@ -25,7 +25,8 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun ActivityGoalsTab(
-    state: ActivityState
+    state: ActivityState,
+    showAddGoalDialog: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         state.goals.forEach { goalProgress ->
@@ -48,7 +49,7 @@ fun ActivityGoalsTab(
             ButtonSecondary(
                 text = "Add",
                 icon = Icons.Outlined.Add,
-                onClick = {}
+                onClick = showAddGoalDialog
             )
         }
     }
@@ -59,6 +60,7 @@ fun ActivityGoalsTab(
 private fun ActivityGoalsTabPreview() {
     ActivityTrackerTheme {
         ActivityGoalsTab(
+            showAddGoalDialog = {},
             state = ActivityState(
                 type = ActivityType.RUN,
                 goals = List(5) {

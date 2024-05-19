@@ -128,7 +128,9 @@ class ActivityViewModel @Inject constructor(
             ActivityAction.DismissDialogs -> {
                 state = state.copy(
                     showDiscardDialog = false,
-                    showSelectMapTypeDialog = false
+                    showSelectMapTypeDialog = false,
+                    showAddGoalDialog = false,
+                    showSetGoalsDialog = false
                 )
             }
 
@@ -158,6 +160,10 @@ class ActivityViewModel @Inject constructor(
                 viewModelScope.launch {
                     eventChannel.trySend(ActivityEvent.OpenGoals)
                 }
+            }
+
+            ActivityAction.OnAddGoalClick -> {
+                state = state.copy(showAddGoalDialog = true)
             }
 
             is ActivityAction.DismissGoalsDialog -> {
