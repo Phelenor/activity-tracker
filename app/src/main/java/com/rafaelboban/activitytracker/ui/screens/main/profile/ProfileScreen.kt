@@ -277,7 +277,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.change_name),
             onClick = { onAction(ProfileAction.OnChangeNameClick) },
-            imageVector = Icons.Filled.Edit,
+            icon = Icons.Filled.Edit,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
@@ -286,7 +286,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.sign_out),
             onClick = { onAction(ProfileAction.OnLogoutClick) },
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
+            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
@@ -295,7 +295,7 @@ private fun ProfileScreen(
         ButtonSecondary(
             text = stringResource(id = R.string.delete_account),
             onClick = { onAction(ProfileAction.OnDeleteAccountClick) },
-            imageVector = Icons.Default.Delete,
+            icon = Icons.Default.Delete,
             containerColor = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.onError,
             modifier = Modifier

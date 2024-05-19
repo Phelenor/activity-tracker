@@ -11,5 +11,7 @@ data class ActivityData(
     val locations: ImmutableList<ImmutableList<com.rafaelboban.activitytracker.model.location.LocationTimestamp>> = persistentListOf(),
     val heartRatePoints: ImmutableList<HeartRatePoint> = persistentListOf(),
     val currentHeartRate: HeartRatePoint? = null,
-    val caloriesBurned: Int? = null
+    val caloriesBurned: Int? = null,
+    val startTimestamp: Long? = null,
+    val endTimestamp: Long? = null
 )

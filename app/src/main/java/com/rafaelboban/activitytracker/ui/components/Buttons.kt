@@ -31,7 +31,7 @@ fun ButtonSecondary(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    imageVector: ImageVector? = null,
+    icon: ImageVector? = null,
     containerColor: Color? = null,
     textColor: Color? = null
 ) {
@@ -50,10 +50,10 @@ fun ButtonSecondary(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            imageVector?.let {
+            icon?.let {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = imageVector,
+                    imageVector = icon,
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -134,7 +134,7 @@ fun OutlinedButtonPrimary(
 @Composable
 private fun ButtonWithIconPreview() {
     ActivityTrackerTheme {
-        ButtonSecondary(text = "LOGOUT", onClick = { /*TODO*/ }, imageVector = Icons.Default.Delete)
+        ButtonSecondary(text = "LOGOUT", onClick = { /*TODO*/ }, icon = Icons.Default.Delete)
     }
 }
 

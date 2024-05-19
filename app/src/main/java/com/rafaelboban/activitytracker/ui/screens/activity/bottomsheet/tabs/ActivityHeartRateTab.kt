@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.twotone.Favorite
@@ -67,7 +65,7 @@ fun ActivityHeartRateTab(state: ActivityState) {
             modifier = Modifier.fillMaxWidth()
         ) {
             listOfNotNull(
-                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.activityStatus != ActivityStatus.FINISHED },
+                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.status != ActivityStatus.FINISHED },
                 arrayOf(R.string.average_heartrate, "$averageHeartRate bpm", Icons.TwoTone.Favorite, MaterialTheme.colorScheme.error),
                 arrayOf(R.string.max_heartrate, "$maxHeartRate bpm", Icons.Filled.Favorite, MaterialTheme.colorScheme.error)
             ).forEach { (labelRes, value, icon, tint) ->
@@ -79,7 +77,7 @@ fun ActivityHeartRateTab(state: ActivityState) {
                 )
             }
 
-            if (state.activityStatus == ActivityStatus.FINISHED) {
+            if (state.status == ActivityStatus.FINISHED) {
                 Text(
                     text = "HR zone analysis:",
                     style = Typography.displayLarge,
@@ -162,7 +160,7 @@ private fun ActivityHeartRateTabPreview() {
     ActivityTrackerTheme {
         ActivityHeartRateTab(
             state = ActivityState(
-                activityType = ActivityType.RUN,
+                type = ActivityType.RUN,
                 activityData = ActivityData(
                     heartRatePoints = persistentListOf(HeartRatePoint(23, Duration.ZERO)),
                     currentHeartRate = HeartRatePoint(120, Duration.ZERO)

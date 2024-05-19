@@ -8,7 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.di.PreferencesStandard
-import com.rafaelboban.activitytracker.network.model.PREFERENCE_SHOW_GOALS_REMINDER
+import com.rafaelboban.activitytracker.network.model.goals.PREFERENCE_SHOW_GOALS_REMINDER
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
@@ -22,6 +22,7 @@ import com.rafaelboban.core.shared.utils.F
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +32,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.time.Duration.Companion.minutes
@@ -47,9 +47,9 @@ class ActivityViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val activityType = checkNotNull(savedStateHandle.get<Int>("activityTypeOrdinal")).let { ordinal -> ActivityType.entries[ordinal] }
+    private val type = checkNotNull(savedStateHandle.get<Int>("activityTypeOrdinal")).let { ordinal -> ActivityType.entries[ordinal] }
 
-    var state by mutableStateOf(ActivityState(activityStatus = tracker.activityStatus.value, activityType = activityType))
+    var state by mutableStateOf(ActivityState(status = tracker.status.value, type = type))
         private set
 
     private val eventChannel = Channel<ActivityEvent>()
@@ -58,13 +58,13 @@ class ActivityViewModel @Inject constructor(
     private var weatherUpdateJob: Job? = null
 
     init {
-        tracker.startTrackingLocation(activityType)
+        tracker.startTrackingLocation(type)
 
         tracker.currentLocation.onEach { currentLocation ->
             state = state.copy(currentLocation = currentLocation?.location)
         }.launchIn(viewModelScope)
 
-        tracker.activityData.onEach { data ->
+        tracker.data.onEach { data ->
             state = state.copy(
                 activityData = data,
                 maxSpeed = max(state.maxSpeed, data.speed).coerceAtMost(state.activityData.speed)
@@ -74,6 +74,10 @@ class ActivityViewModel @Inject constructor(
         tracker.duration.onEach { duration ->
             state = state.copy(duration = duration)
         }.launchIn(viewModelScope)
+
+        tracker.goals.onEach { goals ->
+            state = state.copy(goals = goals.toImmutableList())
+        }
 
         if (preferences.getBoolean(PREFERENCE_SHOW_GOALS_REMINDER, true)) {
             viewModelScope.launch {
@@ -93,32 +97,32 @@ class ActivityViewModel @Inject constructor(
 
         when (action) {
             ActivityAction.OnStartClick -> {
-                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS, startTimestamp = Instant.now().epochSecond)
+                state = state.copy(status = ActivityStatus.IN_PROGRESS)
                 tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
             }
 
             ActivityAction.OnPauseClick -> {
-                state = state.copy(activityStatus = ActivityStatus.PAUSED)
+                state = state.copy(status = ActivityStatus.PAUSED)
                 tracker.setIsTrackingActivity(false)
                 tracker.setActivityStatus(ActivityStatus.PAUSED)
             }
 
             ActivityAction.OnResumeClick -> {
-                state = state.copy(activityStatus = ActivityStatus.IN_PROGRESS)
+                state = state.copy(status = ActivityStatus.IN_PROGRESS)
                 tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
             }
 
             ActivityAction.OnFinishClick -> {
-                state = state.copy(activityStatus = ActivityStatus.FINISHED, endTimestamp = Instant.now().epochSecond)
+                state = state.copy(status = ActivityStatus.FINISHED)
                 tracker.setIsTrackingActivity(false)
                 tracker.setActivityStatus(ActivityStatus.FINISHED)
                 tracker.stopTrackingLocation()
             }
 
             ActivityAction.OnBackClick -> {
-                state = state.copy(showDiscardDialog = state.activityStatus.isActive)
+                state = state.copy(showDiscardDialog = state.status.isActive)
             }
 
             ActivityAction.DismissDialogs -> {
@@ -179,7 +183,7 @@ class ActivityViewModel @Inject constructor(
                     MessagingAction.Resume -> onAction(ActivityAction.OnResumeClick, fromWatch = true)
                     MessagingAction.Start -> onAction(ActivityAction.OnStartClick, fromWatch = true)
                     MessagingAction.ConnectionRequest -> {
-                        if (state.activityStatus.isActive) {
+                        if (state.status.isActive) {
                             watchConnector.sendMessageToWatch(MessagingAction.Start)
                         }
                     }

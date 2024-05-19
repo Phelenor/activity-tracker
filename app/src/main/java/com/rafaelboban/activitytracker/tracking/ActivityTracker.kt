@@ -4,6 +4,7 @@ package com.rafaelboban.activitytracker.tracking
 
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
+import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -43,17 +45,20 @@ class ActivityTracker(
     private val watchConnector: PhoneToWatchConnector
 ) {
 
-    private val _activityType = MutableStateFlow<ActivityType?>(null)
-    val activityType = _activityType.asStateFlow()
+    private val _type = MutableStateFlow<ActivityType?>(null)
+    val type = _type.asStateFlow()
 
-    private val _activityData = MutableStateFlow(ActivityData())
-    val activityData = _activityData.asStateFlow()
+    private val _data = MutableStateFlow(ActivityData())
+    val data = _data.asStateFlow()
 
     private val _duration = MutableStateFlow(Duration.ZERO)
     val duration = _duration.asStateFlow()
 
-    private val _activityStatus = MutableStateFlow(ActivityStatus.NOT_STARTED)
-    val activityStatus = _activityStatus.asStateFlow()
+    private val _status = MutableStateFlow(ActivityStatus.NOT_STARTED)
+    val status = _status.asStateFlow()
+
+    private val _goals = MutableStateFlow(emptyList<ActivityGoalProgress>())
+    val goals = _goals.asStateFlow()
 
     private val isTrackingActivity = MutableStateFlow(false)
     private val isTrackingLocation = MutableStateFlow(false)
@@ -67,7 +72,7 @@ class ActivityTracker(
             }
         }.onEach { location ->
             if (location.speed != null && !isTrackingActivity.value) {
-                _activityData.update { data ->
+                _data.update { data ->
                     data.copy(
                         speed = location.speed
                     )
@@ -102,7 +107,7 @@ class ActivityTracker(
     init {
         isTrackingActivity.onEach { isTracking ->
             if (isTracking.not()) {
-                _activityData.update { data ->
+                _data.update { data ->
                     data.copy(locations = (data.locations + listOf(persistentListOf())).toImmutableList())
                 }
             }
@@ -114,7 +119,7 @@ class ActivityTracker(
 
         heartRates.onEach { heartRates ->
             if (heartRates.isNotEmpty()) {
-                _activityData.update { data ->
+                _data.update { data ->
                     data.copy(
                         currentHeartRate = heartRates.last(),
                         heartRatePoints = if (isTrackingActivity.value) {
@@ -129,7 +134,7 @@ class ActivityTracker(
 
         calories.filterNotNull()
             .onEach { calories ->
-                _activityData.update { data ->
+                _data.update { data ->
                     data.copy(caloriesBurned = calories)
                 }
             }.launchIn(applicationScope)
@@ -141,7 +146,7 @@ class ActivityTracker(
                     emit(location)
                 } else {
                     if (location.speed == null) {
-                        _activityData.update { data ->
+                        _data.update { data ->
                             data.copy(speed = 0f)
                         }
                     }
@@ -152,7 +157,7 @@ class ActivityTracker(
                     durationTimestamp = duration
                 )
             }.map { location ->
-                _activityData.update { data ->
+                _data.update { data ->
                     val currentSpeed = location.location.speed ?: Float.MAX_VALUE
                     val distanceFromLastLocation = data.locations.lastOrNull()?.lastOrNull()?.latLong?.distanceTo(location.latLong) ?: Float.MAX_VALUE
                     val shouldSaveLocation = currentSpeed > 0.8 && distanceFromLastLocation > 1
@@ -179,21 +184,21 @@ class ActivityTracker(
             watchConnector.sendMessageToWatch(MessagingAction.DurationUpdate(duration))
         }.launchIn(applicationScope)
 
-        activityData
+        data
             .map { it.distanceMeters }
             .distinctUntilChanged()
             .onEach { distance ->
                 watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(distance))
             }.launchIn(applicationScope)
 
-        activityData
+        data
             .map { it.speed }
             .distinctUntilChanged()
             .onEach { speed ->
                 watchConnector.sendMessageToWatch(MessagingAction.SpeedUpdate(speed))
             }.launchIn(applicationScope)
 
-        _activityType
+        _type
             .onEach { type ->
                 watchConnector.sendMessageToWatch(MessagingAction.SetActivityData(type, UserData.user?.age))
             }.launchIn(applicationScope)
@@ -204,11 +209,30 @@ class ActivityTracker(
     }
 
     fun setActivityStatus(status: ActivityStatus) {
-        _activityStatus.value = status
+        _status.value = status
+
+        when (status) {
+            ActivityStatus.IN_PROGRESS -> {
+                val wasNotStarted = _data.value.startTimestamp == null
+                if (wasNotStarted) {
+                    _data.update { data ->
+                        data.copy(startTimestamp = Instant.now().epochSecond)
+                    }
+                }
+            }
+
+            ActivityStatus.FINISHED -> {
+                _data.update { data ->
+                    data.copy(endTimestamp = Instant.now().epochSecond)
+                }
+            }
+
+            else -> Unit
+        }
     }
 
     fun startTrackingLocation(type: ActivityType) {
-        _activityType.value = type
+        _type.value = type
         isTrackingLocation.value = true
         watchConnector.setCanTrack(true)
     }
@@ -223,8 +247,8 @@ class ActivityTracker(
         setIsTrackingActivity(false)
         setActivityStatus(ActivityStatus.NOT_STARTED)
 
-        _activityType.value = null
+        _type.value = null
         _duration.value = Duration.ZERO
-        _activityData.value = ActivityData()
+        _data.value = ActivityData()
     }
 }

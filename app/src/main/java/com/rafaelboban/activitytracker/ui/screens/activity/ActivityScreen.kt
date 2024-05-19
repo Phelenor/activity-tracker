@@ -54,7 +54,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -124,7 +123,7 @@ fun ActivityScreenRoot(
         }
     }
 
-    BackHandler(enabled = viewModel.state.activityStatus.isActive) {
+    BackHandler(enabled = viewModel.state.status.isActive) {
         viewModel.onAction(ActivityAction.OnBackClick)
     }
 
@@ -140,7 +139,7 @@ fun ActivityScreenRoot(
         },
         onAction = { action ->
             if (action == ActivityAction.OnBackClick) {
-                if (viewModel.state.activityStatus.isActive.not()) {
+                if (viewModel.state.status.isActive.not()) {
                     navigateUp()
                 }
             }
@@ -168,12 +167,12 @@ fun ActivityScreen(
         }
     }
 
-    LaunchedEffect(state.activityStatus) {
-        if (state.activityStatus == ActivityStatus.IN_PROGRESS && ActivityTrackerService.isActive.not()) {
+    LaunchedEffect(state.status) {
+        if (state.status == ActivityStatus.IN_PROGRESS && ActivityTrackerService.isActive.not()) {
             toggleTrackerService(true)
         }
 
-        if (state.activityStatus == ActivityStatus.FINISHED && ActivityTrackerService.isActive) {
+        if (state.status == ActivityStatus.FINISHED && ActivityTrackerService.isActive) {
             toggleTrackerService(false)
         }
     }
@@ -254,9 +253,9 @@ fun ActivityScreen(
                         }
                 ) {
                     ActivityTopAppBar(
-                        activityType = state.activityType,
+                        activityType = state.type,
                         onBackClick = { onAction(ActivityAction.OnBackClick) },
-                        gpsOk = if (state.activityStatus != ActivityStatus.FINISHED) state.currentLocation != null else null
+                        gpsOk = if (state.status != ActivityStatus.FINISHED) state.currentLocation != null else null
                     )
 
                     Row(
@@ -284,7 +283,7 @@ fun ActivityScreen(
 
                         VerticalDivider(modifier = Modifier.height(24.dp))
 
-                        if (state.activityType.showPace) {
+                        if (state.type.showPace) {
                             ActivityDataColumn(
                                 modifier = Modifier.weight(1.2f),
                                 title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
@@ -309,7 +308,7 @@ fun ActivityScreen(
                     locations = state.activityData.locations,
                     cameraLocked = state.mapCameraLocked,
                     mapType = state.mapType,
-                    activityType = state.activityType,
+                    activityType = state.type,
                     maxSpeed = state.maxSpeed,
                     modifier = Modifier.constrainAs(map) {
                         top.linkTo(infoCard.bottom, margin = (-16).dp)
@@ -319,9 +318,9 @@ fun ActivityScreen(
                     }
                 )
 
-                if (state.activityStatus != ActivityStatus.FINISHED) {
+                if (state.status != ActivityStatus.FINISHED) {
                     AnimatedContent(
-                        targetState = state.activityStatus,
+                        targetState = state.status,
                         label = "controls",
                         transitionSpec = {
                             slideInVertically(
@@ -427,7 +426,7 @@ fun ActivityScreen(
                 }
 
                 state.activityData.currentHeartRate
-                    ?.takeIf { state.activityStatus.isActive }
+                    ?.takeIf { state.status.isActive }
                     ?.let { point ->
                         val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
 
@@ -483,8 +482,8 @@ private fun ActivityScreenPreview() {
             toggleTrackerService = {},
             scaffoldState = rememberBottomSheetScaffoldState(),
             state = ActivityState(
-                activityStatus = ActivityStatus.IN_PROGRESS,
-                activityType = ActivityType.WALK,
+                status = ActivityStatus.IN_PROGRESS,
+                type = ActivityType.WALK,
                 duration = Duration.parse("1h 30m 52s"),
                 activityData = ActivityData(
                     distanceMeters = 1925,

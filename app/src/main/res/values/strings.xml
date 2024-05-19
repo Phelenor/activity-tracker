@@ -54,12 +54,16 @@
     <string name="goals">Goals</string>
     <string name="weather">Weather</string>
     <string name="elevation_gain">Elevation gain</string>
-    <string name="current_heartrate">Current heartrate</string>
-    <string name="average_heartrate">Average heartrate</string>
-    <string name="max_heartrate">Max. heartrate</string>
+    <string name="current_heartrate">Current heart rate</string>
+    <string name="average_heartrate">Average heart rate</string>
+    <string name="avg_heartrate">Avg. heart rate</string>
+    <string name="max_heartrate">Max. heart rate</string>
     <string name="calories_estimated">Calories (estimated)</string>
     <string name="average_pace">Average pace</string>
+    <string name="avg_pace">Avg. pace</string>
     <string name="average_speed">Average speed</string>
+    <string name="avg_speed">Avg. speed</string>
     <string name="calories">Calories</string>
-    <string name="duration_pct_in_zone">Duration % in HR zone</string>
+    <string name="duration_pct_in_zone">% in HR zone</string>
+    <string name="duration_pct_above_below_zone">% above/below HR zone</string>
 </resources>

@@ -54,7 +54,7 @@ class ActivityTrackerService : LifecycleService() {
         createNotificationChannel()
 
         val activityIntent = Intent(applicationContext, MainActivity::class.java).apply {
-            data = "activity_tracker://current_activity/${tracker.activityType.value?.ordinal}".toUri()
+            data = "activity_tracker://current_activity/${tracker.type.value?.ordinal}".toUri()
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
 
@@ -91,7 +91,7 @@ class ActivityTrackerService : LifecycleService() {
     private fun startNotificationUpdates() {
         combine(
             tracker.duration,
-            tracker.activityData
+            tracker.data
         ) { duration, data ->
             val distanceUnit = if (data.distanceMeters < 1000) "m" else "km"
             notificationBuilder.setContentText("${duration.formatElapsedTimeDisplay()} | ${ActivityDataFormatter.formatDistanceDisplay(data.distanceMeters)} $distanceUnit")

@@ -31,7 +31,7 @@ object ActivityDataFormatter {
     }
 
     fun convertSpeedToPace(speed: Float): String {
-        if (speed < 0.8f) return "-"
+        if (speed < 2f) return "-"
 
         val pace = 60f / speed
         val minutes = pace.toInt()

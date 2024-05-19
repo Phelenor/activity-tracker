@@ -3,7 +3,6 @@ package com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,6 +18,7 @@ import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityChipRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityDetailsTab
+import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityGoalsTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityHeartRateTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityWeatherTab
 import com.rafaelboban.core.shared.model.ActivityType
@@ -58,7 +56,7 @@ fun ActivityBottomSheetContent(
                 when (tab) {
                     ActivityTabType.DETAILS -> ActivityDetailsTab(state = state)
                     ActivityTabType.HEART -> ActivityHeartRateTab(state = state)
-                    ActivityTabType.GOALS -> Box {}
+                    ActivityTabType.GOALS -> ActivityGoalsTab(state = state)
                     ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather, isLoading = state.isWeatherLoading, onReloadClick = onLoadWeather)
                 }
             }
@@ -71,7 +69,7 @@ fun ActivityBottomSheetContent(
 private fun ActivityBottomSheetContentPreview() {
     ActivityTrackerTheme {
         ActivityBottomSheetContent(
-            state = ActivityState(activityType = ActivityType.WALK),
+            state = ActivityState(type = ActivityType.WALK),
             scrollState = rememberScrollState(),
             selectedTab = ActivityTabType.DETAILS,
             onTabSelected = {},
