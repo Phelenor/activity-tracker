@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.R
@@ -21,8 +25,10 @@ import com.rafaelboban.activitytracker.network.model.goals.GoalValueComparisonTy
 import com.rafaelboban.activitytracker.ui.components.ButtonSecondary
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityGoalProgressRow
+import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
@@ -34,16 +40,18 @@ fun ActivityGoalsTab(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         state.goals.forEach { goalProgress ->
-            ActivityGoalProgressRow(
-                goalProgress = goalProgress,
-                activityStatus = state.status,
-                onRemoveClick = onRemoveGoal
-            )
+            key(goalProgress.goal.type) {
+                ActivityGoalProgressRow(
+                    goalProgress = goalProgress,
+                    activityStatus = state.status,
+                    onRemoveClick = onRemoveGoal
+                )
+            }
 
             HorizontalDivider(modifier = Modifier.padding(8.dp))
         }
 
-        if (showAddButton) {
+        if (showAddButton && state.status == ActivityStatus.NOT_STARTED) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -54,6 +62,22 @@ fun ActivityGoalsTab(
                     text = stringResource(R.string.add),
                     icon = Icons.Outlined.Add,
                     onClick = showAddGoalDialog
+                )
+            }
+        }
+
+        if (state.status == ActivityStatus.IN_PROGRESS) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Goal progress updates every 5 seconds.",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = Typography.labelMedium,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -69,6 +93,7 @@ private fun ActivityGoalsTabPreview() {
             showAddGoalDialog = {},
             onRemoveGoal = {},
             state = ActivityState(
+                status = ActivityStatus.IN_PROGRESS,
                 type = ActivityType.RUN,
                 goals = List(5) {
                     ActivityGoalProgress(

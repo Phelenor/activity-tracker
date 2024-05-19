@@ -329,7 +329,7 @@ private fun NumberPicker(
             onValueChange = {
                 if (it.toFloatOrNull() != null || it.isBlank()) {
                     text = it
-                    if (isValid(it)) {
+                    if (isValid(it) && it.toFloatOrNull() != null) {
                         onNumber(checkNotNull(it.toFloatOrNull()))
                     }
                 }
@@ -376,7 +376,7 @@ private fun NumberPickerWithComparisonType(
             onValueChange = {
                 if (it.toFloatOrNull() != null || it.isBlank()) {
                     text = it
-                    if (isValid(it)) {
+                    if (isValid(it) && it.toFloatOrNull() != null) {
                         onConfirm(checkNotNull(it.toFloatOrNull()), selectedType)
                     }
                 }

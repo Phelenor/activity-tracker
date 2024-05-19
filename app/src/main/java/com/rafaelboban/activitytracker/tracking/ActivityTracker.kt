@@ -7,6 +7,7 @@ import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoal
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
+import com.rafaelboban.activitytracker.network.model.goals.GoalValueComparisonType
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
@@ -16,11 +17,17 @@ import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.model.HeartRatePoint
+import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
+import com.rafaelboban.core.shared.utils.F
+import com.rafaelboban.core.shared.utils.HeartRateZone
+import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.rafaelboban.core.shared.utils.replaceLastSublist
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,12 +44,14 @@ import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class ActivityTracker(
-    applicationScope: CoroutineScope,
+    private val applicationScope: CoroutineScope,
     private val locationObserver: LocationObserver,
     private val watchConnector: PhoneToWatchConnector
 ) {
@@ -64,6 +73,8 @@ class ActivityTracker(
 
     private val isTrackingActivity = MutableStateFlow(false)
     private val isTrackingLocation = MutableStateFlow(false)
+
+    private var goalProgressUpdateJob: Job? = null
 
     val currentLocation = isTrackingLocation
         .flatMapLatest { isObservingLocation ->
@@ -186,24 +197,21 @@ class ActivityTracker(
             watchConnector.sendMessageToWatch(MessagingAction.DurationUpdate(duration))
         }.launchIn(applicationScope)
 
-        data
-            .map { it.distanceMeters }
+        data.map { it.distanceMeters }
             .distinctUntilChanged()
             .onEach { distance ->
                 watchConnector.sendMessageToWatch(MessagingAction.DistanceUpdate(distance))
             }.launchIn(applicationScope)
 
-        data
-            .map { it.speed }
+        data.map { it.speed }
             .distinctUntilChanged()
             .onEach { speed ->
                 watchConnector.sendMessageToWatch(MessagingAction.SpeedUpdate(speed))
             }.launchIn(applicationScope)
 
-        _type
-            .onEach { type ->
-                watchConnector.sendMessageToWatch(MessagingAction.SetActivityData(type, UserData.user?.age))
-            }.launchIn(applicationScope)
+        _type.onEach { type ->
+            watchConnector.sendMessageToWatch(MessagingAction.SetActivityData(type, UserData.user?.age))
+        }.launchIn(applicationScope)
     }
 
     fun setIsTrackingActivity(active: Boolean) {
@@ -240,11 +248,17 @@ class ActivityTracker(
                 currentValue = 0f
             )
         }
+
+        startGoalProgressUpdates()
     }
 
     fun removeGoal(goalType: ActivityGoalType) {
         _goals.update { currentGoals ->
             currentGoals.filterNot { it.goal.type == goalType }
+        }
+
+        if (_goals.value.isEmpty()) {
+            goalProgressUpdateJob?.cancel()
         }
     }
 
@@ -267,5 +281,54 @@ class ActivityTracker(
         _type.value = null
         _duration.value = Duration.ZERO
         _data.value = ActivityData()
+    }
+
+    private fun startGoalProgressUpdates() {
+        goalProgressUpdateJob?.cancel()
+        goalProgressUpdateJob = applicationScope.launch {
+            while (isActive) {
+                val distribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(heartRates.value, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, _duration.value)
+
+                _goals.update {
+                    goals.value.map { it.goal }.map { goal ->
+                        ActivityGoalProgress(
+                            goal = goal,
+                            currentValue = when (goal.type) {
+                                ActivityGoalType.DISTANCE -> _data.value.distanceMeters / 1000f
+                                ActivityGoalType.DURATION -> _duration.value.inWholeSeconds.F
+                                ActivityGoalType.CALORIES -> calories.value?.F ?: 0f
+                                ActivityGoalType.AVG_HEART_RATE -> if (heartRates.value.isEmpty()) 0f else heartRates.value.map { it.heartRate }.average().F
+                                ActivityGoalType.AVG_SPEED -> if (_duration.value == Duration.ZERO) 0f else (_data.value.distanceMeters / 1000f) / (_duration.value.inWholeSeconds / 3600f)
+                                ActivityGoalType.AVG_PACE -> if (_duration.value == Duration.ZERO) 0f else 60f / (_data.value.distanceMeters / 1000f) / (_duration.value.inWholeSeconds / 3600f)
+                                ActivityGoalType.IN_HR_ZONE -> {
+                                    goal.label?.toInt()?.let { index ->
+                                        val zone = HeartRateZone.Trackable[index]
+                                        distribution?.get(zone) ?: 0f
+                                    } ?: run {
+                                        0f
+                                    }
+                                }
+
+                                ActivityGoalType.BELOW_ABOVE_HR_ZONE -> {
+                                    goal.label?.toInt()?.let { index ->
+                                        val zones = if (goal.valueType == GoalValueComparisonType.GREATER) {
+                                            HeartRateZone.entries.subList(index, HeartRateZone.Trackable.size)
+                                        } else {
+                                            HeartRateZone.entries.subList(0, index + 1)
+                                        }
+
+                                        zones.map { zone -> distribution?.get(zone) ?: 0f }.sum()
+                                    } ?: run {
+                                        0f
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+
+                delay(5.seconds)
+            }
+        }
     }
 }
