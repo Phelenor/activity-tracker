@@ -10,8 +10,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoal
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
@@ -26,30 +28,34 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun ActivityGoalsTab(
     state: ActivityState,
-    showAddGoalDialog: () -> Unit
+    showAddButton: Boolean,
+    showAddGoalDialog: () -> Unit,
+    onRemoveGoal: (ActivityGoalType) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         state.goals.forEach { goalProgress ->
             ActivityGoalProgressRow(
                 goalProgress = goalProgress,
                 activityStatus = state.status,
-                onRemoveClick = {}
+                onRemoveClick = onRemoveGoal
             )
 
             HorizontalDivider(modifier = Modifier.padding(8.dp))
         }
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            ButtonSecondary(
-                text = "Add",
-                icon = Icons.Outlined.Add,
-                onClick = showAddGoalDialog
-            )
+        if (showAddButton) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                ButtonSecondary(
+                    text = stringResource(R.string.add),
+                    icon = Icons.Outlined.Add,
+                    onClick = showAddGoalDialog
+                )
+            }
         }
     }
 }
@@ -59,7 +65,9 @@ fun ActivityGoalsTab(
 private fun ActivityGoalsTabPreview() {
     ActivityTrackerTheme {
         ActivityGoalsTab(
+            showAddButton = true,
             showAddGoalDialog = {},
+            onRemoveGoal = {},
             state = ActivityState(
                 type = ActivityType.RUN,
                 goals = List(5) {

@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityChipRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
@@ -31,7 +32,8 @@ fun ActivityBottomSheetContent(
     selectedTab: ActivityTabType,
     onTabSelected: (ActivityTabType) -> Unit,
     onLoadWeather: () -> Unit,
-    onAddGoal: () -> Unit,
+    onOpenAddGoal: () -> Unit,
+    onRemoveGoal: (ActivityGoalType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(selectedTab) {
@@ -57,7 +59,7 @@ fun ActivityBottomSheetContent(
                 when (tab) {
                     ActivityTabType.DETAILS -> ActivityDetailsTab(state = state)
                     ActivityTabType.HEART -> ActivityHeartRateTab(state = state)
-                    ActivityTabType.GOALS -> ActivityGoalsTab(state = state, showAddGoalDialog = onAddGoal)
+                    ActivityTabType.GOALS -> ActivityGoalsTab(state = state, showAddButton = state.goals.size < ActivityGoalType.entries.size, showAddGoalDialog = onOpenAddGoal, onRemoveGoal = onRemoveGoal)
                     ActivityTabType.WEATHER -> ActivityWeatherTab(weather = state.weather, isLoading = state.isWeatherLoading, onReloadClick = onLoadWeather)
                 }
             }
@@ -75,7 +77,8 @@ private fun ActivityBottomSheetContentPreview() {
             selectedTab = ActivityTabType.DETAILS,
             onTabSelected = {},
             onLoadWeather = {},
-            onAddGoal = {}
+            onOpenAddGoal = {},
+            onRemoveGoal = {}
         )
     }
 }

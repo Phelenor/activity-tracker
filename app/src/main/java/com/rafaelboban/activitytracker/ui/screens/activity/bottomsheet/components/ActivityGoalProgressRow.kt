@@ -117,15 +117,15 @@ private fun getValueText(
         }
 
         ActivityGoalType.IN_HR_ZONE -> {
-            val currentPct = "${(currentValue * 100).roundToInt()}%"
-            val goalPct = "${(value * 100).roundToInt()}%"
+            val currentPct = "${currentValue.roundToInt()}%"
+            val goalPct = "${value.roundToInt()}%"
             "In Zone $label: $currentPct (G: ${comparisonType.label} $goalPct)"
         }
 
         ActivityGoalType.BELOW_ABOVE_HR_ZONE -> {
             val prefix = if (comparisonType == GoalValueComparisonType.GREATER) "Above" else "Below"
-            val currentPct = "${(currentValue * 100).roundToInt()}%"
-            val goalPct = "${(value * 100).roundToInt()}%"
+            val currentPct = "${currentValue.roundToInt()}%"
+            val goalPct = "${value.roundToInt()}%"
             "$prefix Zone $label: $currentPct (G: $goalPct)"
         }
 

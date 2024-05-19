@@ -327,7 +327,7 @@ private fun NumberPicker(
         OutlinedTextField(
             value = text,
             onValueChange = {
-                if (it.toFloatOrNull() != null) {
+                if (it.toFloatOrNull() != null || it.isBlank()) {
                     text = it
                     if (isValid(it)) {
                         onNumber(checkNotNull(it.toFloatOrNull()))
@@ -374,7 +374,7 @@ private fun NumberPickerWithComparisonType(
         OutlinedTextField(
             value = text,
             onValueChange = {
-                if (it.toFloatOrNull() != null) {
+                if (it.toFloatOrNull() != null || it.isBlank()) {
                     text = it
                     if (isValid(it)) {
                         onConfirm(checkNotNull(it.toFloatOrNull()), selectedType)
@@ -464,6 +464,7 @@ fun NumberPickerWithZones(
         NumberPickerWithComparisonType(
             label = label,
             onConfirm = { value, comparisonType ->
+                onZoneChanged(selectedZoneIndexLabel)
                 onInput(value, comparisonType)
             },
             isValid = { string ->

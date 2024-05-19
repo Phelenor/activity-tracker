@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.rafaelboban.activitytracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +30,6 @@ fun TimePickerDialog(
 
     if (showDialog) {
         DatePickerDialog(
-            properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = onDismiss,
             confirmButton = {
                 ButtonPrimary(
@@ -52,7 +50,7 @@ fun TimePickerDialog(
             }
         ) {
             TimePicker(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 state = state
             )
         }

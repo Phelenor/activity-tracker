@@ -4,7 +4,9 @@ package com.rafaelboban.activitytracker.tracking
 
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoal
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
@@ -228,6 +230,21 @@ class ActivityTracker(
             }
 
             else -> Unit
+        }
+    }
+
+    fun addGoal(goal: ActivityGoal) {
+        _goals.update { currentGoals ->
+            currentGoals + ActivityGoalProgress(
+                goal = goal,
+                currentValue = 0f
+            )
+        }
+    }
+
+    fun removeGoal(goalType: ActivityGoalType) {
+        _goals.update { currentGoals ->
+            currentGoals.filterNot { it.goal.type == goalType }
         }
     }
 

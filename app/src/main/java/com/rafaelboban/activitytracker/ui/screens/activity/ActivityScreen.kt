@@ -2,7 +2,6 @@
 
 package com.rafaelboban.activitytracker.ui.screens.activity
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -221,7 +220,7 @@ fun ActivityScreen(
                     goalTypes = (ActivityGoalType.entries - state.goals.map { it.goal.type }.toSet()).toImmutableList(),
                     onDismissClick = { onAction(ActivityAction.DismissDialogs) },
                     onAddClick = { goal ->
-                        Log.d("MARIN", "223: add goal=$goal")
+                        onAction(ActivityAction.AddGoal(goal))
                     }
                 )
             }
@@ -247,7 +246,8 @@ fun ActivityScreen(
                     selectedTab = state.selectedBottomSheetTab,
                     onTabSelected = { tab -> onAction(ActivityAction.OnTabChanged(tab)) },
                     onLoadWeather = { onAction(ActivityAction.OnReloadWeather) },
-                    onAddGoal = { onAction(ActivityAction.OnAddGoalClick) },
+                    onOpenAddGoal = { onAction(ActivityAction.OnAddGoalClick) },
+                    onRemoveGoal = { type -> onAction(ActivityAction.RemoveGoal(type)) },
                     modifier = Modifier.height(boxHeight * 0.6f)
                 )
             }

@@ -77,7 +77,7 @@ class ActivityViewModel @Inject constructor(
 
         tracker.goals.onEach { goals ->
             state = state.copy(goals = goals.toImmutableList())
-        }
+        }.launchIn(viewModelScope)
 
         if (preferences.getBoolean(PREFERENCE_SHOW_GOALS_REMINDER, true)) {
             viewModelScope.launch {
@@ -164,6 +164,14 @@ class ActivityViewModel @Inject constructor(
 
             ActivityAction.OnAddGoalClick -> {
                 state = state.copy(showAddGoalDialog = true)
+            }
+
+            is ActivityAction.AddGoal -> {
+                tracker.addGoal(action.goal)
+            }
+
+            is ActivityAction.RemoveGoal -> {
+                tracker.removeGoal(action.goal)
             }
 
             is ActivityAction.DismissGoalsDialog -> {
