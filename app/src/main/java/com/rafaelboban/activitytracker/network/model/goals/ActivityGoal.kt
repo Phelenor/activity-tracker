@@ -3,7 +3,7 @@ package com.rafaelboban.activitytracker.network.model.goals
 data class ActivityGoal(
     val type: ActivityGoalType,
     val valueType: GoalValueComparisonType,
-    val label: String,
+    val label: String?,
     val value: Float
 )
 

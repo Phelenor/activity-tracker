@@ -2,6 +2,7 @@
 
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -219,7 +220,9 @@ fun ActivityScreen(
                 AddActivityGoalDialog(
                     goalTypes = (ActivityGoalType.entries - state.goals.map { it.goal.type }.toSet()).toImmutableList(),
                     onDismissClick = { onAction(ActivityAction.DismissDialogs) },
-                    onActionClick = { }
+                    onAddClick = { goal ->
+                        Log.d("MARIN", "223: add goal=$goal")
+                    }
                 )
             }
         }

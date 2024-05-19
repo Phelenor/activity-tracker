@@ -29,8 +29,6 @@ import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
 import com.rafaelboban.activitytracker.network.model.goals.GoalValueComparisonType
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.ActivityType
-import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
@@ -43,7 +41,6 @@ import kotlin.time.toKotlinDuration
 fun ActivityGoalProgressRow(
     goalProgress: ActivityGoalProgress,
     activityStatus: ActivityStatus,
-    activityType: ActivityType,
     onRemoveClick: (ActivityGoalType) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -69,7 +66,7 @@ fun ActivityGoalProgressRow(
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            text = getValueText(goalProgress.goal.type, goalProgress.goal.value, goalProgress.currentValue, goalProgress.goal.valueType, label = goalProgress.goal.label, usePace = activityType.showPace)
+            text = getValueText(goalProgress.goal.type, goalProgress.goal.value, goalProgress.currentValue, goalProgress.goal.valueType, label = goalProgress.goal.label)
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -102,8 +99,7 @@ private fun getValueText(
     value: Float,
     currentValue: Float,
     comparisonType: GoalValueComparisonType,
-    label: String,
-    usePace: Boolean = false
+    label: String?
 ): String {
     return when (type) {
         ActivityGoalType.DISTANCE -> "${currentValue.roundToDecimals(1)}/${value.roundToDecimals(1)} km"
@@ -113,11 +109,11 @@ private fun getValueText(
         }
 
         ActivityGoalType.AVG_SPEED -> {
-            val speedGoal = if (usePace) ActivityDataFormatter.convertSpeedToPace(value) else value.roundToDecimals(1)
-            val speedCurrent = if (usePace) ActivityDataFormatter.convertSpeedToPace(currentValue) else currentValue.roundToDecimals(1)
-            val unit = if (usePace) "min/km" else "km/h"
+            "${currentValue.roundToDecimals(1)} (G: ${comparisonType.label} ${value.roundToDecimals(1)} km/h)"
+        }
 
-            "$speedCurrent (G: ${comparisonType.label} $speedGoal $unit)"
+        ActivityGoalType.AVG_PACE -> {
+            "${currentValue.roundToDecimals(1)} (G: ${comparisonType.label} ${value.roundToDecimals(1)} min/km)"
         }
 
         ActivityGoalType.IN_HR_ZONE -> {
@@ -148,7 +144,6 @@ private fun ActivityGoalRowPreview() {
         ActivityGoalProgressRow(
             activityStatus = ActivityStatus.IN_PROGRESS,
             onRemoveClick = {},
-            activityType = ActivityType.RUN,
             goalProgress = ActivityGoalProgress(
                 currentValue = 0.2f,
                 goal = ActivityGoal(

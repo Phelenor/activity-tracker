@@ -11,6 +11,7 @@ enum class ActivityGoalType(@StringRes val stringRes: Int) {
     CALORIES(R.string.calories),
     AVG_HEART_RATE(R.string.avg_heartrate),
     AVG_SPEED(R.string.avg_speed),
+    AVG_PACE(R.string.avg_pace),
     IN_HR_ZONE(R.string.duration_pct_in_zone),
     BELOW_ABOVE_HR_ZONE(R.string.duration_pct_above_below_zone)
 }

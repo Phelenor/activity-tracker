@@ -33,7 +33,6 @@ fun ActivityGoalsTab(
             ActivityGoalProgressRow(
                 goalProgress = goalProgress,
                 activityStatus = state.status,
-                activityType = state.type,
                 onRemoveClick = {}
             )
 
