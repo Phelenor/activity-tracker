@@ -178,6 +178,10 @@ fun ActivityScreen(
         if (state.status == ActivityStatus.FINISHED && ActivityTrackerService.isActive) {
             toggleTrackerService(false)
         }
+
+        if (state.status == ActivityStatus.FINISHED && state.goals.isNotEmpty()) {
+            onAction(ActivityAction.OpenGoals)
+        }
     }
 
     DialogScaffold(
