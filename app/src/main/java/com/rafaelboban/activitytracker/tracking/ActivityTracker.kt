@@ -7,7 +7,6 @@ import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoal
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
-import com.rafaelboban.activitytracker.network.model.goals.GoalValueComparisonType
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.currentSpeed
 import com.rafaelboban.activitytracker.util.distanceSequenceMeters
@@ -278,6 +277,7 @@ class ActivityTracker(
         setIsTrackingActivity(false)
         setActivityStatus(ActivityStatus.NOT_STARTED)
 
+        _goals.value = emptyList()
         _type.value = null
         _duration.value = Duration.ZERO
         _data.value = ActivityData()
@@ -301,23 +301,24 @@ class ActivityTracker(
                                 ActivityGoalType.AVG_SPEED -> if (_duration.value == Duration.ZERO) 0f else (_data.value.distanceMeters / 1000f) / (_duration.value.inWholeSeconds / 3600f)
                                 ActivityGoalType.AVG_PACE -> if (_duration.value == Duration.ZERO) 0f else 60f / (_data.value.distanceMeters / 1000f) / (_duration.value.inWholeSeconds / 3600f)
                                 ActivityGoalType.IN_HR_ZONE -> {
-                                    goal.label?.toInt()?.let { index ->
-                                        val zone = HeartRateZone.Trackable[index]
-                                        distribution?.get(zone) ?: 0f
+                                    goal.label?.toIntOrNull()?.let { index ->
+                                        val zone = HeartRateZone.entries[index]
+                                        distribution?.get(zone)?.times(100) ?: 0f
+                                    } ?: run {
+                                        0f
+                                    }
+                                }
+                                ActivityGoalType.BELOW_HR_ZONE -> {
+                                    goal.label?.toIntOrNull()?.let { index ->
+                                        HeartRateZone.entries.subList(0, index + 1).map { zone -> distribution?.get(zone)?.times(100) ?: 0f }.sum()
                                     } ?: run {
                                         0f
                                     }
                                 }
 
-                                ActivityGoalType.BELOW_ABOVE_HR_ZONE -> {
-                                    goal.label?.toInt()?.let { index ->
-                                        val zones = if (goal.valueType == GoalValueComparisonType.GREATER) {
-                                            HeartRateZone.entries.subList(index, HeartRateZone.Trackable.size)
-                                        } else {
-                                            HeartRateZone.entries.subList(0, index + 1)
-                                        }
-
-                                        zones.map { zone -> distribution?.get(zone) ?: 0f }.sum()
+                                ActivityGoalType.ABOVE_HR_ZONE -> {
+                                    goal.label?.toIntOrNull()?.let { index ->
+                                        HeartRateZone.entries.subList(index, HeartRateZone.entries.size).map { zone -> distribution?.get(zone)?.times(100) ?: 0f }.sum()
                                     } ?: run {
                                         0f
                                     }

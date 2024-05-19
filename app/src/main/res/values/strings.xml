@@ -66,4 +66,6 @@
     <string name="calories">Calories</string>
     <string name="duration_pct_in_zone">% in HR zone</string>
     <string name="duration_pct_above_below_zone">% above/below HR zone</string>
+    <string name="duration_pct_below_zone">% below HR zone</string>
+    <string name="duration_pct_above_zone">% above HR zone</string>
 </resources>

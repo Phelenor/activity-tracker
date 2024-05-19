@@ -209,9 +209,22 @@ fun AddActivityGoalDialog(
                 )
             }
 
-            ActivityGoalType.BELOW_ABOVE_HR_ZONE -> {
+            ActivityGoalType.BELOW_HR_ZONE -> {
                 NumberPickerWithZones(
-                    label = "% above/below HR Zone (incl.)",
+                    label = "% below HR Zone (incl.)",
+                    onZoneChanged = { zoneIndex ->
+                        goalLabel = zoneIndex
+                    },
+                    onInput = { value, comparisonType ->
+                        selectedGoalValue = value
+                        selectedGoalComparisonType = comparisonType
+                    }
+                )
+            }
+
+            ActivityGoalType.ABOVE_HR_ZONE -> {
+                NumberPickerWithZones(
+                    label = "% above HR Zone (incl.)",
                     onZoneChanged = { zoneIndex ->
                         goalLabel = zoneIndex
                     },
