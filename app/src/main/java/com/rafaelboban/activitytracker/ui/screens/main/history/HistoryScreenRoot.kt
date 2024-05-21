@@ -32,11 +32,17 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun HistoryScreenRoot(
+    navigateToActivityOverview: (String) -> Unit,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     HistoryScreen(
         state = viewModel.state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                is HistoryAction.OpenActivityOverview -> navigateToActivityOverview(action.id)
+                else -> viewModel.onAction(action)
+            }
+        }
     )
 }
 
@@ -70,7 +76,7 @@ private fun HistoryScreen(
                 ActivityCard(
                     activity = activity,
                     onDeleteClick = { onAction(HistoryAction.DeleteActivity(activity.id)) },
-                    navigateToActivityOverview = {},
+                    navigateToActivityOverview = { onAction(HistoryAction.OpenActivityOverview(activity.id)) },
                     modifier = Modifier
                         .animateItem()
                         .padding(horizontal = 8.dp, vertical = 4.dp)

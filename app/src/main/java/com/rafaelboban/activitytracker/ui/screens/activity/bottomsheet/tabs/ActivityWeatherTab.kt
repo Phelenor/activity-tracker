@@ -99,6 +99,7 @@ fun ActivityWeatherTab(
                     Text(
                         text = "Forecast",
                         style = Typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
 

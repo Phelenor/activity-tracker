@@ -76,7 +76,7 @@ fun ActivityCard(
                 .clip(RoundedCornerShape(16.dp))
                 .border(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary, width = 2.dp)
                 .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .combinedClickable(
                     onClick = { navigateToActivityOverview() },
                     onLongClick = { showDropDown = true }
@@ -126,7 +126,7 @@ fun ActivityCard(
 }
 
 @Composable
-private fun MapImage(
+fun MapImage(
     imageUrl: String?,
     modifier: Modifier = Modifier
 ) {

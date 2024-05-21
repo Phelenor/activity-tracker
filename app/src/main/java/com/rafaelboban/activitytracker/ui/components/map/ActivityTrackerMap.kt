@@ -116,7 +116,7 @@ fun ActivityTrackerMap(
         modifier = modifier
             .applyIf(!triggerMapSnapshot) { fillMaxSize() }
             .applyIf(triggerMapSnapshot) {
-                width(300.dp)
+                width(360.dp)
                     .aspectRatio(16 / 9f)
                     .alpha(0f)
             },
@@ -142,7 +142,7 @@ fun ActivityTrackerMap(
             if (triggerMapSnapshot && !snapshotTriggered) {
                 snapshotTriggered = true
 
-                delay(150L)
+                delay(300L)
 
                 val boundsBuilder = LatLngBounds.builder().apply {
                     locations.flatten().forEach { location ->

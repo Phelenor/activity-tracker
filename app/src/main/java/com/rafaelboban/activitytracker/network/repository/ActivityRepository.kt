@@ -28,5 +28,7 @@ class ActivityRepository @Inject constructor(
 
     suspend fun getActivities() = api.getActivities()
 
+    suspend fun getActivity(id: String) = api.getActivity(id)
+
     suspend fun deleteActivity(id: String) = api.deleteActivity(id)
 }

@@ -69,7 +69,7 @@ fun ActivityTopAppBar(
         }
 
         Text(
-            text = stringResource(id = activityType.titleRes),
+            text = stringResource(id = activityType.inProgressTitleRes),
             style = Typography.displayMedium,
             color = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.padding(horizontal = 16.dp)

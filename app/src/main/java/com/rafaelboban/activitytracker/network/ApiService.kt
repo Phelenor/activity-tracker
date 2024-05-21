@@ -37,6 +37,9 @@ interface ApiService {
     @GET("/api/activities")
     suspend fun getActivities(): ApiResponse<List<Activity>>
 
+    @GET("/api/activities/{id}")
+    suspend fun getActivity(@Path("id") id: String): ApiResponse<Activity>
+
     @DELETE("/api/activities/{id}")
     suspend fun deleteActivity(@Path("id") id: String): ApiResponse<String?>
 

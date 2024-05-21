@@ -30,6 +30,7 @@ class HistoryViewModel @Inject constructor(
         when (action) {
             HistoryAction.Refresh -> getActivities()
             is HistoryAction.DeleteActivity -> deleteActivity(action.id)
+            else -> Unit
         }
     }
 

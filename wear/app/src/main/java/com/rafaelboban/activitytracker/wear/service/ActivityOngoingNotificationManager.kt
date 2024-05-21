@@ -56,7 +56,7 @@ class ActivityOngoingNotificationManager @Inject constructor(
 
         val builder = notificationBuilder
             .setContentIntent(pendingIntent)
-            .setContentTitle(context.getString(activityType.titleRes))
+            .setContentTitle(context.getString(activityType.inProgressTitleRes))
 
         val startMillis = SystemClock.elapsedRealtime()
         val ongoingActivityStatus = Status.Builder()

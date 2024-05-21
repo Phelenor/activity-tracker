@@ -68,6 +68,7 @@ sealed class MainScreenBottomBarItem(val route: MainScreenNavigation, val select
 fun MainScreen(
     onLogout: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
+    navigateToActivityOverview: (String) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -120,6 +121,7 @@ fun MainScreen(
             modifier = Modifier.padding(padding),
             navController = navController,
             navigateToActivity = navigateToActivity,
+            navigateToActivityOverview = navigateToActivityOverview,
             navigateToLogin = onLogout
         )
     }
@@ -130,6 +132,7 @@ fun MainNavigationGraph(
     navController: NavHostController,
     navigateToLogin: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
+    navigateToActivityOverview: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -138,7 +141,9 @@ fun MainNavigationGraph(
         startDestination = MainScreenNavigation.Dashboard
     ) {
         composableFade<MainScreenNavigation.History> {
-            HistoryScreenRoot()
+            HistoryScreenRoot(
+                navigateToActivityOverview = navigateToActivityOverview
+            )
         }
 
         composableFade<MainScreenNavigation.Dashboard> {

@@ -4,6 +4,10 @@ import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.HeartRateZone
 import kotlinx.serialization.Serializable
+import java.time.Instant
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class Activity(
@@ -23,7 +27,35 @@ data class Activity(
     val heartRateZoneDistribution: Map<HeartRateZone, Float>,
     val goals: List<ActivityGoalProgress>,
     val imageUrl: String? = null
-)
+) {
+
+    companion object {
+
+        val MockModel = Activity(
+            id = "test-id",
+            activityType = ActivityType.RUN,
+            durationSeconds = (10.minutes + 30.seconds).inWholeSeconds,
+            startTimestamp = Instant.now().epochSecond - 3.hours.inWholeSeconds,
+            distanceMeters = 2543,
+            avgSpeedKmh = 15.6234f,
+            elevation = 123,
+            imageUrl = null,
+            avgHeartRate = 120,
+            heartRateZoneDistribution = emptyMap(),
+            calories = 120,
+            goals = emptyList(),
+            endTimestamp = Instant.now().epochSecond,
+            maxHeartRate = 150,
+            maxSpeedKmh = 5.5f,
+            weather = ActivityWeatherInfo(
+                temp = 16f,
+                humidity = 84f,
+                icon = "04n",
+                description = "Overcast clouds"
+            )
+        )
+    }
+}
 
 @Serializable
 data class ActivityWeatherInfo(

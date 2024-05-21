@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
+import com.rafaelboban.activitytracker.ui.screens.activityOverview.ActivityOverviewScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -36,6 +37,9 @@ fun RootNavigation(
                 navigateToActivity = { type ->
                     navHostController.navigate(NavigationGraph.Activity(type.ordinal))
                 },
+                navigateToActivityOverview = { id ->
+                    navHostController.navigate(NavigationGraph.ActivityOverview(id))
+                },
                 onLogout = {
                     navHostController.navigate(NavigationGraph.Auth) {
                         popUpTo(NavigationGraph.Main) {
@@ -57,6 +61,12 @@ fun RootNavigation(
                 navigateUp = { navHostController.navigateUp() }
             )
         }
+
+        composableSlide<NavigationGraph.ActivityOverview> {
+            ActivityOverviewScreenRoot(
+                navigateUp = { navHostController.navigateUp() }
+            )
+        }
     }
 }
 
@@ -70,4 +80,7 @@ sealed interface NavigationGraph {
 
     @Serializable
     data class Activity(val activityTypeOrdinal: Int) : NavigationGraph
+
+    @Serializable
+    data class ActivityOverview(val id: String) : NavigationGraph
 }

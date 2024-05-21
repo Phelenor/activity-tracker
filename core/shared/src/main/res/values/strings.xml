@@ -8,4 +8,8 @@
     <string name="now_walking">Now Walking</string>
     <string name="now_cycling">Now Cycling</string>
     <string name="now_exercising">Now Exercising</string>
+    <string name="exercise">Exercise</string>
+    <string name="ride">Ride</string>
+    <string name="walk">Walk</string>
+    <string name="run">Run</string>
 </resources>
