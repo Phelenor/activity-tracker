@@ -11,10 +11,12 @@ import com.skydoves.sandwich.ApiResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -32,11 +34,14 @@ interface ApiService {
     suspend fun updateUserData(@Body body: UpdateUserData): ApiResponse<User>
 
     @Multipart
-    @POST("/api/activity")
+    @POST("/api/activities")
     suspend fun postActivity(@Part("activity") activity: RequestBody, @Part image: MultipartBody.Part): ApiResponse<Activity>
 
     @GET("/api/activities")
     suspend fun getActivities(): ApiResponse<List<Activity>>
+
+    @DELETE("/api/activities/{id}")
+    suspend fun deleteActivity(@Path("id") id: String): ApiResponse<String?>
 
     @GET("https://api.openweathermap.org/data/3.0/onecall")
     suspend fun getWeatherData(

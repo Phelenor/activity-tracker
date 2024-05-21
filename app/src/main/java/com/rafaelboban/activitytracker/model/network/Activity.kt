@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Activity(
+    val id: String,
     val activityType: ActivityType,
     val startTimestamp: Long,
     val endTimestamp: Long,
@@ -14,6 +15,8 @@ data class Activity(
     val durationSeconds: Long,
     val avgSpeedKmh: Float,
     val avgHeartRate: Int,
+    val maxSpeedKmh: Float = 0f,
+    val maxHeartRate: Int = 0,
     val calories: Int,
     val elevation: Int,
     val weather: ActivityWeatherInfo?,

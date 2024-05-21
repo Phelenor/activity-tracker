@@ -204,6 +204,7 @@ class ActivityViewModel @Inject constructor(
         viewModelScope.launch {
             val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(state.activityData.heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, state.duration)
             val activity = Activity(
+                id = "",
                 activityType = state.type,
                 startTimestamp = tracker.startTimestamp ?: 0,
                 endTimestamp = tracker.endTimestamp ?: 0,
@@ -213,6 +214,8 @@ class ActivityViewModel @Inject constructor(
                 calories = state.activityData.caloriesBurned ?: 0,
                 avgHeartRate = state.activityData.heartRatePoints.map { it.heartRate }.takeIf { it.isNotEmpty() }?.average()?.toInt() ?: 0,
                 avgSpeedKmh = state.duration.inWholeSeconds.takeIf { it > 0 }?.let { (state.activityData.distanceMeters / 1000f) / (state.duration.inWholeSeconds / 3600f) } ?: 0f,
+                maxHeartRate = state.activityData.heartRatePoints.maxOfOrNull { it.heartRate } ?: 0,
+                maxSpeedKmh = 0f,
                 heartRateZoneDistribution = zoneDistribution ?: emptyMap(),
                 goals = state.goals,
                 weather = state.weather?.current?.let { weather ->
@@ -230,8 +233,6 @@ class ActivityViewModel @Inject constructor(
             }.onFailure {
                 state = state.copy(isSaving = false)
             }
-
-            activityRepository.getActivities()
         }
     }
 
