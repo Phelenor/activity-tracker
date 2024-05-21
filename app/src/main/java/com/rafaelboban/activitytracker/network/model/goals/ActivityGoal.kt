@@ -1,5 +1,8 @@
 package com.rafaelboban.activitytracker.network.model.goals
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ActivityGoal(
     val type: ActivityGoalType,
     val valueType: GoalValueComparisonType,
@@ -8,9 +11,11 @@ data class ActivityGoal(
 )
 
 enum class GoalValueComparisonType(val label: String) {
-    GREATER(">"), LESS("<")
+    GREATER(">"),
+    LESS("<")
 }
 
+@Serializable
 data class ActivityGoalProgress(
     val goal: ActivityGoal,
     val currentValue: Float

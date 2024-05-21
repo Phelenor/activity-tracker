@@ -28,5 +28,6 @@ data class ActivityState(
     val weather: WeatherForecast? = null,
     val isWeatherLoading: Boolean = false,
     val goals: ImmutableList<ActivityGoalProgress> = persistentListOf(),
+    val isSaving: Boolean = false,
     val type: ActivityType
 )

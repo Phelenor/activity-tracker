@@ -38,14 +38,14 @@ object NetworkModule {
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideJsonRetrofitAdapter(): Converter.Factory {
-        val json = Json {
-            ignoreUnknownKeys = true
-            explicitNulls = false
-        }
-
-        return json.asConverterFactory("application/json".toMediaType())
+    fun provideJson() = Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
     }
+
+    @Provides
+    @Singleton
+    fun provideJsonRetrofitAdapter(json: Json) = json.asConverterFactory("application/json".toMediaType())
 
     @Provides
     @Singleton

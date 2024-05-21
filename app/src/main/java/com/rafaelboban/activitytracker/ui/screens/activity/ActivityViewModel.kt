@@ -8,17 +8,24 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.di.PreferencesStandard
+import com.rafaelboban.activitytracker.model.network.Activity
+import com.rafaelboban.activitytracker.model.network.ActivityWeatherInfo
 import com.rafaelboban.activitytracker.network.model.goals.PREFERENCE_SHOW_GOALS_REMINDER
+import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.activitytracker.util.edit
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.F
+import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
+import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +49,7 @@ class ActivityViewModel @Inject constructor(
     private val applicationScope: CoroutineScope,
     private val tracker: ActivityTracker,
     private val watchConnector: PhoneToWatchConnector,
+    private val activityRepository: ActivityRepository,
     private val weatherRepository: WeatherRepository,
     @PreferencesStandard private val preferences: SharedPreferences,
     savedStateHandle: SavedStateHandle
@@ -98,26 +106,26 @@ class ActivityViewModel @Inject constructor(
         when (action) {
             ActivityAction.OnStartClick -> {
                 state = state.copy(status = ActivityStatus.IN_PROGRESS)
-                tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
+                tracker.setIsTrackingActivity(true)
             }
 
             ActivityAction.OnPauseClick -> {
                 state = state.copy(status = ActivityStatus.PAUSED)
-                tracker.setIsTrackingActivity(false)
                 tracker.setActivityStatus(ActivityStatus.PAUSED)
+                tracker.setIsTrackingActivity(false)
             }
 
             ActivityAction.OnResumeClick -> {
                 state = state.copy(status = ActivityStatus.IN_PROGRESS)
-                tracker.setIsTrackingActivity(true)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
+                tracker.setIsTrackingActivity(true)
             }
 
             ActivityAction.OnFinishClick -> {
-                state = state.copy(status = ActivityStatus.FINISHED)
-                tracker.setIsTrackingActivity(false)
+                state = state.copy(status = ActivityStatus.FINISHED, isSaving = true)
                 tracker.setActivityStatus(ActivityStatus.FINISHED)
+                tracker.setIsTrackingActivity(false)
                 tracker.stopTrackingLocation()
             }
 
@@ -182,9 +190,48 @@ class ActivityViewModel @Inject constructor(
                 }
             }
 
+            is ActivityAction.MapSnapshotDone -> {
+                saveActivity(action.stream)
+            }
+
             is ActivityAction.OnSelectMapType -> {
                 state = state.copy(mapType = action.type)
             }
+        }
+    }
+
+    private fun saveActivity(mapSnapshot: ByteArray) {
+        viewModelScope.launch {
+            val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(state.activityData.heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, state.duration)
+            val activity = Activity(
+                activityType = state.type,
+                startTimestamp = tracker.startTimestamp ?: 0,
+                endTimestamp = tracker.endTimestamp ?: 0,
+                durationSeconds = state.duration.inWholeSeconds,
+                distanceMeters = state.activityData.distanceMeters,
+                elevation = state.activityData.elevationGain,
+                calories = state.activityData.caloriesBurned ?: 0,
+                avgHeartRate = state.activityData.heartRatePoints.map { it.heartRate }.takeIf { it.isNotEmpty() }?.average()?.toInt() ?: 0,
+                avgSpeedKmh = state.duration.inWholeSeconds.takeIf { it > 0 }?.let { (state.activityData.distanceMeters / 1000f) / (state.duration.inWholeSeconds / 3600f) } ?: 0f,
+                heartRateZoneDistribution = zoneDistribution ?: emptyMap(),
+                goals = state.goals,
+                weather = state.weather?.current?.let { weather ->
+                    ActivityWeatherInfo(
+                        temp = weather.temp,
+                        humidity = weather.humidity,
+                        icon = weather.info.firstOrNull()?.icon ?: "",
+                        description = weather.info.firstOrNull()?.description ?: ""
+                    )
+                }
+            )
+
+            activityRepository.saveActivity(activity, mapSnapshot).onSuccess {
+                state = state.copy(isSaving = false)
+            }.onFailure {
+                state = state.copy(isSaving = false)
+            }
+
+            activityRepository.getActivities()
         }
     }
 

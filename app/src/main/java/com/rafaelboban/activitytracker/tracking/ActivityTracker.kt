@@ -55,6 +55,12 @@ class ActivityTracker(
     private val watchConnector: PhoneToWatchConnector
 ) {
 
+    var startTimestamp: Long? = null
+        private set
+
+    var endTimestamp: Long? = null
+        private set
+
     private val _type = MutableStateFlow<ActivityType?>(null)
     val type = _type.asStateFlow()
 
@@ -222,18 +228,13 @@ class ActivityTracker(
 
         when (status) {
             ActivityStatus.IN_PROGRESS -> {
-                val wasNotStarted = _data.value.startTimestamp == null
-                if (wasNotStarted) {
-                    _data.update { data ->
-                        data.copy(startTimestamp = Instant.now().epochSecond)
-                    }
+                if (startTimestamp == null) {
+                    startTimestamp = Instant.now().epochSecond
                 }
             }
 
             ActivityStatus.FINISHED -> {
-                _data.update { data ->
-                    data.copy(endTimestamp = Instant.now().epochSecond)
-                }
+                endTimestamp = Instant.now().epochSecond
             }
 
             else -> Unit
@@ -308,6 +309,7 @@ class ActivityTracker(
                                         0f
                                     }
                                 }
+
                                 ActivityGoalType.BELOW_HR_ZONE -> {
                                     goal.label?.toIntOrNull()?.let { index ->
                                         HeartRateZone.entries.subList(0, index + 1).map { zone -> distribution?.get(zone)?.times(100) ?: 0f }.sum()

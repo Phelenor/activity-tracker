@@ -23,4 +23,5 @@ sealed interface ActivityAction {
     data class OnTabChanged(val tab: ActivityTabType) : ActivityAction
     data class DismissGoalsDialog(val doNotShowAgain: Boolean) : ActivityAction
     data class OnSelectMapType(val type: MapType) : ActivityAction
+    class MapSnapshotDone(val stream: ByteArray) : ActivityAction
 }

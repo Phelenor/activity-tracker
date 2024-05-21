@@ -1,5 +1,8 @@
+@file:OptIn(MapsComposeExperimentalApi::class)
+
 package com.rafaelboban.activitytracker.ui.components.map
 
+import android.graphics.Bitmap
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -31,12 +34,15 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import com.google.maps.android.ktx.awaitSnapshot
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
@@ -53,6 +59,8 @@ fun ActivityTrackerMap(
     mapType: MapType,
     activityType: ActivityType,
     maxSpeed: Float,
+    onSnapshot: (Bitmap) -> Unit,
+    triggerMapSnapshot: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -62,6 +70,8 @@ fun ActivityTrackerMap(
     val mapStyle = remember { MapStyleOptions.loadRawResourceStyle(context, if (isDarkTheme) R.raw.map_style_dark else R.raw.map_style_light) }
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberMarkerState()
+
+    var snapshotTriggered by remember { mutableStateOf(false) }
 
     val userMarkerLatitude by animateFloatAsState(
         targetValue = currentLocation?.latitude?.F ?: 0f,
@@ -118,6 +128,13 @@ fun ActivityTrackerMap(
         )
     ) {
         StandardPolylines(locations = locations)
+
+        MapEffect(triggerMapSnapshot) { map ->
+            if (triggerMapSnapshot && !snapshotTriggered) {
+                snapshotTriggered = true
+                map.awaitSnapshot()?.let(onSnapshot)
+            }
+        }
 
         currentLocation?.let {
             MarkerComposable(

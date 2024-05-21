@@ -2,9 +2,13 @@
 
 package com.rafaelboban.activitytracker.ui.screens.activity
 
+import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -78,6 +82,7 @@ import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButto
 import com.rafaelboban.activitytracker.ui.components.AddActivityGoalDialog
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
+import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
 import com.rafaelboban.activitytracker.ui.components.SetActivityGoalsDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
@@ -103,6 +108,7 @@ import com.rafaelboban.core.theme.mobile.Montserrat
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import kotlin.time.Duration
 
 @Composable
@@ -329,6 +335,20 @@ fun ActivityScreen(
                     mapType = state.mapType,
                     activityType = state.type,
                     maxSpeed = state.maxSpeed,
+                    triggerMapSnapshot = state.isSaving,
+                    onSnapshot = { bitmap ->
+                        val stream = ByteArrayOutputStream().apply {
+                            use {
+                                bitmap.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    80,
+                                    it
+                                )
+                            }
+                        }
+
+                        onAction(ActivityAction.MapSnapshotDone(stream.toByteArray()))
+                    },
                     modifier = Modifier.constrainAs(map) {
                         top.linkTo(infoCard.bottom, margin = (-16).dp)
                         bottom.linkTo(parent.bottom)
@@ -487,6 +507,14 @@ fun ActivityScreen(
                         }
                     }
             }
+        }
+
+        AnimatedVisibility(
+            visible = state.isSaving,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
+            LoadingIndicator(modifier = Modifier.fillMaxSize())
         }
     }
 }
