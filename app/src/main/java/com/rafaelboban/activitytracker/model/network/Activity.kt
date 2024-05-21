@@ -5,6 +5,7 @@ import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.HeartRateZone
 import kotlinx.serialization.Serializable
 import java.time.Instant
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -41,7 +42,7 @@ data class Activity(
             elevation = 123,
             imageUrl = null,
             avgHeartRate = 120,
-            heartRateZoneDistribution = emptyMap(),
+            heartRateZoneDistribution = HeartRateZone.entries.associateWith { Random.nextFloat() },
             calories = 120,
             goals = emptyList(),
             endTimestamp = Instant.now().epochSecond,

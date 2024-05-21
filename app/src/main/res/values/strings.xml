@@ -76,4 +76,6 @@
     <string name="save_activity_question">Save activity?</string>
     <string name="short_activity_info">This activity was shorter than 30 seconds.</string>
     <string name="save">Save</string>
+    <string name="max_pace">Max. pace</string>
+    <string name="max_speed">Max. speed</string>
 </resources>

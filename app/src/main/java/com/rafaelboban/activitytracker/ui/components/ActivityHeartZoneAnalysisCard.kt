@@ -30,17 +30,20 @@ import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityDetailsRow
+import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.HeartRateZoneProgressBar
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.convertSpeedToPace
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatDistanceDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
+import com.rafaelboban.core.shared.utils.HeartRateZone
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun ActivityDetailsCard(
-    activity: Activity,
+fun ActivityHeartZoneAnalysisCard(
+    heartZoneDistribution: Map<HeartRateZone, Float>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -51,45 +54,18 @@ fun ActivityDetailsCard(
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(16.dp)
     ) {
-        val distanceUnit = if (activity.distanceMeters < 1000) "m" else "km"
-        val elevationUnit = if (activity.elevation < 1000) "m" else "km"
-
-        val maxSpeedPaceData = if (activity.activityType.showPace) {
-            arrayOf(R.string.max_pace, "${convertSpeedToPace(activity.maxSpeedKmh)} min/km", Icons.Outlined.Speed, MaterialTheme.colorScheme.onBackground)
-        } else {
-            arrayOf(R.string.max_speed, "${activity.maxSpeedKmh.roundToDecimals(1)} km/h", Icons.Default.Speed, MaterialTheme.colorScheme.onBackground)
-        }
-
-        val averageSpeedPaceData = if (activity.activityType.showPace) {
-            arrayOf(R.string.average_pace, "${convertSpeedToPace(activity.avgSpeedKmh)} min/km", Icons.Outlined.Speed, MaterialTheme.colorScheme.onBackground)
-        } else {
-            arrayOf(R.string.average_speed, "${activity.avgSpeedKmh.roundToDecimals(1)} km/h", Icons.Default.Speed, MaterialTheme.colorScheme.onBackground)
-        }
-
-        val durationFormatted = (1.seconds * activity.durationSeconds.toInt()).formatElapsedTimeDisplay()
-
         Text(
-            text = stringResource(R.string.details),
+            text = "Heart Rate Zones",
             style = Typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
         )
 
-        listOfNotNull(
-            arrayOf(R.string.duration, durationFormatted, Icons.Default.Timer, MaterialTheme.colorScheme.onBackground),
-            arrayOf(R.string.distance, "${formatDistanceDisplay(activity.distanceMeters)} $distanceUnit", Icons.AutoMirrored.Filled.TrendingUp, MaterialTheme.colorScheme.onBackground),
-            maxSpeedPaceData,
-            averageSpeedPaceData,
-            arrayOf(R.string.elevation_gain, "${formatDistanceDisplay(activity.elevation)} $elevationUnit", Icons.Outlined.Elevator, MaterialTheme.colorScheme.onBackground),
-            arrayOf(R.string.average_heartrate, "${activity.avgHeartRate} bpm", Icons.TwoTone.Favorite, MaterialTheme.colorScheme.error).takeIf { activity.avgHeartRate > 0 },
-            arrayOf(R.string.max_heartrate, "${activity.maxHeartRate} bpm", Icons.Filled.Favorite, MaterialTheme.colorScheme.error).takeIf { activity.maxHeartRate > 0 },
-            arrayOf(R.string.calories_estimated, "${activity.calories} kcal", Icons.Filled.LocalFireDepartment, MaterialTheme.colorScheme.error).takeIf { activity.calories > 0 }
-        ).forEach { (labelRes, value, icon, tint) ->
-            ActivityDetailsRow(
-                label = stringResource(id = labelRes as Int),
-                value = value as String,
-                icon = icon as ImageVector,
-                iconTint = tint as Color
+        HeartRateZone.entries.forEach { zone ->
+            HeartRateZoneProgressBar(
+                modifier = Modifier.padding(start = 2.dp),
+                zone = zone,
+                progress = heartZoneDistribution[zone] ?: 0f
             )
         }
     }
@@ -99,6 +75,6 @@ fun ActivityDetailsCard(
 @Composable
 private fun ActivityDetailsCardPreview() {
     ActivityTrackerTheme {
-        ActivityDetailsCard(activity = Activity.MockModel)
+        ActivityHeartZoneAnalysisCard(heartZoneDistribution = HeartRateZone.entries.associateWith { Random.nextFloat() })
     }
 }
