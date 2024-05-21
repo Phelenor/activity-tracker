@@ -75,7 +75,7 @@ class ActivityViewModel @Inject constructor(
         tracker.data.onEach { data ->
             state = state.copy(
                 activityData = data,
-                maxSpeed = max(state.maxSpeed, data.speed).coerceAtMost(state.activityData.speed)
+                maxSpeed = max(state.maxSpeed, data.speed)
             )
         }.launchIn(viewModelScope)
 
@@ -223,7 +223,7 @@ class ActivityViewModel @Inject constructor(
                 avgHeartRate = state.activityData.heartRatePoints.map { it.heartRate }.takeIf { it.isNotEmpty() }?.average()?.toInt() ?: 0,
                 avgSpeedKmh = state.duration.inWholeSeconds.takeIf { it > 0 }?.let { (state.activityData.distanceMeters / 1000f) / (state.duration.inWholeSeconds / 3600f) } ?: 0f,
                 maxHeartRate = state.activityData.heartRatePoints.maxOfOrNull { it.heartRate } ?: 0,
-                maxSpeedKmh = 0f,
+                maxSpeedKmh = state.maxSpeed,
                 heartRateZoneDistribution = zoneDistribution ?: emptyMap(),
                 goals = state.goals,
                 weather = state.weather?.current?.let { weather ->
