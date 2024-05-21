@@ -10,9 +10,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,17 +23,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -50,6 +56,9 @@ import com.rafaelboban.activitytracker.ui.components.applyIf
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun ActivityTrackerMap(
@@ -64,6 +73,8 @@ fun ActivityTrackerMap(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
+    val scope = rememberCoroutineScope()
 
     var firstComposition by remember { mutableStateOf(true) }
     val isDarkTheme = isSystemInDarkTheme()
@@ -110,9 +121,15 @@ fun ActivityTrackerMap(
     }
 
     GoogleMap(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .applyIf(!triggerMapSnapshot) { fillMaxSize() }
+            .applyIf(triggerMapSnapshot) {
+                width(300.dp)
+                    .aspectRatio(16 / 9f)
+                    .alpha(0f)
+            },
         cameraPositionState = cameraPositionState,
-        contentPadding = PaddingValues(top = 72.dp, bottom = 36.dp, start = 8.dp),
+        contentPadding = if (triggerMapSnapshot) PaddingValues(0.dp) else PaddingValues(top = 72.dp, bottom = 36.dp, start = 8.dp),
         properties = MapProperties(
             mapStyleOptions = mapStyle,
             mapType = mapType,
@@ -131,8 +148,34 @@ fun ActivityTrackerMap(
 
         MapEffect(triggerMapSnapshot) { map ->
             if (triggerMapSnapshot && !snapshotTriggered) {
+                delay(150L)
+
                 snapshotTriggered = true
-                map.awaitSnapshot()?.let(onSnapshot)
+
+                val boundsBuilder = LatLngBounds.builder().apply {
+                    locations.flatten().forEach { location ->
+                        include(
+                            LatLng(
+                                location.latLong.latitude,
+                                location.latLong.longitude
+                            )
+                        )
+                    }
+                }
+
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                        boundsBuilder.build(),
+                        with(density) { 16.dp.toPx() }.roundToInt()
+                    )
+                )
+
+                map.setOnCameraIdleListener {
+                    scope.launch {
+                        delay(100L)
+                        map.awaitSnapshot()?.let(onSnapshot)
+                    }
+                }
             }
         }
 
