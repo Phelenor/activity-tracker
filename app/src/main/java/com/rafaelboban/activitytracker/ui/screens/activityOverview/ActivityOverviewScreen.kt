@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.ui.components.ActivityDetailsCard
+import com.rafaelboban.activitytracker.ui.components.ActivityGoalsCard
 import com.rafaelboban.activitytracker.ui.components.ActivityHeartZoneAnalysisCard
 import com.rafaelboban.activitytracker.ui.components.ActivityMapCard
 import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
@@ -80,6 +81,13 @@ private fun ActivityOverviewScreen(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         heartZoneDistribution = activity.heartRateZoneDistribution
                     )
+
+                    if (activity.goals.isNotEmpty()) {
+                        ActivityGoalsCard(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            goals = activity.goals
+                        )
+                    }
                 }
             }
 

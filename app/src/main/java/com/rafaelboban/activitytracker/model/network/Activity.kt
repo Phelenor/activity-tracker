@@ -1,6 +1,9 @@
 package com.rafaelboban.activitytracker.model.network
 
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoal
 import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalProgress
+import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
+import com.rafaelboban.activitytracker.network.model.goals.GoalValueComparisonType
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.HeartRateZone
 import kotlinx.serialization.Serializable
@@ -44,7 +47,17 @@ data class Activity(
             avgHeartRate = 120,
             heartRateZoneDistribution = HeartRateZone.entries.associateWith { Random.nextFloat() },
             calories = 120,
-            goals = emptyList(),
+            goals = List(5) {
+                ActivityGoalProgress(
+                    currentValue = 1.2f,
+                    goal = ActivityGoal(
+                        type = ActivityGoalType.DISTANCE,
+                        valueType = GoalValueComparisonType.GREATER,
+                        value = 3.4f,
+                        label = "distance"
+                    )
+                )
+            },
             endTimestamp = Instant.now().epochSecond,
             maxHeartRate = 150,
             maxSpeedKmh = 5.5f,

@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,13 +59,14 @@ fun ActivityGoalProgressRow(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
+            modifier = Modifier.weight(1f, fill = true),
             style = Typography.labelLarge,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
+            textAlign = TextAlign.End,
             overflow = TextOverflow.Ellipsis,
             text = getValueText(goalProgress.goal.type, goalProgress.goal.value, goalProgress.currentValue, goalProgress.goal.valueType, label = goalProgress.goal.label)
         )
