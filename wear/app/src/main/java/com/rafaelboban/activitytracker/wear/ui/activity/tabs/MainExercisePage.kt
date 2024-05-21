@@ -22,9 +22,7 @@ import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,7 +40,6 @@ import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
-import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.wear.ActivityTrackerWearTheme
 
 @Composable
@@ -130,7 +127,7 @@ fun MainExercisePage(
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    width = Dimension.value(112.dp)
+                    width = Dimension.wrapContent
                     height = Dimension.fillToConstraints
                 }
         ) { status ->
@@ -154,22 +151,15 @@ fun MainExercisePage(
                 }
 
                 ActivityStatus.PAUSED -> {
-                    Row(verticalAlignment = Alignment.Top) {
+                    Box(contentAlignment = Alignment.TopCenter) {
                         ActivityActionButton(
                             icon = Icons.Filled.PlayArrow,
                             onClick = { onAction(ActivityAction.OnResumeClick) }
                         )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        ActivityActionButton(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                            onClick = { onAction(ActivityAction.OnFinishClick) }
-                        )
                     }
                 }
 
-                else -> Unit // TODO: Clear and restart
+                else -> Unit
             }
         }
     }
