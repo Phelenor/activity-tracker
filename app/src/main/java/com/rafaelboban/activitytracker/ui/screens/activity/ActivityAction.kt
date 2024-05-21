@@ -18,6 +18,7 @@ sealed interface ActivityAction {
     data object OnReloadWeather : ActivityAction
     data object OpenGoals : ActivityAction
     data object OnAddGoalClick : ActivityAction
+    data object SaveActivity : ActivityAction
     data class AddGoal(val goal: ActivityGoal) : ActivityAction
     data class RemoveGoal(val goal: ActivityGoalType) : ActivityAction
     data class OnTabChanged(val tab: ActivityTabType) : ActivityAction

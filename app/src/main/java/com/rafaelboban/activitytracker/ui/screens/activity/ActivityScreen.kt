@@ -191,7 +191,7 @@ fun ActivityScreen(
     }
 
     DialogScaffold(
-        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showSetGoalsDialog || state.showAddGoalDialog,
+        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showSetGoalsDialog || state.showAddGoalDialog || state.showDoYouWantToSaveDialog,
         onDismiss = { onAction(ActivityAction.DismissDialogs) }
     ) {
         when {
@@ -206,6 +206,16 @@ fun ActivityScreen(
                     toggleTrackerService(false)
                     onAction(ActivityAction.DiscardActivity)
                 }
+            )
+
+            state.showDoYouWantToSaveDialog -> InfoDialog(
+                title = stringResource(id = com.rafaelboban.activitytracker.R.string.save_activity_question),
+                subtitle = stringResource(id = com.rafaelboban.activitytracker.R.string.short_activity_info),
+                actionText = stringResource(id = com.rafaelboban.activitytracker.R.string.save),
+                actionButtonColor = MaterialTheme.colorScheme.primary,
+                actionButtonTextColor = MaterialTheme.colorScheme.onPrimary,
+                onDismissClick = { onAction(ActivityAction.DismissDialogs) },
+                onActionClick = { onAction(ActivityAction.SaveActivity) }
             )
 
             state.showSelectMapTypeDialog -> {

@@ -123,7 +123,10 @@ class ActivityViewModel @Inject constructor(
             }
 
             ActivityAction.OnFinishClick -> {
-                state = state.copy(status = ActivityStatus.FINISHED, isSaving = true)
+                val shorterThan30Seconds = state.duration < 30.seconds
+                val hasAtLeast5Locations = state.activityData.locations.flatten().size >= 5
+
+                state = state.copy(status = ActivityStatus.FINISHED, isSaving = !shorterThan30Seconds && hasAtLeast5Locations, showDoYouWantToSaveDialog = shorterThan30Seconds && hasAtLeast5Locations)
                 tracker.setActivityStatus(ActivityStatus.FINISHED)
                 tracker.setIsTrackingActivity(false)
                 tracker.stopTrackingLocation()
@@ -138,7 +141,8 @@ class ActivityViewModel @Inject constructor(
                     showDiscardDialog = false,
                     showSelectMapTypeDialog = false,
                     showAddGoalDialog = false,
-                    showSetGoalsDialog = false
+                    showSetGoalsDialog = false,
+                    showDoYouWantToSaveDialog = false
                 )
             }
 
@@ -172,6 +176,10 @@ class ActivityViewModel @Inject constructor(
 
             ActivityAction.OnAddGoalClick -> {
                 state = state.copy(showAddGoalDialog = true)
+            }
+
+            ActivityAction.SaveActivity -> {
+                state = state.copy(isSaving = true)
             }
 
             is ActivityAction.AddGoal -> {

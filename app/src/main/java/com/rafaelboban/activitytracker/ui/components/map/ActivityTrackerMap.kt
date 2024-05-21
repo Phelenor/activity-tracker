@@ -166,7 +166,7 @@ fun ActivityTrackerMap(
                 map.moveCamera(
                     CameraUpdateFactory.newLatLngBounds(
                         boundsBuilder.build(),
-                        with(density) { 16.dp.toPx() }.roundToInt()
+                        with(density) { 48.dp.toPx() }.roundToInt()
                     )
                 )
 

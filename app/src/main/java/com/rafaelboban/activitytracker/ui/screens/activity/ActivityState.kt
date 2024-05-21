@@ -18,6 +18,7 @@ data class ActivityState(
     val duration: Duration = Duration.ZERO,
     val currentLocation: Location? = null,
     val showDiscardDialog: Boolean = false,
+    val showDoYouWantToSaveDialog: Boolean = false,
     val status: ActivityStatus = ActivityStatus.NOT_STARTED,
     val mapCameraLocked: Boolean = true,
     val showSelectMapTypeDialog: Boolean = false,

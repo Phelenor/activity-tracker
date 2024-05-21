@@ -16,7 +16,7 @@ data class Activity(
     val avgSpeedKmh: Float,
     val avgHeartRate: Int,
     val maxSpeedKmh: Float = 0f,
-    val maxHeartRate: Int = 0,
+    val maxHeartRate: Int,
     val calories: Int,
     val elevation: Int,
     val weather: ActivityWeatherInfo?,

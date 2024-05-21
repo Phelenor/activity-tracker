@@ -73,4 +73,7 @@
     <string name="duration_pct_below_zone">% below HR zone</string>
     <string name="duration_pct_above_zone">% above HR zone</string>
     <string name="delete">Delete</string>
+    <string name="save_activity_question">Save activity?</string>
+    <string name="short_activity_info">This activity was shorter than 30 seconds.</string>
+    <string name="save">Save</string>
 </resources>
