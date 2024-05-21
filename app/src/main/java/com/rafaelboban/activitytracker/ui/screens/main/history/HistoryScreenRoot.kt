@@ -60,7 +60,6 @@ private fun HistoryScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp)
         ) {
-
             if (state.showEmptyState) {
                 item {
                     HistoryEmptyState()

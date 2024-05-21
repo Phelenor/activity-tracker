@@ -3,6 +3,7 @@
 package com.rafaelboban.activitytracker.ui.screens.activity
 
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -123,6 +124,7 @@ fun ActivityScreenRoot(
     ObserveAsEvents(flow = viewModel.events) { event ->
         when (event) {
             ActivityEvent.NavigateBack -> navigateUp()
+            ActivityEvent.ActivitySaveError -> Toast.makeText(context, context.getString(R.string.activity_save_error), Toast.LENGTH_LONG).show()
             ActivityEvent.OpenGoals -> {
                 viewModel.onAction(ActivityAction.OnTabChanged(ActivityTabType.GOALS))
                 scope.launch {

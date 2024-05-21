@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="activity_save_error">Activity couldn\'t be saved.</string>
+</resources>

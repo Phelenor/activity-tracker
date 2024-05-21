@@ -5,18 +5,11 @@ package com.rafaelboban.activitytracker.ui.components.map
 import android.graphics.Bitmap
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,10 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +46,7 @@ import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.ui.components.applyIf
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
+import com.rafaelboban.core.theme.mobile.ColorSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -148,9 +140,9 @@ fun ActivityTrackerMap(
 
         MapEffect(triggerMapSnapshot) { map ->
             if (triggerMapSnapshot && !snapshotTriggered) {
-                delay(150L)
-
                 snapshotTriggered = true
+
+                delay(150L)
 
                 val boundsBuilder = LatLngBounds.builder().apply {
                     locations.flatten().forEach { location ->
@@ -179,26 +171,48 @@ fun ActivityTrackerMap(
             }
         }
 
-        currentLocation?.let {
-            MarkerComposable(
-                currentLocation,
-                state = markerState,
-                anchor = Offset(0.5f, 0.5f)
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .applyIf(mapType.hardlyVisible) { border(shape = CircleShape, width = 2.dp, color = MaterialTheme.colorScheme.background) }
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(4.dp)
+        if (snapshotTriggered) {
+            val firstLocation = locations.flatten().firstOrNull()
+            val lastLocation = locations.flatten().lastOrNull()
+
+            firstLocation?.let {
+                lastLocation?.let {
+                    MarkerComposable(
+                        firstLocation,
+                        state = rememberMarkerState(position = LatLng(firstLocation.latLong.latitude, firstLocation.latLong.longitude)),
+                        anchor = Offset(0.5f, 0.5f)
+                    ) {
+                        MapMarker(
+                            imageVector = null,
+                            backgroundColor = ColorSuccess,
+                            showBorder = true
+                        )
+                    }
+
+                    MarkerComposable(
+                        lastLocation,
+                        state = rememberMarkerState(position = LatLng(lastLocation.latLong.latitude, lastLocation.latLong.longitude)),
+                        anchor = Offset(0.5f, 0.5f)
+                    ) {
+                        MapMarker(
+                            imageVector = ImageVector.vectorResource(com.rafaelboban.core.theme.R.drawable.ic_finish_flag),
+                            backgroundColor = MaterialTheme.colorScheme.error,
+                            iconTint = MaterialTheme.colorScheme.onError,
+                            showBorder = true
+                        )
+                    }
+                }
+            }
+        } else {
+            currentLocation?.let {
+                MarkerComposable(
+                    currentLocation,
+                    state = markerState,
+                    anchor = Offset(0.5f, 0.5f)
                 ) {
-                    Icon(
+                    MapMarker(
                         imageVector = ImageVector.vectorResource(id = activityType.drawableRes),
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
+                        showBorder = mapType.hardlyVisible
                     )
                 }
             }

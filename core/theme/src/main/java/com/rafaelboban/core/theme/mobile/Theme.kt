@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
     primary = primaryLight,
@@ -81,6 +82,8 @@ internal val DarkColors = darkColorScheme(
     surfaceContainerHigh = surfaceContainerHighDark,
     surfaceContainerHighest = surfaceContainerHighestDark
 )
+
+val ColorSuccess = Color(0xFF0da63b)
 
 @Composable
 fun ActivityTrackerTheme(

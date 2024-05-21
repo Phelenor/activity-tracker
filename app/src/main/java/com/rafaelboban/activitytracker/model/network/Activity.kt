@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Activity(
-    val id: String,
+    val id: String = "",
     val activityType: ActivityType,
     val startTimestamp: Long,
     val endTimestamp: Long,

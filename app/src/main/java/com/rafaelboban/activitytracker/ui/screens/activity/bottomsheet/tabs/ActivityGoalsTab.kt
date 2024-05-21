@@ -51,6 +51,22 @@ fun ActivityGoalsTab(
             HorizontalDivider(modifier = Modifier.padding(8.dp))
         }
 
+        if (state.goals.isEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "No goals set for this activity.",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = Typography.labelMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
         if (showAddButton && state.status == ActivityStatus.NOT_STARTED) {
             Box(
                 contentAlignment = Alignment.Center,

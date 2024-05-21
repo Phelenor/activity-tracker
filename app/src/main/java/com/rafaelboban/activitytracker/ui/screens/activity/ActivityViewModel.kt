@@ -28,6 +28,7 @@ import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
+import com.skydoves.sandwich.suspendOnFailure
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -212,7 +213,6 @@ class ActivityViewModel @Inject constructor(
         viewModelScope.launch {
             val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(state.activityData.heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, state.duration)
             val activity = Activity(
-                id = "",
                 activityType = state.type,
                 startTimestamp = tracker.startTimestamp ?: 0,
                 endTimestamp = tracker.endTimestamp ?: 0,
@@ -236,11 +236,11 @@ class ActivityViewModel @Inject constructor(
                 }
             )
 
-            activityRepository.saveActivity(activity, mapSnapshot).onSuccess {
-                state = state.copy(isSaving = false)
-            }.onFailure {
-                state = state.copy(isSaving = false)
+            activityRepository.saveActivity(activity, mapSnapshot).suspendOnFailure {
+                eventChannel.send(ActivityEvent.ActivitySaveError)
             }
+
+            state = state.copy(isSaving = false)
         }
     }
 
