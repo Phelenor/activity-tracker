@@ -6,5 +6,6 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class HistoryState(
     val activities: ImmutableList<Activity> = persistentListOf(),
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    val showEmptyState: Boolean = false
 )

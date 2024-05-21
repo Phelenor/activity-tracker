@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.ActivityWeatherInfo
 import com.rafaelboban.activitytracker.ui.components.ActivityCard
+import com.rafaelboban.activitytracker.ui.components.HistoryEmptyState
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.collections.immutable.toImmutableList
@@ -59,6 +60,13 @@ private fun HistoryScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp)
         ) {
+
+            if (state.showEmptyState) {
+                item {
+                    HistoryEmptyState()
+                }
+            }
+
             items(state.activities, key = { it.id }) { activity ->
                 ActivityCard(
                     activity = activity,

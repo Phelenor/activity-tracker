@@ -21,9 +21,6 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("/")
-    suspend fun ping(): ApiResponse<Unit>
-
     @POST("/api/login")
     suspend fun login(@Body body: LoginRequest): ApiResponse<LoginResponse>
 
