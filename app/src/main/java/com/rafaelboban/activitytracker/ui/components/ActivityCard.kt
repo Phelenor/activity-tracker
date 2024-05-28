@@ -212,7 +212,7 @@ private fun ActivityDateSection(
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-            text = DateHelper.formatTimestampToDate(timestamp),
+            text = DateHelper.formatTimestampToDateTime(timestamp),
             style = Typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

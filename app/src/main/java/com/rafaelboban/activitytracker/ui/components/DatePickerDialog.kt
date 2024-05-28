@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
@@ -13,21 +14,22 @@ import com.rafaelboban.activitytracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BirthDatePicker(
+fun DatePickerDialog(
     showDialog: Boolean,
     initialSelectedTimestamp: Long?,
-    modifier: Modifier = Modifier,
     onConfirm: (Long) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    yearRange: IntRange = DatePickerDefaults.YearRange
 ) {
     val dateState = rememberDatePickerState(
         initialSelectedDateMillis = initialSelectedTimestamp?.times(1000),
-        yearRange = 1900..2012
+        yearRange = yearRange
     )
 
     if (showDialog) {
         DatePickerDialog(
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = modifier.padding(horizontal = 4.dp),
             onDismissRequest = onDismiss,
             confirmButton = {
                 ButtonPrimary(

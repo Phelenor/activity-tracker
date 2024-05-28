@@ -41,10 +41,10 @@ import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.User
-import com.rafaelboban.activitytracker.ui.components.BirthDatePicker
 import com.rafaelboban.activitytracker.ui.components.ButtonSecondary
 import com.rafaelboban.activitytracker.ui.components.ChangeNameBottomSheet
 import com.rafaelboban.activitytracker.ui.components.ConfirmActionBottomSheet
+import com.rafaelboban.activitytracker.ui.components.DatePickerDialog
 import com.rafaelboban.activitytracker.ui.components.EnterNumberBottomSheet
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.LabeledItem
@@ -120,11 +120,12 @@ private fun ProfileScreen(
 
     FullScreenLoadingDialog(showDialog = state.submitInProgress)
 
-    BirthDatePicker(
+    DatePickerDialog(
         showDialog = state.showBirthDateDialog,
         initialSelectedTimestamp = state.user.birthTimestamp,
         onConfirm = { timestamp -> onAction(ProfileAction.ConfirmBirthDateClick(timestamp)) },
-        onDismiss = { onAction(ProfileAction.DismissDialog) }
+        onDismiss = { onAction(ProfileAction.DismissDialog) },
+        yearRange = 1900..2012
     )
 
     if (showBottomSheet) {

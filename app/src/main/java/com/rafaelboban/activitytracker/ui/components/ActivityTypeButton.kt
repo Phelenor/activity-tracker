@@ -22,7 +22,8 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 fun ActivityTypeButton(
     activityType: ActivityType,
     onClick: (ActivityType) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -31,7 +32,7 @@ fun ActivityTypeButton(
             .aspectRatio(1f)
             .clip(CircleShape)
             .clickable { onClick(activityType) }
-            .background(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary)
+            .background(shape = CircleShape, color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
     ) {
         Icon(
             modifier = Modifier.size(24.dp),

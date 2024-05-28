@@ -55,7 +55,7 @@ fun DialogButtonRow(
     onActionClick: () -> Unit,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
-    negativeText: String = "Cancel",
+    negativeText: String = stringResource(R.string.cancel),
     actionEnabled: Boolean = true,
     actionButtonColor: Color = MaterialTheme.colorScheme.primaryContainer,
     actionButtonTextColor: Color = MaterialTheme.colorScheme.onPrimaryContainer

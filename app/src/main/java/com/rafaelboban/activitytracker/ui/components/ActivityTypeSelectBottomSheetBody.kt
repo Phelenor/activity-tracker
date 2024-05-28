@@ -39,7 +39,7 @@ fun ActivityTypeSelectBottomSheetBody(
             .padding(bottom = 24.dp, start = 12.dp, end = 12.dp)
     ) {
         Text(
-            text = stringResource(id = R.string.select_activity),
+            text = stringResource(id = R.string.select_activity_type),
             style = Typography.displayLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,

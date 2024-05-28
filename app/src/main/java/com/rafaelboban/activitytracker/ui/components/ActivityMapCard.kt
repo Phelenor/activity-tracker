@@ -47,7 +47,6 @@ fun ActivityMapCard(
             .padding(16.dp)
     ) {
         Row(
-            modifier = modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -59,7 +58,7 @@ fun ActivityMapCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = DateHelper.formatTimestampToDate(startTimestamp),
+                text = DateHelper.formatTimestampToDateTime(startTimestamp),
                 style = Typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

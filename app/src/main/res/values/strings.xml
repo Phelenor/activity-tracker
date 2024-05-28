@@ -29,11 +29,11 @@
     <string name="name_validation">Name length longer than 3 characters, and shorter than 30 characters</string>
     <string name="add">Add</string>
     <string name="individual_activity_label">Start individual activity</string>
-    <string name="create_group_activity">Start group activity\n</string>
+    <string name="create_group_activity">Create group activity\n</string>
     <string name="join_group_activity">Join group activity</string>
     <string name="join_gym_activity">Join gym activity</string>
     <string name="get_equipment_info">Get equipment info</string>
-    <string name="select_activity">Select activity</string>
+    <string name="select_activity_type">Select activity type</string>
     <string name="history">History</string>
     <string name="dashboard">Dashboard</string>
     <string name="profile">Profile</string>
@@ -78,4 +78,10 @@
     <string name="save">Save</string>
     <string name="max_pace">Max. pace</string>
     <string name="max_speed">Max. speed</string>
+    <string name="schedule">Schedule</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="unscheduled">Unscheduled</string>
+    <string name="select_group_activity_type">Select group activity type</string>
+    <string name="set_estimated_start_time">Set estimated start time</string>
 </resources>

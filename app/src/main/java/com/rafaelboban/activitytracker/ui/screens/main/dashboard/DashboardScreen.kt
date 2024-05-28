@@ -27,12 +27,15 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomSheetBody
+import com.rafaelboban.activitytracker.ui.components.ConfigureGroupActivityBottomSheetBody
 import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -48,6 +51,25 @@ fun DashboardScreenRoot(
         )
     )
 
+    val checkPermissionsAndInvoke: (() -> Unit) -> Unit = { block ->
+        if (locationTrackingPermissions.allPermissionsGranted) {
+            block()
+        } else if (locationTrackingPermissions.shouldShowRationale) {
+            viewModel.displayRationaleDialog(isVisible = true)
+        } else {
+            locationTrackingPermissions.launchMultiplePermissionRequest()
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is DashboardEvent.ActivityCreated -> {
+                viewModel.dismissBottomSheet()
+                Timber.tag("MARIN").d("${event.groupActivityId} ${event.activityType}")
+            }
+        }
+    }
+
     DashboardScreen(
         state = viewModel.state,
         onAction = { action ->
@@ -55,16 +77,9 @@ fun DashboardScreenRoot(
                 DashboardAction.DismissBottomSheet -> viewModel.dismissBottomSheet()
                 DashboardAction.DismissRationaleDialog -> viewModel.displayRationaleDialog(isVisible = false)
                 DashboardAction.RequestPermissions -> locationTrackingPermissions.launchMultiplePermissionRequest()
-                DashboardAction.OpenSelectActivityBottomSheet -> {
-                    if (locationTrackingPermissions.allPermissionsGranted) {
-                        viewModel.showSelectActivityBottomSheet()
-                    } else if (locationTrackingPermissions.shouldShowRationale) {
-                        viewModel.displayRationaleDialog(isVisible = true)
-                    } else {
-                        locationTrackingPermissions.launchMultiplePermissionRequest()
-                    }
-                }
-
+                DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
+                DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
+                is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
                     navigateToActivity(action.type)
@@ -103,11 +118,23 @@ fun DashboardScreen(
         )
     }
 
-    if (state.showSelectActivityBottomSheet) {
-        ModalBottomSheet(onDismissRequest = dismissBottomSheet) {
-            ActivityTypeSelectBottomSheetBody(
-                onClick = { onAction(DashboardAction.StartIndividualActivity(it)) }
-            )
+    if (state.showSelectActivityBottomSheet || state.showConfigureGroupActivityBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = dismissBottomSheet,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            when {
+                state.showSelectActivityBottomSheet -> ActivityTypeSelectBottomSheetBody(
+                    onClick = { onAction(DashboardAction.StartIndividualActivity(it)) }
+                )
+
+                state.showConfigureGroupActivityBottomSheet -> ConfigureGroupActivityBottomSheetBody(
+                    isCreatingActivity = state.isCreatingGroupActivity,
+                    onClick = { activityType, startTimestamp ->
+                        onAction(DashboardAction.CreateGroupActivity(activityType, startTimestamp))
+                    }
+                )
+            }
         }
     }
 
@@ -122,9 +149,17 @@ fun DashboardScreen(
     ) {
         items(DashboardControl.entries) { control ->
             ControlCard(
-                onClick = { onAction(DashboardAction.OpenSelectActivityBottomSheet) },
                 control = control,
-                modifier = Modifier.aspectRatio(1f)
+                modifier = Modifier.aspectRatio(1f),
+                onClick = {
+                    when (control) {
+                        DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                        DashboardControl.CREATE_GROUP_ACTIVITY -> onAction(DashboardAction.OpenConfigureGroupActivityBottomSheet)
+                        DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                        DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                        DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                    }
+                }
             )
         }
     }
@@ -143,7 +178,7 @@ private fun DashboardScreenPreview() {
 
 enum class DashboardControl(@StringRes val titleRes: Int, @DrawableRes val icon: Int, val offline: Boolean = false) {
     INDIVIDUAL_ACTIVITY(R.string.individual_activity_label, com.rafaelboban.core.shared.R.drawable.ic_run, true),
-    GROUP_ACTIVITY(R.string.create_group_activity, com.rafaelboban.core.shared.R.drawable.app_logo_main),
+    CREATE_GROUP_ACTIVITY(R.string.create_group_activity, com.rafaelboban.core.shared.R.drawable.app_logo_main),
     JOIN_GROUP_ACTIVITY(R.string.join_group_activity, R.drawable.ic_person_add),
     JOIN_GYM_ACTIVITY(R.string.join_gym_activity, R.drawable.ic_treadmill_run),
     SCAN_GYM_EQUIPMENT(R.string.get_equipment_info, R.drawable.ic_qr_scanner)

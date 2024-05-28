@@ -3,6 +3,8 @@ package com.rafaelboban.activitytracker.network
 import com.rafaelboban.activitytracker.BuildConfig
 import com.rafaelboban.activitytracker.model.User
 import com.rafaelboban.activitytracker.model.network.Activity
+import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
+import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.model.LoginResponse
 import com.rafaelboban.activitytracker.network.model.UpdateUserData
@@ -42,6 +44,9 @@ interface ApiService {
 
     @DELETE("/api/activities/{id}")
     suspend fun deleteActivity(@Path("id") id: String): ApiResponse<String?>
+
+    @POST("/api/create-group-activity")
+    suspend fun createGroupActivity(@Body body: CreateGroupActivityRequest): ApiResponse<GroupActivity>
 
     @GET("https://api.openweathermap.org/data/3.0/onecall")
     suspend fun getWeatherData(

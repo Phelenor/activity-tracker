@@ -20,7 +20,8 @@ fun TimePickerDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     initialHour: Int = 0,
-    initialMinute: Int = 0
+    initialMinute: Int = 0,
+    alwaysEnabled: Boolean = false
 ) {
     val state = rememberTimePickerState(
         is24Hour = true,
@@ -30,12 +31,13 @@ fun TimePickerDialog(
 
     if (showDialog) {
         DatePickerDialog(
+            modifier = modifier,
             onDismissRequest = onDismiss,
             confirmButton = {
                 ButtonPrimary(
                     modifier = Modifier.padding(end = 8.dp),
                     text = stringResource(id = R.string.confirm),
-                    enabled = state.hour != 0 || state.minute != 0,
+                    enabled = (state.hour != 0 || state.minute != 0) || alwaysEnabled,
                     onClick = {
                         onConfirm(state.hour, state.minute)
                         onDismiss()
@@ -50,8 +52,10 @@ fun TimePickerDialog(
             }
         ) {
             TimePicker(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                state = state
+                state = state,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             )
         }
     }
