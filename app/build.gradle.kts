@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.dagger.hilt.android)
     implementation(libs.hilt.navigation)
     implementation(libs.androidx.lifecycle.service)
+    implementation(libs.mlkit.barcode.scanning)
     ksp(libs.dagger.hilt.compiler)
     ksp(libs.hilt.compiler)
 
@@ -124,6 +125,10 @@ dependencies {
     implementation(libs.google.maps.android.utils.ktx)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.wearable)
+
+    implementation(libs.camerax.camera)
+    implementation(libs.camerax.mlkit.vision)
+    implementation(libs.camerax.view)
 
     debugImplementation(libs.chucker)
     releaseImplementation(libs.chucker.no.op)

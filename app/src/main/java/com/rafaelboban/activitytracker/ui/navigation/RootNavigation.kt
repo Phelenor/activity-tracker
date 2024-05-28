@@ -8,6 +8,7 @@ import androidx.navigation.navDeepLink
 import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.activityOverview.ActivityOverviewScreenRoot
+import com.rafaelboban.activitytracker.ui.screens.camera.ScannerScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -40,6 +41,9 @@ fun RootNavigation(
                 navigateToActivityOverview = { id ->
                     navHostController.navigate(NavigationGraph.ActivityOverview(id))
                 },
+                navigateToQRCodeScanner = {
+                    navHostController.navigate(NavigationGraph.QRCodeScanner)
+                },
                 onLogout = {
                     navHostController.navigate(NavigationGraph.Auth) {
                         popUpTo(NavigationGraph.Main) {
@@ -67,6 +71,12 @@ fun RootNavigation(
                 navigateUp = { navHostController.navigateUp() }
             )
         }
+
+        composableSlide<NavigationGraph.QRCodeScanner> {
+            ScannerScreenRoot(
+                navigateUp = { navHostController.navigateUp() }
+            )
+        }
     }
 }
 
@@ -83,4 +93,7 @@ sealed interface NavigationGraph {
 
     @Serializable
     data class ActivityOverview(val id: String) : NavigationGraph
+
+    @Serializable
+    data object QRCodeScanner : NavigationGraph
 }

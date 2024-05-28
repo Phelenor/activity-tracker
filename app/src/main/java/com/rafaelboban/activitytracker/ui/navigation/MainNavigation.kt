@@ -69,6 +69,7 @@ fun MainScreen(
     onLogout: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
+    navigateToQRCodeScanner: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -122,6 +123,7 @@ fun MainScreen(
             navController = navController,
             navigateToActivity = navigateToActivity,
             navigateToActivityOverview = navigateToActivityOverview,
+            navigateToQRCodeScanner = navigateToQRCodeScanner,
             navigateToLogin = onLogout
         )
     }
@@ -133,6 +135,7 @@ fun MainNavigationGraph(
     navigateToLogin: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
+    navigateToQRCodeScanner: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -147,7 +150,10 @@ fun MainNavigationGraph(
         }
 
         composableFade<MainScreenNavigation.Dashboard> {
-            DashboardScreenRoot(navigateToActivity = navigateToActivity)
+            DashboardScreenRoot(
+                navigateToActivity = navigateToActivity,
+                navigateToQRCodeScanner = navigateToQRCodeScanner
+            )
         }
 
         composableFade<MainScreenNavigation.Profile> {

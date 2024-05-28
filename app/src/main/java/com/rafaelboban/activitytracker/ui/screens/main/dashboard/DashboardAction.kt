@@ -7,6 +7,7 @@ sealed interface DashboardAction {
     data object DismissRationaleDialog : DashboardAction
     data object RequestPermissions : DashboardAction
     data object OpenSelectActivityTypeIndividualBottomSheet : DashboardAction
+    data object OpenJoinGroupActivityBottomSheet : DashboardAction
     data object OpenConfigureGroupActivityBottomSheet : DashboardAction
     data class StartIndividualActivity(val type: ActivityType) : DashboardAction
     data class CreateGroupActivity(val type: ActivityType, val estimatedStartTimestamp: Long?) : DashboardAction

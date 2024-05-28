@@ -24,7 +24,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomSheetBody
 import com.rafaelboban.activitytracker.ui.components.ConfigureGroupActivityBottomSheetBody
@@ -41,6 +44,7 @@ import timber.log.Timber
 @Composable
 fun DashboardScreenRoot(
     navigateToActivity: (ActivityType) -> Unit,
+    navigateToQRCodeScanner: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val locationTrackingPermissions = rememberMultiplePermissionsState(
@@ -51,13 +55,25 @@ fun DashboardScreenRoot(
         )
     )
 
-    val checkPermissionsAndInvoke: (() -> Unit) -> Unit = { block ->
+    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+
+    val checkLocationPermissionsAndInvoke: (() -> Unit) -> Unit = { block ->
         if (locationTrackingPermissions.allPermissionsGranted) {
             block()
         } else if (locationTrackingPermissions.shouldShowRationale) {
-            viewModel.displayRationaleDialog(isVisible = true)
+            viewModel.displayLocationRationaleDialog(isVisible = true)
         } else {
             locationTrackingPermissions.launchMultiplePermissionRequest()
+        }
+    }
+
+    val checkCameraPermissionAndInvoke: (() -> Unit) -> Unit = { block ->
+        if (cameraPermission.status.isGranted) {
+            block()
+        } else if (cameraPermission.status.shouldShowRationale) {
+            viewModel.displayLocationRationaleDialog(isVisible = true)
+        } else {
+            cameraPermission.launchPermissionRequest()
         }
     }
 
@@ -75,10 +91,11 @@ fun DashboardScreenRoot(
         onAction = { action ->
             when (action) {
                 DashboardAction.DismissBottomSheet -> viewModel.dismissBottomSheet()
-                DashboardAction.DismissRationaleDialog -> viewModel.displayRationaleDialog(isVisible = false)
+                DashboardAction.DismissRationaleDialog -> viewModel.displayLocationRationaleDialog(isVisible = false)
                 DashboardAction.RequestPermissions -> locationTrackingPermissions.launchMultiplePermissionRequest()
-                DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
-                DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
+                DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
+                DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
+                DashboardAction.OpenJoinGroupActivityBottomSheet -> checkCameraPermissionAndInvoke(navigateToQRCodeScanner)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
@@ -106,12 +123,14 @@ fun DashboardScreen(
     }
 
     DialogScaffold(
-        showDialog = state.shouldShowPermissionRationale,
+        showDialog = state.shouldShowLocationPermissionRationale || state.shouldShowCameraPermissionRationale,
         onDismiss = { onAction(DashboardAction.DismissRationaleDialog) }
     ) {
+        val subtitleRes = if (state.shouldShowLocationPermissionRationale) R.string.permissions_location_rationale_location else R.string.permissions_camera_rationale_location
+
         InfoDialog(
             title = stringResource(id = R.string.permissions),
-            subtitle = stringResource(id = R.string.permissions_rationale_location),
+            subtitle = stringResource(id = subtitleRes),
             actionText = stringResource(id = R.string.ok),
             onActionClick = { onAction(DashboardAction.RequestPermissions) },
             onDismissClick = { onAction(DashboardAction.DismissRationaleDialog) }
@@ -155,7 +174,7 @@ fun DashboardScreen(
                     when (control) {
                         DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
                         DashboardControl.CREATE_GROUP_ACTIVITY -> onAction(DashboardAction.OpenConfigureGroupActivityBottomSheet)
-                        DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                        DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenJoinGroupActivityBottomSheet)
                         DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
                         DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
                     }

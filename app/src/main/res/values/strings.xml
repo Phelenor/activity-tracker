@@ -45,7 +45,8 @@
     <string name="discard_activity_info">Activity won\'t be saved in your activity log.</string>
     <string name="now_running">Now Running</string>
     <string name="permissions">Permissions</string>
-    <string name="permissions_rationale_location">Activity Tracker requires location permission for tracking your activities.</string>
+    <string name="permissions_location_rationale_location">Activity Tracker requires location permission for tracking your activities.</string>
+    <string name="permissions_camera_rationale_location">Activity Tracker requires camera permission for QR code scanning.</string>
     <string name="ok">OK</string>
     <string name="pace">Pace</string>
     <string name="age">Age</string>

@@ -42,8 +42,12 @@ class DashboardViewModel @Inject constructor(
         state = state.copy(showConfigureGroupActivityBottomSheet = true)
     }
 
-    fun displayRationaleDialog(isVisible: Boolean) {
-        state = state.copy(shouldShowPermissionRationale = isVisible)
+    fun displayLocationRationaleDialog(isVisible: Boolean) {
+        state = state.copy(shouldShowLocationPermissionRationale = isVisible)
+    }
+
+    fun shouldShowCameraPermissionRationale(isVisible: Boolean) {
+        state = state.copy(shouldShowCameraPermissionRationale = isVisible)
     }
 
     fun createGroupActivity(type: ActivityType, estimatedStartTimestamp: Long?) {
