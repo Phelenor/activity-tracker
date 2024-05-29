@@ -4,5 +4,11 @@ import com.rafaelboban.core.shared.model.ActivityType
 
 sealed interface DashboardEvent {
 
-    data class ActivityCreated(val groupActivityId: String, val activityType: ActivityType) : DashboardEvent
+    data class GroupActivityCreated(val groupActivityId: String, val activityType: ActivityType) : DashboardEvent
+
+    data class JoinActivitySuccess(val groupActivityId: String, val activityType: ActivityType) : DashboardEvent
+
+    data object GroupActivityCreationError : DashboardEvent
+
+    data object GroupActivityJoinError : DashboardEvent
 }

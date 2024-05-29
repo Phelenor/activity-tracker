@@ -155,7 +155,7 @@ private fun ActivityDurationSection(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary)
+                .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.tertiary,

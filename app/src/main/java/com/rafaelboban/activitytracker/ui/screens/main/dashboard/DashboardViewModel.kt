@@ -7,14 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.core.shared.model.ActivityType
-import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +28,8 @@ class DashboardViewModel @Inject constructor(
     fun dismissBottomSheet() {
         state = state.copy(
             showSelectActivityBottomSheet = false,
-            showConfigureGroupActivityBottomSheet = false
+            showConfigureGroupActivityBottomSheet = false,
+            showJoinGroupActivityBottomSheet = false
         )
     }
 
@@ -42,11 +41,15 @@ class DashboardViewModel @Inject constructor(
         state = state.copy(showConfigureGroupActivityBottomSheet = true)
     }
 
+    fun showJoinGroupActivityBottomSheet() {
+        state = state.copy(showJoinGroupActivityBottomSheet = true)
+    }
+
     fun displayLocationRationaleDialog(isVisible: Boolean) {
         state = state.copy(shouldShowLocationPermissionRationale = isVisible)
     }
 
-    fun shouldShowCameraPermissionRationale(isVisible: Boolean) {
+    fun displayCameraPermissionRationale(isVisible: Boolean) {
         state = state.copy(shouldShowCameraPermissionRationale = isVisible)
     }
 
@@ -55,12 +58,26 @@ class DashboardViewModel @Inject constructor(
             state = state.copy(isCreatingGroupActivity = true)
 
             activityRepository.createGroupActivity(type, estimatedStartTimestamp).suspendOnSuccess {
-                eventChannel.trySend(DashboardEvent.ActivityCreated(data.id, data.activityType))
+                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id, data.activityType))
             }.onFailure {
-                Timber.e("Activity creation error: ${message()}")
+                eventChannel.trySend(DashboardEvent.GroupActivityCreationError)
             }
 
             state = state.copy(isCreatingGroupActivity = false)
+        }
+    }
+
+    fun joinGroupActivity(joinCode: String) {
+        viewModelScope.launch {
+            state = state.copy(isJoiningGroupActivity = true)
+
+            activityRepository.joinGroupActivity(joinCode).suspendOnSuccess {
+                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id, data.activityType))
+            }.onFailure {
+                eventChannel.trySend(DashboardEvent.GroupActivityJoinError)
+            }
+
+            state = state.copy(isJoiningGroupActivity = false)
         }
     }
 }

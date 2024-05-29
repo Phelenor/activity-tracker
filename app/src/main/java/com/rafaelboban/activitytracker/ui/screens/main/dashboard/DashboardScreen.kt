@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.ui.screens.main.dashboard
 
 import android.Manifest
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -34,11 +36,11 @@ import com.rafaelboban.activitytracker.ui.components.ConfigureGroupActivityBotto
 import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
+import com.rafaelboban.activitytracker.ui.components.JoinGroupActivityBottomSheet
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -47,6 +49,8 @@ fun DashboardScreenRoot(
     navigateToQRCodeScanner: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     val locationTrackingPermissions = rememberMultiplePermissionsState(
         listOfNotNull(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -59,6 +63,7 @@ fun DashboardScreenRoot(
 
     val checkLocationPermissionsAndInvoke: (() -> Unit) -> Unit = { block ->
         if (locationTrackingPermissions.allPermissionsGranted) {
+            viewModel.dismissBottomSheet()
             block()
         } else if (locationTrackingPermissions.shouldShowRationale) {
             viewModel.displayLocationRationaleDialog(isVisible = true)
@@ -69,9 +74,10 @@ fun DashboardScreenRoot(
 
     val checkCameraPermissionAndInvoke: (() -> Unit) -> Unit = { block ->
         if (cameraPermission.status.isGranted) {
+            viewModel.dismissBottomSheet()
             block()
         } else if (cameraPermission.status.shouldShowRationale) {
-            viewModel.displayLocationRationaleDialog(isVisible = true)
+            viewModel.displayCameraPermissionRationale(isVisible = true)
         } else {
             cameraPermission.launchPermissionRequest()
         }
@@ -79,9 +85,18 @@ fun DashboardScreenRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is DashboardEvent.ActivityCreated -> {
+            is DashboardEvent.GroupActivityCreated -> {
                 viewModel.dismissBottomSheet()
-                Timber.tag("MARIN").d("${event.groupActivityId} ${event.activityType}")
+                Toast.makeText(context, "Create success ${event.groupActivityId}", Toast.LENGTH_LONG).show()
+                // TODO: nav to activity
+            }
+
+            DashboardEvent.GroupActivityCreationError -> Toast.makeText(context, context.getString(R.string.activity_creation_error), Toast.LENGTH_LONG).show()
+            DashboardEvent.GroupActivityJoinError -> Toast.makeText(context, context.getString(R.string.activity_join_error), Toast.LENGTH_LONG).show()
+            is DashboardEvent.JoinActivitySuccess -> {
+                viewModel.dismissBottomSheet()
+                Toast.makeText(context, "Join success ${event.groupActivityId}", Toast.LENGTH_LONG).show()
+                // TODO: nav to activity
             }
         }
     }
@@ -95,7 +110,9 @@ fun DashboardScreenRoot(
                 DashboardAction.RequestPermissions -> locationTrackingPermissions.launchMultiplePermissionRequest()
                 DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
                 DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
-                DashboardAction.OpenJoinGroupActivityBottomSheet -> checkCameraPermissionAndInvoke(navigateToQRCodeScanner)
+                DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
+                DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke(navigateToQRCodeScanner)
+                is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
@@ -137,7 +154,7 @@ fun DashboardScreen(
         )
     }
 
-    if (state.showSelectActivityBottomSheet || state.showConfigureGroupActivityBottomSheet) {
+    if (state.showSelectActivityBottomSheet || state.showConfigureGroupActivityBottomSheet || state.showJoinGroupActivityBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = dismissBottomSheet,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -152,6 +169,12 @@ fun DashboardScreen(
                     onClick = { activityType, startTimestamp ->
                         onAction(DashboardAction.CreateGroupActivity(activityType, startTimestamp))
                     }
+                )
+
+                state.showJoinGroupActivityBottomSheet -> JoinGroupActivityBottomSheet(
+                    isJoiningActivity = state.isJoiningGroupActivity,
+                    onJoinClick = {},
+                    onScanQrCodeClick = { onAction(DashboardAction.OpenQRCodeScanner) }
                 )
             }
         }

@@ -8,7 +8,9 @@ sealed interface DashboardAction {
     data object RequestPermissions : DashboardAction
     data object OpenSelectActivityTypeIndividualBottomSheet : DashboardAction
     data object OpenJoinGroupActivityBottomSheet : DashboardAction
+    data object OpenQRCodeScanner : DashboardAction
     data object OpenConfigureGroupActivityBottomSheet : DashboardAction
+    data class JoinGroupActivity(val joinCode: String) : DashboardAction
     data class StartIndividualActivity(val type: ActivityType) : DashboardAction
     data class CreateGroupActivity(val type: ActivityType, val estimatedStartTimestamp: Long?) : DashboardAction
 }

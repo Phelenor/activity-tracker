@@ -9,7 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rafaelboban.core.theme.mobile.Typography
@@ -18,7 +20,8 @@ import com.rafaelboban.core.theme.mobile.Typography
 fun LabeledItem(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 20.sp
 ) {
     Column(
         modifier = modifier.padding(horizontal = 4.dp),
@@ -27,6 +30,7 @@ fun LabeledItem(
         Text(
             text = label,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = Typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -34,7 +38,7 @@ fun LabeledItem(
         Text(
             text = value,
             maxLines = 1,
-            fontSize = 20.sp,
+            fontSize = fontSize,
             style = Typography.displayLarge,
             color = MaterialTheme.colorScheme.onSurface
         )

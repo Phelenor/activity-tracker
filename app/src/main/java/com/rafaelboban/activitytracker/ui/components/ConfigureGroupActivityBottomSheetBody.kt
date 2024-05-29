@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.util.DateHelper
 import com.rafaelboban.activitytracker.util.DateHelper.secondsToLocalDate
@@ -158,12 +159,14 @@ fun ConfigureGroupActivityBottomSheetBody(
 
             Spacer(Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
+            Row {
+                val dateText = selectedDateTimestamp?.let { DateHelper.formatTimestampToDate(it) } ?: run { stringResource(R.string.unscheduled) }
+                val timeText = selectedTimeTimestamp?.let { DateHelper.formatTimestampToTime((localDateTimestamp?.plus(it.toLong()) ?: 0)) } ?: run { stringResource(R.string.unscheduled) }
+
                 LabeledItem(
                     label = stringResource(id = R.string.date),
-                    value = selectedDateTimestamp?.let { DateHelper.formatTimestampToDate(it) } ?: run { stringResource(R.string.unscheduled) },
+                    value = dateText,
+                    fontSize = 14.sp,
                     modifier = Modifier
                         .weight(1f)
                         .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
@@ -174,9 +177,8 @@ fun ConfigureGroupActivityBottomSheetBody(
                 Spacer(modifier = Modifier.width(8.dp))
                 LabeledItem(
                     label = stringResource(id = R.string.time),
-                    value = selectedTimeTimestamp?.let {
-                        DateHelper.formatTimestampToTime((localDateTimestamp?.plus(it.toLong()) ?: 0))
-                    } ?: run { stringResource(R.string.unscheduled) },
+                    fontSize = 14.sp,
+                    value = timeText,
                     modifier = Modifier
                         .weight(1f)
                         .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(16.dp))
@@ -192,9 +194,7 @@ fun ConfigureGroupActivityBottomSheetBody(
                 text = stringResource(R.string.create_group_activity),
                 enabled = selectedActivityType != null,
                 onClick = { onClick(checkNotNull(selectedActivityType), localDateTimeTimestamp) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                modifier = Modifier.fillMaxWidth()
             )
         }
 

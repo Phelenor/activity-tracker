@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.network.repository
 
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
+import com.rafaelboban.activitytracker.model.network.JoinGroupActivityRequest
 import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.core.shared.model.ActivityType
 import com.skydoves.sandwich.ApiResponse
@@ -35,4 +36,6 @@ class ActivityRepository @Inject constructor(
     suspend fun deleteActivity(id: String) = api.deleteActivity(id)
 
     suspend fun createGroupActivity(activityType: ActivityType, startTimestamp: Long?) = api.createGroupActivity(CreateGroupActivityRequest(activityType, startTimestamp))
+
+    suspend fun joinGroupActivity(joinCode: String) = api.joinGroupActivity(JoinGroupActivityRequest(joinCode))
 }

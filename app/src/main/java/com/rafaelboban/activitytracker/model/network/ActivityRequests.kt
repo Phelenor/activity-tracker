@@ -8,3 +8,8 @@ data class CreateGroupActivityRequest(
     val activityType: ActivityType,
     val startTimestamp: Long?
 )
+
+@Serializable
+data class JoinGroupActivityRequest(
+    val joinCode: String
+)
