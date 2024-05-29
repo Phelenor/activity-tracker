@@ -1,6 +1,8 @@
 package com.rafaelboban.activitytracker.ui.navigation
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -41,8 +43,8 @@ fun RootNavigation(
                 navigateToActivityOverview = { id ->
                     navHostController.navigate(NavigationGraph.ActivityOverview(id))
                 },
-                navigateToQRCodeScanner = {
-                    navHostController.navigate(NavigationGraph.QRCodeScanner)
+                navigateToQRCodeScanner = { scannerType ->
+                    navHostController.navigate(NavigationGraph.QRCodeScanner(scannerType.ordinal))
                 },
                 onLogout = {
                     navHostController.navigate(NavigationGraph.Auth) {
@@ -73,8 +75,13 @@ fun RootNavigation(
         }
 
         composableSlide<NavigationGraph.QRCodeScanner> {
+            val context = LocalContext.current
+
             ScannerScreenRoot(
-                navigateUp = { navHostController.navigateUp() }
+                navigateUp = { navHostController.navigateUp() },
+                navigateToGroupActivity = {
+                    Toast.makeText(context, "Successful join activity", Toast.LENGTH_LONG).show()
+                }
             )
         }
     }
@@ -95,5 +102,5 @@ sealed interface NavigationGraph {
     data class ActivityOverview(val id: String) : NavigationGraph
 
     @Serializable
-    data object QRCodeScanner : NavigationGraph
+    data class QRCodeScanner(val scannerTypeOrdinal: Int) : NavigationGraph
 }

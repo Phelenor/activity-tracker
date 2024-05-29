@@ -52,7 +52,7 @@ fun JoinGroupActivityBottomSheet(
     var text by remember { mutableStateOf("") }
 
     val isValid: (String) -> Boolean = { input ->
-        input.length == 8 && input.all { it.isDigit() }
+        input.length == 6 && input.all { it.isLetterOrDigit() }
     }
 
     Box(
@@ -91,8 +91,8 @@ fun JoinGroupActivityBottomSheet(
 
             OutlinedTextField(
                 value = text,
-                onValueChange = { if (it.isDigitsOnly()) text = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = { newText -> if (newText.all { it.isLetterOrDigit() }) text = newText.uppercase() },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 textStyle = Typography.bodyLarge,
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,

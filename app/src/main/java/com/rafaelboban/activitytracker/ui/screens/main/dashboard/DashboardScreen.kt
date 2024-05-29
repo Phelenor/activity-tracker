@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +38,7 @@ import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.JoinGroupActivityBottomSheet
+import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
@@ -46,20 +48,32 @@ import kotlinx.coroutines.launch
 @Composable
 fun DashboardScreenRoot(
     navigateToActivity: (ActivityType) -> Unit,
-    navigateToQRCodeScanner: () -> Unit,
+    navigateToQRCodeScanner: (ScannerType) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
+    var permissionGrantedPendingAction = remember { { } }
+
     val locationTrackingPermissions = rememberMultiplePermissionsState(
-        listOfNotNull(
+        permissions = listOfNotNull(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
-        )
+        ),
+        onPermissionsResult = {
+            permissionGrantedPendingAction()
+            permissionGrantedPendingAction = {}
+        }
     )
 
-    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+    val cameraPermission = rememberPermissionState(
+        permission = Manifest.permission.CAMERA,
+        onPermissionResult = {
+            permissionGrantedPendingAction()
+            permissionGrantedPendingAction = {}
+        }
+    )
 
     val checkLocationPermissionsAndInvoke: (() -> Unit) -> Unit = { block ->
         if (locationTrackingPermissions.allPermissionsGranted) {
@@ -68,6 +82,7 @@ fun DashboardScreenRoot(
         } else if (locationTrackingPermissions.shouldShowRationale) {
             viewModel.displayLocationRationaleDialog(isVisible = true)
         } else {
+            permissionGrantedPendingAction = block
             locationTrackingPermissions.launchMultiplePermissionRequest()
         }
     }
@@ -79,6 +94,7 @@ fun DashboardScreenRoot(
         } else if (cameraPermission.status.shouldShowRationale) {
             viewModel.displayCameraPermissionRationale(isVisible = true)
         } else {
+            permissionGrantedPendingAction = block
             cameraPermission.launchPermissionRequest()
         }
     }
@@ -111,7 +127,7 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
                 DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
-                DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke(navigateToQRCodeScanner)
+                DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
@@ -173,7 +189,7 @@ fun DashboardScreen(
 
                 state.showJoinGroupActivityBottomSheet -> JoinGroupActivityBottomSheet(
                     isJoiningActivity = state.isJoiningGroupActivity,
-                    onJoinClick = {},
+                    onJoinClick = { joinCode -> onAction(DashboardAction.JoinGroupActivity(joinCode)) },
                     onScanQrCodeClick = { onAction(DashboardAction.OpenQRCodeScanner) }
                 )
             }

@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.composableFade
+import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
 import com.rafaelboban.activitytracker.ui.screens.main.dashboard.DashboardScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.history.HistoryScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.main.profile.ProfileScreenRoot
@@ -69,7 +70,7 @@ fun MainScreen(
     onLogout: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
-    navigateToQRCodeScanner: () -> Unit,
+    navigateToQRCodeScanner: (ScannerType) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -135,7 +136,7 @@ fun MainNavigationGraph(
     navigateToLogin: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
-    navigateToQRCodeScanner: () -> Unit,
+    navigateToQRCodeScanner: (ScannerType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(

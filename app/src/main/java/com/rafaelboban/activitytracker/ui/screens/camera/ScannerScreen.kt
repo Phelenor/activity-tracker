@@ -2,10 +2,16 @@
 
 package com.rafaelboban.activitytracker.ui.screens.camera
 
+import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,17 +35,29 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.camera.CameraPreview
+import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import kotlin.math.min
 
 @Composable
 fun ScannerScreenRoot(
+    navigateToGroupActivity: (String) -> Unit,
     navigateUp: () -> Boolean,
     viewModel: ScannerScreenViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            ScannerScreenEvent.GroupActivityJoinFailure -> Toast.makeText(context, "Invalid join code", Toast.LENGTH_LONG).show()
+            is ScannerScreenEvent.GroupActivityJoinSuccess -> navigateToGroupActivity(event.activityId)
+        }
+    }
+
     ScannerScreen(
-        scanningEnabled = viewModel.scanningEnabled,
+        state = viewModel.state,
         onAction = { action ->
             when (action) {
                 ScannerScreenAction.OnBackPress -> navigateUp()
@@ -51,7 +69,7 @@ fun ScannerScreenRoot(
 
 @Composable
 private fun ScannerScreen(
-    scanningEnabled: Boolean,
+    state: ScannerScreenState,
     onAction: (ScannerScreenAction) -> Unit
 ) {
     val context = LocalContext.current
@@ -68,7 +86,7 @@ private fun ScannerScreen(
             COORDINATE_SYSTEM_VIEW_REFERENCED,
             ContextCompat.getMainExecutor(context)
         ) { result ->
-            if (scanningEnabled) {
+            if (state.isScanningEnabled && state.isCheckingDataValidity.not()) {
                 val text = result.getValue(barcodeScanner)?.firstOrNull()?.rawValue
 
                 text?.let {
@@ -105,6 +123,14 @@ private fun ScannerScreen(
             )
 
             QRCameraOverlay()
+
+            AnimatedVisibility(
+                visible = state.isCheckingDataValidity,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(200))
+            ) {
+                LoadingIndicator(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }
