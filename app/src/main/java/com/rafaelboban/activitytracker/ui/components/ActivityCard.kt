@@ -209,7 +209,7 @@ private fun ActivityDateSection(
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
         Text(
             text = DateHelper.formatTimestampToDateTime(timestamp),

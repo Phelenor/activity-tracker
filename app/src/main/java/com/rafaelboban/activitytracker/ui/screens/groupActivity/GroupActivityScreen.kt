@@ -628,12 +628,14 @@ private fun ActivityScreenPreview() {
                 groupActivity = GroupActivity(
                     id = "id",
                     activityType = ActivityType.RUN,
-                    activeUsers = emptyList(),
                     startedUsers = emptyList(),
+                    joinedUsers = emptyList(),
+                    activeUsers = emptyList(),
                     joinCode = "AD2323",
                     status = ActivityStatus.IN_PROGRESS,
                     userOwnerId = "sdadasd",
-                    startTimestamp = 31241412
+                    startTimestamp = 31241412,
+                    userOwnerName = "Rafael"
                 ),
                 groupActivityFetchStatus = FetchStatus.SUCCESS,
                 duration = Duration.parse("1h 30m 52s"),

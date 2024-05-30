@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.core.shared.model.ActivityType
 import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onSuccess
 import com.skydoves.sandwich.suspendOnSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -24,6 +26,18 @@ class DashboardViewModel @Inject constructor(
 
     private val eventChannel = Channel<DashboardEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    init {
+        getPendingActivities()
+    }
+
+    private fun getPendingActivities() {
+        viewModelScope.launch {
+            activityRepository.getGroupActivities().onSuccess {
+                state = state.copy(pendingActivities = data.toImmutableList())
+            }
+        }
+    }
 
     fun dismissBottomSheet() {
         state = state.copy(

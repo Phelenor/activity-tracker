@@ -8,14 +8,20 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -25,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -32,16 +39,21 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.rafaelboban.activitytracker.R
+import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.ui.components.ActivityTypeSelectBottomSheetBody
 import com.rafaelboban.activitytracker.ui.components.ConfigureGroupActivityBottomSheetBody
 import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.JoinGroupActivityBottomSheet
+import com.rafaelboban.activitytracker.ui.components.PendingActivityCard
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
+import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
+import com.rafaelboban.core.theme.mobile.Typography
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -127,6 +139,7 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
                 DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
+                is DashboardAction.OnPendingActivityClick -> navigateToGroupActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
@@ -204,7 +217,48 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
     ) {
-        items(DashboardControl.entries) { control ->
+        if (state.pendingActivities.isNotEmpty()) {
+            item(
+                span = { GridItemSpan(maxLineSpan) },
+                key = "scheduled_activities_header"
+            ) {
+                Text(
+                    text = stringResource(R.string.scheduled_activities),
+                    style = Typography.displayLarge,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem()
+                        .padding(vertical = 8.dp, horizontal = 8.dp)
+                )
+            }
+        }
+
+        items(
+            items = state.pendingActivities,
+            span = { GridItemSpan(maxLineSpan) },
+            key = { it.id }
+        ) { activity ->
+            PendingActivityCard(
+                groupActivity = activity,
+                navigateToGroupActivity = { id -> onAction(DashboardAction.OnPendingActivityClick(id)) }
+            )
+        }
+
+        if (state.pendingActivities.isNotEmpty()) {
+            item(
+                span = { GridItemSpan(maxLineSpan) },
+                key = "list_margin"
+            ) {
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+
+        items(
+            DashboardControl.entries,
+            key = { it }
+        ) { control ->
             ControlCard(
                 control = control,
                 modifier = Modifier.aspectRatio(1f),
@@ -227,7 +281,22 @@ fun DashboardScreen(
 private fun DashboardScreenPreview() {
     ActivityTrackerTheme {
         DashboardScreen(
-            state = DashboardState(),
+            state = DashboardState(
+                pendingActivities = List(3) { i ->
+                    GroupActivity(
+                        id = "id$i",
+                        activityType = ActivityType.RUN,
+                        startedUsers = emptyList(),
+                        joinedUsers = emptyList(),
+                        activeUsers = emptyList(),
+                        joinCode = "AD2323",
+                        status = ActivityStatus.IN_PROGRESS,
+                        userOwnerId = "sdadasd",
+                        startTimestamp = 31241412,
+                        userOwnerName = "Rafael"
+                    )
+                }.toImmutableList()
+            ),
             onAction = {}
         )
     }
