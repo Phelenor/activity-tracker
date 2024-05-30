@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -69,6 +70,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -79,6 +81,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.network.FetchStatus
+import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.ui.components.ActivityDataColumn
 import com.rafaelboban.activitytracker.ui.components.ActivityFloatingActionButton
@@ -90,8 +93,6 @@ import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
 import com.rafaelboban.activitytracker.ui.components.ShareGroupActivityDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.components.map.hardlyVisible
-import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreen
-import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.components.ActivityTopAppBar
 import com.rafaelboban.activitytracker.ui.screens.activity.components.HeartRateZoneIndicatorVertical
 import com.rafaelboban.activitytracker.ui.screens.groupActivity.bottomsheet.GroupActivityBottomSheetContent
@@ -360,52 +361,79 @@ fun GroupActivityScreen(
                                 }
                             )
 
-                            if (state.status != ActivityStatus.FINISHED) {
-                                AnimatedContent(
-                                    targetState = state.status,
-                                    label = "controls",
-                                    transitionSpec = {
-                                        slideInVertically(
-                                            animationSpec = tween(200),
-                                            initialOffsetY = { it }
-                                        ) togetherWith slideOutVertically(
-                                            animationSpec = tween(200),
-                                            targetOffsetY = { it }
-                                        )
-                                    },
-                                    modifier = Modifier
-                                        .padding(bottom = 42.dp)
-                                        .zIndex(1f)
-                                        .constrainAs(controls) {
-                                            bottom.linkTo(parent.bottom)
-                                            start.linkTo(parent.start)
-                                            end.linkTo(parent.end)
-                                            width = Dimension.value(152.dp)
-                                        }
-                                ) { status ->
-                                    when (status) {
-                                        ActivityStatus.NOT_STARTED -> {
-                                            Box(contentAlignment = Alignment.Center) {
+                            AnimatedContent(
+                                targetState = state.status,
+                                label = "controls",
+                                transitionSpec = {
+                                    slideInVertically(
+                                        animationSpec = tween(200),
+                                        initialOffsetY = { it }
+                                    ) togetherWith slideOutVertically(
+                                        animationSpec = tween(200),
+                                        targetOffsetY = { it }
+                                    )
+                                },
+                                modifier = Modifier
+                                    .padding(bottom = 42.dp)
+                                    .zIndex(1f)
+                                    .constrainAs(controls) {
+                                        bottom.linkTo(parent.bottom)
+                                        start.linkTo(parent.start)
+                                        end.linkTo(parent.end)
+                                        width = Dimension.value(250.dp)
+                                    }
+                            ) { status ->
+                                when (status) {
+                                    ActivityStatus.NOT_STARTED -> {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.heightIn(min = 72.dp)
+                                        ) {
+                                            if (state.isActivityOwner) {
                                                 ActivityFloatingActionButton(
                                                     icon = Icons.Filled.PlayArrow,
                                                     onClick = { onAction(GroupActivityAction.OnStartClick) },
                                                     showBorder = state.mapType.hardlyVisible
                                                 )
+                                            } else {
+                                                Text(
+                                                    text = stringResource(R.string.waiting_for_start),
+                                                    style = Typography.displayMedium,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onTertiary,
+                                                    modifier = Modifier
+                                                        .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiary)
+                                                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                                                )
                                             }
                                         }
+                                    }
 
-                                        ActivityStatus.IN_PROGRESS -> {
-                                            Box(contentAlignment = Alignment.Center) {
+                                    ActivityStatus.IN_PROGRESS -> {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            if (state.isActivityOwner) {
                                                 ActivityFloatingActionButton(
                                                     icon = Icons.Filled.Pause,
                                                     onClick = { onAction(GroupActivityAction.OnPauseClick) },
                                                     showBorder = state.mapType.hardlyVisible
                                                 )
+                                            } else {
+                                                ActivityFloatingActionButton(
+                                                    icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+                                                    onClick = { onAction(GroupActivityAction.OnFinishClick) },
+                                                    showBorder = state.mapType.hardlyVisible
+                                                )
                                             }
                                         }
+                                    }
 
-                                        ActivityStatus.PAUSED -> {
-                                            Row {
+                                    ActivityStatus.PAUSED -> {
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (state.isActivityOwner) {
                                                 ActivityFloatingActionButton(
                                                     icon = Icons.Filled.PlayArrow,
                                                     onClick = { onAction(GroupActivityAction.OnResumeClick) },
@@ -419,10 +447,45 @@ fun GroupActivityScreen(
                                                     onClick = { onAction(GroupActivityAction.OnFinishClick) },
                                                     showBorder = state.mapType.hardlyVisible
                                                 )
+                                            } else {
+                                                Text(
+                                                    text = stringResource(R.string.paused),
+                                                    style = Typography.displayMedium,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onTertiary,
+                                                    modifier = Modifier
+                                                        .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiary)
+                                                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                                                )
+
+                                                Spacer(modifier = Modifier.width(8.dp))
+
+                                                ActivityFloatingActionButton(
+                                                    icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+                                                    onClick = { onAction(GroupActivityAction.OnFinishClick) },
+                                                    showBorder = state.mapType.hardlyVisible
+                                                )
                                             }
                                         }
+                                    }
 
-                                        else -> Unit
+                                    ActivityStatus.FINISHED -> {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.heightIn(min = 72.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.activity_finished),
+                                                style = Typography.displayMedium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onTertiary,
+                                                modifier = Modifier
+                                                    .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiary)
+                                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -556,13 +619,23 @@ private fun GroupActivityFetchError(
 @Composable
 private fun ActivityScreenPreview() {
     ActivityTrackerTheme {
-        ActivityScreen(
+        GroupActivityScreen(
             onAction = {},
             toggleTrackerService = {},
             scaffoldState = rememberBottomSheetScaffoldState(),
-            state = ActivityState(
-                status = ActivityStatus.IN_PROGRESS,
-                type = ActivityType.WALK,
+            state = GroupActivityState(
+                status = ActivityStatus.NOT_STARTED,
+                groupActivity = GroupActivity(
+                    id = "id",
+                    activityType = ActivityType.RUN,
+                    activeUsers = emptyList(),
+                    startedUsers = emptyList(),
+                    joinCode = "AD2323",
+                    status = ActivityStatus.IN_PROGRESS,
+                    userOwnerId = "sdadasd",
+                    startTimestamp = 31241412
+                ),
+                groupActivityFetchStatus = FetchStatus.SUCCESS,
                 duration = Duration.parse("1h 30m 52s"),
                 activityData = ActivityData(
                     distanceMeters = 1925,

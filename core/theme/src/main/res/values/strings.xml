@@ -3,4 +3,7 @@
     <string name="activity_save_error">Activity couldn\'t be saved.</string>
     <string name="retry">Retry</string>
     <string name="network_error_occurred">Network error occurred</string>
+    <string name="waiting_for_start">Waiting for Start</string>
+    <string name="paused">Paused</string>
+    <string name="activity_finished">Activity Finished</string>
 </resources>

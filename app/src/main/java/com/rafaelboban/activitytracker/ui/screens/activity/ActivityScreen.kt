@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -67,6 +68,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -106,6 +108,7 @@ import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.rafaelboban.core.theme.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Montserrat
+import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -369,73 +372,83 @@ fun ActivityScreen(
                     }
                 )
 
-                if (state.status != ActivityStatus.FINISHED) {
-                    AnimatedContent(
-                        targetState = state.status,
-                        label = "controls",
-                        transitionSpec = {
-                            slideInVertically(
-                                animationSpec = tween(200),
-                                initialOffsetY = { it }
-                            ) togetherWith slideOutVertically(
-                                animationSpec = tween(200),
-                                targetOffsetY = { it }
-                            )
-                        },
-                        modifier = Modifier
-                            .padding(bottom = 42.dp)
-                            .zIndex(1f)
-                            .constrainAs(controls) {
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                                width = Dimension.value(152.dp)
+                AnimatedContent(
+                    targetState = state.status,
+                    label = "controls",
+                    transitionSpec = {
+                        slideInVertically(
+                            animationSpec = tween(200),
+                            initialOffsetY = { it }
+                        ) togetherWith slideOutVertically(
+                            animationSpec = tween(200),
+                            targetOffsetY = { it }
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(bottom = 42.dp)
+                        .zIndex(1f)
+                        .constrainAs(controls) {
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            width = Dimension.value(200.dp)
+                        }
+                ) { status ->
+                    when (status) {
+                        ActivityStatus.NOT_STARTED -> {
+                            Box(contentAlignment = Alignment.Center) {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.PlayArrow,
+                                    onClick = { onAction(ActivityAction.OnStartClick) },
+                                    showBorder = state.mapType.hardlyVisible
+                                )
                             }
-                    ) { status ->
-                        when (status) {
-                            ActivityStatus.NOT_STARTED -> {
-                                Box(
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    ActivityFloatingActionButton(
-                                        icon = Icons.Filled.PlayArrow,
-                                        onClick = { onAction(ActivityAction.OnStartClick) },
-                                        showBorder = state.mapType.hardlyVisible
-                                    )
-                                }
+                        }
+
+                        ActivityStatus.IN_PROGRESS -> {
+                            Box(contentAlignment = Alignment.Center) {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.Pause,
+                                    onClick = { onAction(ActivityAction.OnPauseClick) },
+                                    showBorder = state.mapType.hardlyVisible
+                                )
                             }
+                        }
 
-                            ActivityStatus.IN_PROGRESS -> {
-                                Box(
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    ActivityFloatingActionButton(
-                                        icon = Icons.Filled.Pause,
-                                        onClick = { onAction(ActivityAction.OnPauseClick) },
-                                        showBorder = state.mapType.hardlyVisible
-                                    )
-                                }
+                        ActivityStatus.PAUSED -> {
+                            Row {
+                                ActivityFloatingActionButton(
+                                    icon = Icons.Filled.PlayArrow,
+                                    onClick = { onAction(ActivityAction.OnResumeClick) },
+                                    showBorder = state.mapType.hardlyVisible
+                                )
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                ActivityFloatingActionButton(
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
+                                    onClick = { onAction(ActivityAction.OnFinishClick) },
+                                    showBorder = state.mapType.hardlyVisible
+                                )
                             }
+                        }
 
-                            ActivityStatus.PAUSED -> {
-                                Row {
-                                    ActivityFloatingActionButton(
-                                        icon = Icons.Filled.PlayArrow,
-                                        onClick = { onAction(ActivityAction.OnResumeClick) },
-                                        showBorder = state.mapType.hardlyVisible
-                                    )
-
-                                    Spacer(modifier = Modifier.width(8.dp))
-
-                                    ActivityFloatingActionButton(
-                                        icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                                        onClick = { onAction(ActivityAction.OnFinishClick) },
-                                        showBorder = state.mapType.hardlyVisible
-                                    )
-                                }
+                        ActivityStatus.FINISHED -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.heightIn(min = 72.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.activity_finished),
+                                    style = Typography.displayMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onTertiary,
+                                    modifier = Modifier
+                                        .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiary)
+                                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                                )
                             }
-
-                            else -> Unit
                         }
                     }
                 }
