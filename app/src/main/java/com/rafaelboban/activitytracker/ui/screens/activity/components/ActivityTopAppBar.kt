@@ -45,7 +45,7 @@ fun ActivityTopAppBar(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     showShareButton: Boolean = false,
-    onShareClick: () -> Unit = {},
+    onShareClick: () -> Unit = {}
 ) {
     val gpsBlinkAnimation by rememberInfiniteTransition(label = "gps_blink").animateFloat(
         initialValue = 0f,

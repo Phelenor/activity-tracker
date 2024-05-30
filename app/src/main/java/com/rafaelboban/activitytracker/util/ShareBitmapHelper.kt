@@ -30,7 +30,7 @@ object ShareBitmapHelper {
     fun saveBitmapToCache(context: Context, bitmap: Bitmap, fileName: String): Uri {
         val cachePath = File(context.cacheDir, "images")
         cachePath.mkdirs()
-        val file = File(cachePath, "${fileName}.png")
+        val file = File(cachePath, "$fileName.png")
         val fileOutputStream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
         fileOutputStream.flush()

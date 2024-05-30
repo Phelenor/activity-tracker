@@ -38,13 +38,12 @@ import com.rafaelboban.activitytracker.util.ShareBitmapHelper
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
 
-
 @Composable
 fun ShareGroupActivityDialog(
     inviteText: String,
     joinCode: String,
     onDismissClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val picture = remember { Picture() }
@@ -92,7 +91,6 @@ fun ShareGroupActivityDialog(
                 .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary)
                 .padding(vertical = 8.dp, horizontal = 16.dp)
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,

@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.components
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
