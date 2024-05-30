@@ -9,6 +9,7 @@ import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.activityOverview.ActivityOverviewScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerScreenRoot
+import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
 import com.rafaelboban.activitytracker.ui.screens.groupActivity.GroupActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
@@ -86,7 +87,11 @@ fun RootNavigation(
             ScannerScreenRoot(
                 navigateUp = { navHostController.navigateUp() },
                 navigateToGroupActivity = { id ->
-                    navHostController.navigate(NavigationGraph.GroupActivity(id))
+                    navHostController.navigate(NavigationGraph.GroupActivity(id)) {
+                        popUpTo(NavigationGraph.QRCodeScanner(ScannerType.GROUP_ACTIVITY.ordinal)) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
