@@ -91,4 +91,7 @@
     <string name="activity_creation_error">Activity creation error</string>
     <string name="activity_join_error">Activity join error</string>
     <string name="group">Group</string>
+    <string name="share">Share</string>
+    <string name="share_join_code">Share join code</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

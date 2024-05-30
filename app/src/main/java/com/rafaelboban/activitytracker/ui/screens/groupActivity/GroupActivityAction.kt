@@ -13,6 +13,7 @@ sealed interface GroupActivityAction {
     data object DiscardActivity : GroupActivityAction
     data object OnCameraLockToggle : GroupActivityAction
     data object OnOpenSelectMapType : GroupActivityAction
+    data object OnShareClick : GroupActivityAction
     data object OnReloadWeather : GroupActivityAction
     data object SaveActivity : GroupActivityAction
     data object RetryGroupActivityFetch : GroupActivityAction

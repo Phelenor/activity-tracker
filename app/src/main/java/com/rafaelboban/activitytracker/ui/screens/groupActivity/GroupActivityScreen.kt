@@ -87,6 +87,7 @@ import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.components.SelectMapTypeDialog
+import com.rafaelboban.activitytracker.ui.components.ShareGroupActivityDialog
 import com.rafaelboban.activitytracker.ui.components.map.ActivityTrackerMap
 import com.rafaelboban.activitytracker.ui.components.map.hardlyVisible
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreen
@@ -183,7 +184,7 @@ fun GroupActivityScreen(
     }
 
     DialogScaffold(
-        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showDoYouWantToSaveDialog,
+        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showDoYouWantToSaveDialog || state.showShareDialog,
         onDismiss = { onAction(GroupActivityAction.DismissDialogs) }
     ) {
         when {
@@ -215,6 +216,15 @@ fun GroupActivityScreen(
                     currentType = state.mapType,
                     onDismissClick = { onAction(GroupActivityAction.DismissDialogs) },
                     onConfirmClick = { type -> onAction(GroupActivityAction.OnSelectMapType(type)) }
+                )
+            }
+
+            state.showShareDialog -> {
+                val activity = checkNotNull(state.groupActivity)
+                ShareGroupActivityDialog(
+                    inviteText = "Join my ${stringResource(activity.activityType.singularRes)}.",
+                    joinCode = activity.joinCode,
+                    onDismissClick = { onAction(GroupActivityAction.DismissDialogs) }
                 )
             }
         }
@@ -271,7 +281,9 @@ fun GroupActivityScreen(
                                 ActivityTopAppBar(
                                     activityType = activityType,
                                     onBackClick = { onAction(GroupActivityAction.OnBackClick) },
-                                    gpsOk = if (state.status != ActivityStatus.FINISHED) state.currentLocation != null else null
+                                    gpsOk = if (state.status != ActivityStatus.FINISHED) state.currentLocation != null else null,
+                                    showShareButton = true,
+                                    onShareClick = { onAction(GroupActivityAction.OnShareClick) }
                                 )
 
                                 Row(

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.GpsNotFixed
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +43,9 @@ fun ActivityTopAppBar(
     activityType: ActivityType,
     gpsOk: Boolean?,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showShareButton: Boolean = false,
+    onShareClick: () -> Unit = {},
 ) {
     val gpsBlinkAnimation by rememberInfiniteTransition(label = "gps_blink").animateFloat(
         initialValue = 0f,
@@ -83,7 +86,7 @@ fun ActivityTopAppBar(
         Spacer(modifier = Modifier.weight(1f))
 
         AnimatedVisibility(
-            visible = gpsOk != null,
+            visible = gpsOk != null && showShareButton.not(),
             enter = fadeIn(tween(200)),
             exit = fadeOut(tween(200))
         ) {
@@ -99,6 +102,16 @@ fun ActivityTopAppBar(
                     .alpha(gpsBlinkAnimation)
             )
         }
+
+        if (showShareButton) {
+            IconButton(onClick = onShareClick) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
     }
 }
 
@@ -109,7 +122,8 @@ private fun ActivityTopAppBarPreview() {
         ActivityTopAppBar(
             gpsOk = true,
             activityType = ActivityType.CYCLING,
-            onBackClick = {}
+            onBackClick = {},
+            showShareButton = true
         )
     }
 }

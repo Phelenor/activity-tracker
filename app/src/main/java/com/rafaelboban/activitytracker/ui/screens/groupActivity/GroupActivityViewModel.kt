@@ -146,7 +146,8 @@ class GroupActivityViewModel @Inject constructor(
                 state = state.copy(
                     showDiscardDialog = false,
                     showSelectMapTypeDialog = false,
-                    showDoYouWantToSaveDialog = false
+                    showDoYouWantToSaveDialog = false,
+                    showShareDialog = false
                 )
             }
 
@@ -156,6 +157,10 @@ class GroupActivityViewModel @Inject constructor(
 
             GroupActivityAction.OnOpenSelectMapType -> {
                 state = state.copy(showSelectMapTypeDialog = true)
+            }
+
+            GroupActivityAction.OnShareClick -> {
+                state = state.copy(showShareDialog = true)
             }
 
             GroupActivityAction.DiscardActivity -> {

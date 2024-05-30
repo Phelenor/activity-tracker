@@ -130,6 +130,8 @@ dependencies {
     implementation(libs.camerax.mlkit.vision)
     implementation(libs.camerax.view)
 
+    implementation(libs.zxing.core)
+
     debugImplementation(libs.chucker)
     releaseImplementation(libs.chucker.no.op)
 

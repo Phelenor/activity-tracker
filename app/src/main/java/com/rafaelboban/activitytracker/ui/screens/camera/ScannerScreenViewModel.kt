@@ -79,6 +79,8 @@ class ScannerScreenViewModel @Inject constructor(
     }
 }
 
-enum class ScannerType {
-    GROUP_ACTIVITY, GYM_ACTIVITY, GYM_EQUIPMENT
+enum class ScannerType(val urlFormat: String) {
+    GROUP_ACTIVITY("activity_tracker://group_activity/"),
+    GYM_ACTIVITY("activity_tracker://gym_activity/"),
+    GYM_EQUIPMENT("activity_tracker://gym_equipment/")
 }
