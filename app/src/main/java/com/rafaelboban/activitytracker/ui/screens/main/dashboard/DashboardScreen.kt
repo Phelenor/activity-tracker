@@ -145,6 +145,7 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
                 DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
                 is DashboardAction.OnPendingActivityClick -> navigateToGroupActivity(action.groupActivityId)
+                is DashboardAction.OnPendingActivityDeleteClick -> viewModel.deletePendingActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
                 is DashboardAction.StartIndividualActivity -> {
@@ -258,7 +259,8 @@ fun DashboardScreen(
         ) { activity ->
             PendingActivityCard(
                 groupActivity = activity,
-                navigateToGroupActivity = { id -> onAction(DashboardAction.OnPendingActivityClick(id)) }
+                navigateToGroupActivity = { onAction(DashboardAction.OnPendingActivityClick(activity.id)) },
+                onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) },
             )
         }
 

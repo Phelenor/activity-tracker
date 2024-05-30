@@ -94,4 +94,16 @@ class DashboardViewModel @Inject constructor(
             state = state.copy(isJoiningGroupActivity = false)
         }
     }
+
+    fun deletePendingActivity(groupActivityId: String) {
+        viewModelScope.launch {
+            val updatedActivities = state.pendingActivities - state.pendingActivities.first { it.id == groupActivityId }
+
+            state = state.copy(
+                pendingActivities = updatedActivities.toImmutableList(),
+            )
+
+            activityRepository.deleteGroupActivity(groupActivityId)
+        }
+    }
 }

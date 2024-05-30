@@ -14,4 +14,5 @@ sealed interface DashboardAction {
     data class StartIndividualActivity(val type: ActivityType) : DashboardAction
     data class CreateGroupActivity(val type: ActivityType, val estimatedStartTimestamp: Long?) : DashboardAction
     data class OnPendingActivityClick(val groupActivityId: String) : DashboardAction
+    data class OnPendingActivityDeleteClick(val groupActivityId: String) : DashboardAction
 }

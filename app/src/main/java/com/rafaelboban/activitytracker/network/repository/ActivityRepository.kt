@@ -41,5 +41,7 @@ class ActivityRepository @Inject constructor(
 
     suspend fun getGroupActivity(id: String) = api.getGroupActivity(id)
 
+    suspend fun deleteGroupActivity(id: String) = api.deleteGroupActivity(id)
+
     suspend fun getGroupActivities() = api.getGroupActivities()
 }

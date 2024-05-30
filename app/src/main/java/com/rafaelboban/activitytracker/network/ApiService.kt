@@ -55,6 +55,9 @@ interface ApiService {
     @GET("/api/group-activities/{id}")
     suspend fun getGroupActivity(@Path("id") id: String): ApiResponse<GroupActivity>
 
+    @DELETE("/api/group-activities/{id}")
+    suspend fun deleteGroupActivity(@Path("id") id: String): ApiResponse<Unit>
+
     @GET("/api/group-activities")
     suspend fun getGroupActivities(): ApiResponse<List<GroupActivity>>
 
