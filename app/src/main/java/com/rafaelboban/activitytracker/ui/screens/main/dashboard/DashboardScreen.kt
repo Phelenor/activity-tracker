@@ -5,6 +5,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,12 +19,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -117,11 +120,13 @@ fun DashboardScreenRoot(
             DashboardEvent.GroupActivityCreationError -> Toast.makeText(context, context.getString(R.string.activity_creation_error), Toast.LENGTH_LONG).show()
             DashboardEvent.GroupActivityJoinError -> Toast.makeText(context, context.getString(R.string.activity_join_error), Toast.LENGTH_LONG).show()
             is DashboardEvent.GroupActivityCreated -> {
+                viewModel.getPendingActivities()
                 viewModel.dismissBottomSheet()
                 navigateToGroupActivity(event.groupActivityId)
             }
 
             is DashboardEvent.JoinActivitySuccess -> {
+                viewModel.getPendingActivities()
                 viewModel.dismissBottomSheet()
                 navigateToGroupActivity(event.groupActivityId)
             }
@@ -158,12 +163,22 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val lazyGridState = rememberLazyGridState()
     val bottomSheetState = rememberModalBottomSheetState()
+
+    var firstLoad = remember { true }
 
     val dismissBottomSheet: () -> Unit = {
         coroutineScope.launch {
             bottomSheetState.hide()
             onAction(DashboardAction.DismissBottomSheet)
+        }
+    }
+
+    LaunchedEffect(state.pendingActivities) {
+        if (firstLoad) {
+            firstLoad = false
+            lazyGridState.animateScrollToItem(0)
         }
     }
 
@@ -209,6 +224,7 @@ fun DashboardScreen(
     }
 
     LazyVerticalGrid(
+        state = lazyGridState,
         columns = GridCells.Adaptive(minSize = 148.dp),
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),

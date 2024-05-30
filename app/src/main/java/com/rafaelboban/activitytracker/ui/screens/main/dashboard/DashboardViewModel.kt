@@ -31,7 +31,7 @@ class DashboardViewModel @Inject constructor(
         getPendingActivities()
     }
 
-    private fun getPendingActivities() {
+    fun getPendingActivities() {
         viewModelScope.launch {
             activityRepository.getGroupActivities().onSuccess {
                 state = state.copy(pendingActivities = data.toImmutableList())
