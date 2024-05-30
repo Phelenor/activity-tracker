@@ -6,4 +6,6 @@
     <string name="error_exercise_already_ended">Exercise already ended</string>
     <string name="activity_paused">Activity Paused</string>
     <string name="open_activity_on_phone">Start a new activity on your phone</string>
+    <string name="waiting">Waiting</string>
+    <string name="in_progress">In progress</string>
 </resources>

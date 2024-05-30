@@ -52,4 +52,7 @@ sealed interface MessagingAction {
 
     @Serializable
     data object WakeUpWatch : MessagingAction
+
+    @Serializable
+    data class GroupActivityMarker(val isActivityOwner: Boolean) : MessagingAction
 }

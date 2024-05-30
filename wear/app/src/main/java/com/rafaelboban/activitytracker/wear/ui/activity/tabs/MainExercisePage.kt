@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Pause
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,6 +34,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import com.rafaelboban.activitytracker.wear.R
 import com.rafaelboban.activitytracker.wear.ui.activity.ActivityAction
 import com.rafaelboban.activitytracker.wear.ui.activity.ActivityState
 import com.rafaelboban.activitytracker.wear.ui.components.ActivityActionButton
@@ -134,28 +137,46 @@ fun MainExercisePage(
             when (status) {
                 ActivityStatus.NOT_STARTED -> {
                     Box(contentAlignment = Alignment.TopCenter) {
-                        ActivityActionButton(
-                            icon = Icons.Filled.PlayArrow,
-                            onClick = { onAction(ActivityAction.OnStartClick) }
-                        )
+                        if (state.isGroupActivity.not() || state.isGroupActivityOwner) {
+                            ActivityActionButton(
+                                icon = Icons.Filled.PlayArrow,
+                                onClick = { onAction(ActivityAction.OnStartClick) }
+                            )
+                        } else {
+                            ActivityStatusLabel(
+                                label = stringResource(R.string.waiting)
+                            )
+                        }
                     }
                 }
 
                 ActivityStatus.IN_PROGRESS -> {
                     Box(contentAlignment = Alignment.TopCenter) {
-                        ActivityActionButton(
-                            icon = Icons.Filled.Pause,
-                            onClick = { onAction(ActivityAction.OnPauseClick) }
-                        )
+                        if (state.isGroupActivity.not() || state.isGroupActivityOwner) {
+                            ActivityActionButton(
+                                icon = Icons.Filled.Pause,
+                                onClick = { onAction(ActivityAction.OnPauseClick) }
+                            )
+                        } else {
+                            ActivityStatusLabel(
+                                label = stringResource(R.string.in_progress)
+                            )
+                        }
                     }
                 }
 
                 ActivityStatus.PAUSED -> {
                     Box(contentAlignment = Alignment.TopCenter) {
-                        ActivityActionButton(
-                            icon = Icons.Filled.PlayArrow,
-                            onClick = { onAction(ActivityAction.OnResumeClick) }
-                        )
+                        if (state.isGroupActivity.not() || state.isGroupActivityOwner) {
+                            ActivityActionButton(
+                                icon = Icons.Filled.PlayArrow,
+                                onClick = { onAction(ActivityAction.OnResumeClick) }
+                            )
+                        } else {
+                            ActivityStatusLabel(
+                                label = stringResource(com.rafaelboban.core.theme.R.string.paused)
+                            )
+                        }
                     }
                 }
 
@@ -165,6 +186,25 @@ fun MainExercisePage(
     }
 }
 
+@Composable
+fun ActivityStatusLabel(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onTertiary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiary)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+    )
+}
+
 @WearPreviewDevices
 @Composable
 private fun MainExercisePagePreview() {
@@ -172,7 +212,8 @@ private fun MainExercisePagePreview() {
         MainExercisePage(
             onAction = {},
             state = ActivityState(
-                activityStatus = ActivityStatus.PAUSED
+                activityStatus = ActivityStatus.IN_PROGRESS,
+                isGroupActivity = true
             )
         )
     }

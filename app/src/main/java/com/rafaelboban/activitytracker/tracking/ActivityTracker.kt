@@ -262,15 +262,15 @@ class ActivityTracker(
         }
     }
 
-    fun startTrackingLocation(type: ActivityType) {
+    fun startTrackingLocation(type: ActivityType, isGroupActivity: Boolean = false, isGroupActivityOwner: Boolean = false) {
         _type.value = type
         isTrackingLocation.value = true
-        watchConnector.setCanTrack(true)
+        watchConnector.setActivityData(canTrack = true, isGroupActivity, isGroupActivityOwner)
     }
 
     fun stopTrackingLocation() {
         isTrackingLocation.value = false
-        watchConnector.setCanTrack(false)
+        watchConnector.setActivityData(canTrack = false, isGroupActivity = false, isGroupActivityOwner = false)
     }
 
     fun clear() {

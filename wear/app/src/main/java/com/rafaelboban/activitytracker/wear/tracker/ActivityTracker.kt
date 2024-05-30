@@ -45,6 +45,12 @@ class ActivityTracker(
     private val _calories = MutableStateFlow(0)
     val calories = _calories.asStateFlow()
 
+    private val _isGroupActivity = MutableStateFlow(false)
+    val isGroupActivity = _isGroupActivity.asStateFlow()
+
+    private val _isGroupActivityOwner = MutableStateFlow(false)
+    val isGroupActivityOwner = _isGroupActivityOwner.asStateFlow()
+
     val distanceMeters = phoneConnector.messages
         .filterIsInstance<MessagingAction.DistanceUpdate>()
         .map { it.distanceMeters }
@@ -78,6 +84,11 @@ class ActivityTracker(
                 when (action) {
                     is MessagingAction.CanTrack -> _canTrack.value = true
                     is MessagingAction.CanNotTrack -> _canTrack.value = false
+                    is MessagingAction.GroupActivityMarker -> {
+                        _isGroupActivity.value = true
+                        _isGroupActivityOwner.value = action.isActivityOwner
+                    }
+
                     is MessagingAction.SetActivityData -> {
                         _activityType.value = action.activityType
                         _userAge.value = action.userAge ?: DEFAULT_HEART_RATE_TRACKER_AGE

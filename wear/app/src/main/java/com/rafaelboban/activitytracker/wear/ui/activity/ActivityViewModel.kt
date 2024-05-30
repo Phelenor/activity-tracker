@@ -87,6 +87,14 @@ class ActivityViewModel @Inject constructor(
             state = state.copy(userAge = age)
         }.launchIn(viewModelScope)
 
+        activityTracker.isGroupActivity.onEach { isGroupActivity ->
+            state = state.copy(isGroupActivity = isGroupActivity)
+        }.launchIn(viewModelScope)
+
+        activityTracker.isGroupActivityOwner.onEach { isGroupActivityOwner ->
+            state = state.copy(isGroupActivityOwner = isGroupActivityOwner)
+        }.launchIn(viewModelScope)
+
         activityStatus.onEach { status ->
             val previousStatus = activityTracker.activityStatus.value
 

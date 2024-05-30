@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.groupActivity
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,6 +23,7 @@ import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
+import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import com.skydoves.sandwich.suspendOnFailure
@@ -75,15 +77,19 @@ class GroupActivityViewModel @Inject constructor(
 
             activityRepository.getGroupActivity(id).onSuccess {
                 state = state.copy(groupActivity = data, isActivityOwner = currentUser.id == data.userOwnerId, groupActivityFetchStatus = FetchStatus.SUCCESS)
-                initTracker(data.activityType)
+                initTracker(data.activityType, state.isActivityOwner)
             }.onFailure {
                 state = state.copy(groupActivityFetchStatus = FetchStatus.ERROR)
             }
         }
     }
 
-    private fun initTracker(type: ActivityType) {
-        tracker.startTrackingLocation(type)
+    private fun initTracker(type: ActivityType, isActivityOwner: Boolean) {
+        tracker.startTrackingLocation(type, isGroupActivity = true, isGroupActivityOwner = isActivityOwner)
+
+        viewModelScope.launch {
+            watchConnector.sendMessageToWatch(MessagingAction.GroupActivityMarker(isActivityOwner))
+        }
 
         tracker.currentLocation.onEach { currentLocation ->
             state = state.copy(currentLocation = currentLocation?.location)
@@ -295,6 +301,7 @@ class GroupActivityViewModel @Inject constructor(
                     state = state.copy(weather = data.copy(hourly = data.hourly.take(5)), isWeatherLoading = false)
                     canRetry = true
                 }.onFailure {
+                    Log.d("MARIN", "302: startWeatherUpdates ${message()}")
                     state = state.copy(isWeatherLoading = false)
                     shouldRetry = canRetry
                     canRetry = false

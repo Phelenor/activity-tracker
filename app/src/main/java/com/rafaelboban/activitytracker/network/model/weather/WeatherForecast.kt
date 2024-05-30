@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class WeatherForecast(
     val current: WeatherData,
     val hourly: List<WeatherData>,
-    val alerts: List<WeatherAlert>
+    val alerts: List<WeatherAlert>?
 )
 
 @Serializable

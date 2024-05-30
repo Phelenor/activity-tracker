@@ -25,6 +25,9 @@ class PhoneToWatchConnector(
     private val connectedNode = MutableStateFlow<Node?>(null)
     private val canTrack = MutableStateFlow(false)
 
+    private var isGroupActivity = false
+    private var isGroupActivityOwner = false
+
     val messages = nodeDiscovery
         .observeConnectedDevices(DeviceType.PHONE)
         .flatMapLatest { connectedDevices ->
@@ -38,8 +41,12 @@ class PhoneToWatchConnector(
             }
         }.onEach { action ->
             if (action == MessagingAction.ConnectionRequest) {
-                val message = if (canTrack.value) MessagingAction.CanTrack else MessagingAction.CanNotTrack
-                sendMessageToWatch(message)
+                val canTrackMessage = if (canTrack.value) MessagingAction.CanTrack else MessagingAction.CanNotTrack
+                sendMessageToWatch(canTrackMessage)
+
+                if (isGroupActivity) {
+                    sendMessageToWatch(MessagingAction.GroupActivityMarker(isGroupActivityOwner))
+                }
             }
         }.shareIn(
             applicationScope,
@@ -61,7 +68,9 @@ class PhoneToWatchConnector(
         messagingClient.sendOrQueueAction(action)
     }
 
-    fun setCanTrack(canTrack: Boolean) {
+    fun setActivityData(canTrack: Boolean, isGroupActivity: Boolean, isGroupActivityOwner: Boolean) {
         this.canTrack.value = canTrack
+        this.isGroupActivity = isGroupActivity
+        this.isGroupActivityOwner = isGroupActivityOwner
     }
 }

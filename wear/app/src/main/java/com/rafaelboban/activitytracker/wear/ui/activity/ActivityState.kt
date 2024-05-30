@@ -19,5 +19,7 @@ data class ActivityState(
     val canTrackCalories: Boolean = false,
     val isConnectedPhoneNearby: Boolean = false,
     val isInAmbientMode: Boolean = false,
+    val isGroupActivity: Boolean = false,
+    val isGroupActivityOwner: Boolean = false,
     val isBurnInProtectionRequired: Boolean = false
 )

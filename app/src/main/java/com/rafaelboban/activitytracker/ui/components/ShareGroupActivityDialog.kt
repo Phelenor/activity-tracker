@@ -116,7 +116,7 @@ fun ShareGroupActivityDialog(
 
             QRCodeImage(
                 code = ScannerType.GROUP_ACTIVITY.urlFormat + joinCode,
-                size = 240.dp,
+                size = 216.dp,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .clip(RoundedCornerShape(16.dp))
