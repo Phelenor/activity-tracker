@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -44,11 +46,12 @@ import com.rafaelboban.activitytracker.util.DateHelper.secondsToLocalDate
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.time.Duration
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigureGroupActivityBottomSheetBody(
     onClick: (ActivityType, Long?) -> Unit,
@@ -73,8 +76,8 @@ fun ConfigureGroupActivityBottomSheetBody(
     val localDateTimeTimestamp by remember {
         derivedStateOf {
             selectedTimeTimestamp?.let { time ->
-                localDateTimestamp?.plus(time.toLong())
-            }
+                localDateTimestamp?.plus(time.toLong())?.coerceAtLeast(Instant.now().epochSecond)
+            } ?: Instant.now().epochSecond
         }
     }
 
@@ -83,6 +86,7 @@ fun ConfigureGroupActivityBottomSheetBody(
         initialSelectedTimestamp = selectedDateTimestamp,
         onDismiss = { showDatePicker = false },
         yearRange = currentYear..(currentYear + 1),
+        selectableDates = PresentOrFutureSelectableDates,
         onConfirm = { timestamp ->
             selectedTimeTimestamp = 0
             selectedDateTimestamp = timestamp
@@ -160,8 +164,8 @@ fun ConfigureGroupActivityBottomSheetBody(
             Spacer(Modifier.height(24.dp))
 
             Row {
-                val dateText = selectedDateTimestamp?.let { DateHelper.formatTimestampToDate(it) } ?: run { stringResource(R.string.unscheduled) }
-                val timeText = selectedTimeTimestamp?.let { DateHelper.formatTimestampToTime((localDateTimestamp?.plus(it.toLong()) ?: 0)) } ?: run { stringResource(R.string.unscheduled) }
+                val dateText = selectedDateTimestamp?.let { DateHelper.formatTimestampToDate(it) } ?: run { stringResource(R.string.now) }
+                val timeText = selectedTimeTimestamp?.let { DateHelper.formatTimestampToTime((localDateTimestamp?.plus(it.toLong()) ?: 0)) } ?: run { stringResource(R.string.now) }
 
                 LabeledItem(
                     label = stringResource(id = R.string.date),
@@ -187,6 +191,16 @@ fun ConfigureGroupActivityBottomSheetBody(
                         .padding(vertical = 6.dp)
                 )
             }
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(R.string.activity_clear_notice),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = Typography.labelLarge
+            )
 
             Spacer(Modifier.height(24.dp))
 
