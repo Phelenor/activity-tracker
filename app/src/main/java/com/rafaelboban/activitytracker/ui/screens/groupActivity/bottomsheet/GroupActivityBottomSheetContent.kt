@@ -1,4 +1,4 @@
-package com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet
+package com.rafaelboban.activitytracker.ui.screens.groupActivity.bottomsheet
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -14,27 +14,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rafaelboban.activitytracker.network.model.goals.ActivityGoalType
-import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityChipRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityDetailsTab
-import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityGoalsTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityHeartRateTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityWeatherTab
-import com.rafaelboban.core.shared.model.ActivityType
+import com.rafaelboban.activitytracker.ui.screens.groupActivity.GroupActivityState
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-fun ActivityBottomSheetContent(
-    state: ActivityState,
+fun GroupActivityBottomSheetContent(
+    state: GroupActivityState,
     scrollState: ScrollState,
     selectedTab: ActivityTabType,
     onTabSelected: (ActivityTabType) -> Unit,
     onLoadWeather: () -> Unit,
-    onOpenAddGoal: () -> Unit,
-    onRemoveGoal: (ActivityGoalType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(selectedTab) {
@@ -43,7 +38,7 @@ fun ActivityBottomSheetContent(
 
     Column(modifier = modifier.fillMaxWidth()) {
         ActivityChipRow(
-            tabs = ActivityTabType.Individual.toImmutableList(),
+            tabs = ActivityTabType.Group.toImmutableList(),
             selectedTab = selectedTab,
             onTabSelected = onTabSelected
         )
@@ -60,7 +55,7 @@ fun ActivityBottomSheetContent(
             ) { tab ->
                 when (tab) {
                     ActivityTabType.DETAILS -> ActivityDetailsTab(
-                        type = state.type,
+                        type = checkNotNull(state.groupActivity?.activityType),
                         status = state.status,
                         data = state.activityData,
                         duration = state.duration
@@ -72,14 +67,13 @@ fun ActivityBottomSheetContent(
                         duration = state.duration
                     )
 
-                    ActivityTabType.GOALS -> ActivityGoalsTab(
-                        state = state,
-                        showAddButton = state.goals.size < ActivityGoalType.entries.size,
-                        showAddGoalDialog = onOpenAddGoal,
-                        onRemoveGoal = onRemoveGoal
+                    ActivityTabType.WEATHER -> ActivityWeatherTab(
+                        weather = state.weather,
+                        isLoading = state.isWeatherLoading,
+                        onReloadClick = onLoadWeather
                     )
 
-                    ActivityTabType.WEATHER -> ActivityWeatherTab(
+                    ActivityTabType.GROUP -> ActivityWeatherTab(
                         weather = state.weather,
                         isLoading = state.isWeatherLoading,
                         onReloadClick = onLoadWeather
@@ -96,14 +90,12 @@ fun ActivityBottomSheetContent(
 @Composable
 private fun ActivityBottomSheetContentPreview() {
     ActivityTrackerTheme {
-        ActivityBottomSheetContent(
-            state = ActivityState(type = ActivityType.WALK),
+        GroupActivityBottomSheetContent(
+            state = GroupActivityState(),
             scrollState = rememberScrollState(),
             selectedTab = ActivityTabType.DETAILS,
             onTabSelected = {},
-            onLoadWeather = {},
-            onOpenAddGoal = {},
-            onRemoveGoal = {}
+            onLoadWeather = {}
         )
     }
 }

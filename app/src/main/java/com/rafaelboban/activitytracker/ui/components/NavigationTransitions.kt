@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import kotlin.reflect.KType
 
 fun NavGraphBuilder.composableFade(
     route: String,
@@ -37,6 +39,7 @@ fun NavGraphBuilder.composableSlide(
 }
 
 inline fun <reified T : Any> NavGraphBuilder.composableFade(
+    typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
     deepLinks: List<NavDeepLink> = emptyList(),
     noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
 ) {
@@ -49,6 +52,7 @@ inline fun <reified T : Any> NavGraphBuilder.composableFade(
 }
 
 inline fun <reified T : Any> NavGraphBuilder.composableSlide(
+    typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
     deepLinks: List<NavDeepLink> = emptyList(),
     noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -> Unit)
 ) {

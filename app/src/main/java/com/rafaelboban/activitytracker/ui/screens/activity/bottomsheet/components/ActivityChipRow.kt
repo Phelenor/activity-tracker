@@ -26,16 +26,26 @@ import androidx.compose.ui.unit.sp
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 enum class ActivityTabType(@StringRes val titleRes: Int) {
     DETAILS(R.string.details),
     HEART(R.string.heartrate),
     GOALS(R.string.goals),
-    WEATHER(R.string.weather)
+    WEATHER(R.string.weather),
+    GROUP(R.string.group);
+
+    companion object {
+
+        val Individual = listOf(DETAILS, HEART, GOALS, WEATHER)
+        val Group = listOf(DETAILS, HEART, WEATHER, GROUP)
+    }
 }
 
 @Composable
 fun ActivityChipRow(
+    tabs: ImmutableList<ActivityTabType>,
     selectedTab: ActivityTabType,
     onTabSelected: (ActivityTabType) -> Unit,
     modifier: Modifier = Modifier
@@ -49,7 +59,7 @@ fun ActivityChipRow(
                 .padding(horizontal = 8.dp)
                 .padding(bottom = 8.dp)
         ) {
-            ActivityTabType.entries.forEach { tab ->
+            tabs.forEach { tab ->
                 ActivityTabChip(
                     text = stringResource(id = tab.titleRes),
                     isSelected = tab == selectedTab,
@@ -67,6 +77,7 @@ fun ActivityChipRow(
 private fun ActivityChipRowPreview() {
     ActivityTrackerTheme {
         ActivityChipRow(
+            tabs = ActivityTabType.Individual.toImmutableList(),
             selectedTab = ActivityTabType.DETAILS,
             onTabSelected = {}
         )

@@ -58,7 +58,7 @@ class DashboardViewModel @Inject constructor(
             state = state.copy(isCreatingGroupActivity = true)
 
             activityRepository.createGroupActivity(type, estimatedStartTimestamp).suspendOnSuccess {
-                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id, data.activityType))
+                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id))
             }.onFailure {
                 eventChannel.trySend(DashboardEvent.GroupActivityCreationError)
             }
@@ -72,7 +72,7 @@ class DashboardViewModel @Inject constructor(
             state = state.copy(isJoiningGroupActivity = true)
 
             activityRepository.joinGroupActivity(joinCode).suspendOnSuccess {
-                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id, data.activityType))
+                eventChannel.trySend(DashboardEvent.GroupActivityCreated(data.id))
             }.onFailure {
                 eventChannel.trySend(DashboardEvent.GroupActivityJoinError)
             }

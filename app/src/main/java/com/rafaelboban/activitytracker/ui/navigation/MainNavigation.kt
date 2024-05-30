@@ -69,6 +69,7 @@ sealed class MainScreenBottomBarItem(val route: MainScreenNavigation, val select
 fun MainScreen(
     onLogout: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
+    navigateToGroupActivity: (String) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
     navigateToQRCodeScanner: (ScannerType) -> Unit,
     modifier: Modifier = Modifier,
@@ -123,6 +124,7 @@ fun MainScreen(
             modifier = Modifier.padding(padding),
             navController = navController,
             navigateToActivity = navigateToActivity,
+            navigateToGroupActivity = navigateToGroupActivity,
             navigateToActivityOverview = navigateToActivityOverview,
             navigateToQRCodeScanner = navigateToQRCodeScanner,
             navigateToLogin = onLogout
@@ -135,6 +137,7 @@ fun MainNavigationGraph(
     navController: NavHostController,
     navigateToLogin: () -> Unit,
     navigateToActivity: (ActivityType) -> Unit,
+    navigateToGroupActivity: (String) -> Unit,
     navigateToActivityOverview: (String) -> Unit,
     navigateToQRCodeScanner: (ScannerType) -> Unit,
     modifier: Modifier = Modifier
@@ -153,6 +156,7 @@ fun MainNavigationGraph(
         composableFade<MainScreenNavigation.Dashboard> {
             DashboardScreenRoot(
                 navigateToActivity = navigateToActivity,
+                navigateToGroupActivity = navigateToGroupActivity,
                 navigateToQRCodeScanner = navigateToQRCodeScanner
             )
         }

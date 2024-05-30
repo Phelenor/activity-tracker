@@ -1,8 +1,6 @@
 package com.rafaelboban.activitytracker.ui.navigation
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +9,7 @@ import com.rafaelboban.activitytracker.ui.components.composableSlide
 import com.rafaelboban.activitytracker.ui.screens.activity.ActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.activityOverview.ActivityOverviewScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerScreenRoot
+import com.rafaelboban.activitytracker.ui.screens.groupActivity.GroupActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -46,6 +45,9 @@ fun RootNavigation(
                 navigateToQRCodeScanner = { scannerType ->
                     navHostController.navigate(NavigationGraph.QRCodeScanner(scannerType.ordinal))
                 },
+                navigateToGroupActivity = { id ->
+                    navHostController.navigate(NavigationGraph.GroupActivity(id))
+                },
                 onLogout = {
                     navHostController.navigate(NavigationGraph.Auth) {
                         popUpTo(NavigationGraph.Main) {
@@ -68,6 +70,12 @@ fun RootNavigation(
             )
         }
 
+        composableSlide<NavigationGraph.GroupActivity> {
+            GroupActivityScreenRoot(
+                navigateUp = { navHostController.navigateUp() }
+            )
+        }
+
         composableSlide<NavigationGraph.ActivityOverview> {
             ActivityOverviewScreenRoot(
                 navigateUp = { navHostController.navigateUp() }
@@ -75,12 +83,10 @@ fun RootNavigation(
         }
 
         composableSlide<NavigationGraph.QRCodeScanner> {
-            val context = LocalContext.current
-
             ScannerScreenRoot(
                 navigateUp = { navHostController.navigateUp() },
-                navigateToGroupActivity = {
-                    Toast.makeText(context, "Successful join activity", Toast.LENGTH_LONG).show()
+                navigateToGroupActivity = { id ->
+                    navHostController.navigate(NavigationGraph.GroupActivity(id))
                 }
             )
         }
@@ -100,6 +106,9 @@ sealed interface NavigationGraph {
 
     @Serializable
     data class ActivityOverview(val id: String) : NavigationGraph
+
+    @Serializable
+    data class GroupActivity(val id: String) : NavigationGraph
 
     @Serializable
     data class QRCodeScanner(val scannerTypeOrdinal: Int) : NavigationGraph

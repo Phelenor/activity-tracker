@@ -2,7 +2,6 @@
 
 package com.rafaelboban.activitytracker.ui.screens.camera
 
-import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED
 import androidx.camera.mlkit.vision.MlKitAnalyzer

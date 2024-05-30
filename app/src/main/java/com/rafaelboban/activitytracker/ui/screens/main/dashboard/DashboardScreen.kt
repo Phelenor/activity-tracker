@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 fun DashboardScreenRoot(
     navigateToActivity: (ActivityType) -> Unit,
     navigateToQRCodeScanner: (ScannerType) -> Unit,
+    navigateToGroupActivity: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -101,18 +102,16 @@ fun DashboardScreenRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is DashboardEvent.GroupActivityCreated -> {
-                viewModel.dismissBottomSheet()
-                Toast.makeText(context, "Create success ${event.groupActivityId}", Toast.LENGTH_LONG).show()
-                // TODO: nav to activity
-            }
-
             DashboardEvent.GroupActivityCreationError -> Toast.makeText(context, context.getString(R.string.activity_creation_error), Toast.LENGTH_LONG).show()
             DashboardEvent.GroupActivityJoinError -> Toast.makeText(context, context.getString(R.string.activity_join_error), Toast.LENGTH_LONG).show()
+            is DashboardEvent.GroupActivityCreated -> {
+                viewModel.dismissBottomSheet()
+                navigateToGroupActivity(event.groupActivityId)
+            }
+
             is DashboardEvent.JoinActivitySuccess -> {
                 viewModel.dismissBottomSheet()
-                Toast.makeText(context, "Join success ${event.groupActivityId}", Toast.LENGTH_LONG).show()
-                // TODO: nav to activity
+                navigateToGroupActivity(event.groupActivityId)
             }
         }
     }

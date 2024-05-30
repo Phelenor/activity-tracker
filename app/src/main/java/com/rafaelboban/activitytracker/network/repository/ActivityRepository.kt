@@ -38,4 +38,6 @@ class ActivityRepository @Inject constructor(
     suspend fun createGroupActivity(activityType: ActivityType, startTimestamp: Long?) = api.createGroupActivity(CreateGroupActivityRequest(activityType, startTimestamp))
 
     suspend fun joinGroupActivity(joinCode: String) = api.joinGroupActivity(JoinGroupActivityRequest(joinCode))
+
+    suspend fun getGroupActivity(id: String) = api.getGroupActivity(id)
 }

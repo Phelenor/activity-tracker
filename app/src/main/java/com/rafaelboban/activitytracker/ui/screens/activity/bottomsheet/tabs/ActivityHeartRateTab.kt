@@ -28,13 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.ActivityData
-import com.rafaelboban.activitytracker.ui.screens.activity.ActivityState
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityDetailsRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.HeartRateZoneProgressBar
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.core.shared.model.ActivityStatus
-import com.rafaelboban.core.shared.model.ActivityType
-import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.shared.utils.HeartRateZone
@@ -43,15 +40,18 @@ import com.rafaelboban.core.shared.utils.color
 import com.rafaelboban.core.shared.utils.label
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
-import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 @Composable
-fun ActivityHeartRateTab(state: ActivityState) {
-    val heartRatePoints = state.activityData.heartRatePoints
+fun ActivityHeartRateTab(
+    data: ActivityData,
+    status: ActivityStatus,
+    duration: Duration
+) {
+    val heartRatePoints = data.heartRatePoints
 
-    val currentHeartRate = state.activityData.currentHeartRate?.heartRate
+    val currentHeartRate = data.currentHeartRate?.heartRate
     val maxHeartRate = heartRatePoints.maxOfOrNull { it.heartRate } ?: 0
     val averageHeartRate = if (heartRatePoints.isNotEmpty()) (heartRatePoints.sumOf { it.heartRate } / heartRatePoints.size.F).roundToInt() else 0
 
@@ -59,13 +59,13 @@ fun ActivityHeartRateTab(state: ActivityState) {
         NoHeartRateInfo()
     } else {
         val zoneData = HeartRateZoneHelper.getHeartRateZone(currentHeartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
-        val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, state.duration)
+        val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, duration)
 
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             listOfNotNull(
-                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { state.status != ActivityStatus.FINISHED },
+                arrayOf(R.string.current_heartrate, "$currentHeartRate bpm", Icons.Outlined.FavoriteBorder, MaterialTheme.colorScheme.error).takeIf { status != ActivityStatus.FINISHED },
                 arrayOf(R.string.average_heartrate, "$averageHeartRate bpm", Icons.TwoTone.Favorite, MaterialTheme.colorScheme.error),
                 arrayOf(R.string.max_heartrate, "$maxHeartRate bpm", Icons.Filled.Favorite, MaterialTheme.colorScheme.error)
             ).forEach { (labelRes, value, icon, tint) ->
@@ -77,7 +77,7 @@ fun ActivityHeartRateTab(state: ActivityState) {
                 )
             }
 
-            if (state.status == ActivityStatus.FINISHED) {
+            if (status == ActivityStatus.FINISHED) {
                 Text(
                     text = "HR zone analysis:",
                     style = Typography.displayLarge,
@@ -159,13 +159,9 @@ private fun NoHeartRateInfo(modifier: Modifier = Modifier) {
 private fun ActivityHeartRateTabPreview() {
     ActivityTrackerTheme {
         ActivityHeartRateTab(
-            state = ActivityState(
-                type = ActivityType.RUN,
-                activityData = ActivityData(
-                    heartRatePoints = persistentListOf(HeartRatePoint(23, Duration.ZERO)),
-                    currentHeartRate = HeartRatePoint(120, Duration.ZERO)
-                )
-            )
+            status = ActivityStatus.IN_PROGRESS,
+            data = ActivityData(),
+            duration = Duration.ZERO
         )
     }
 }

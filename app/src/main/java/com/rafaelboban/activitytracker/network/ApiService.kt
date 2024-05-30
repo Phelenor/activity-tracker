@@ -52,6 +52,9 @@ interface ApiService {
     @POST("/api/join-group-activity")
     suspend fun joinGroupActivity(@Body body: JoinGroupActivityRequest): ApiResponse<GroupActivity>
 
+    @GET("/api/group-activity/{id}")
+    suspend fun getGroupActivity(@Path("id") id: String): ApiResponse<GroupActivity>
+
     @GET("https://api.openweathermap.org/data/3.0/onecall")
     suspend fun getWeatherData(
         @Query("lat") latitude: Float,
