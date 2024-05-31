@@ -9,6 +9,7 @@ sealed interface GroupActivityAction {
     data object OnResumeClick : GroupActivityAction
     data object OnPauseClick : GroupActivityAction
     data object OnFinishClick : GroupActivityAction
+    data object OnConfirmFinishClick : GroupActivityAction
     data object DismissDialogs : GroupActivityAction
     data object DiscardActivity : GroupActivityAction
     data object OnCameraLockToggle : GroupActivityAction

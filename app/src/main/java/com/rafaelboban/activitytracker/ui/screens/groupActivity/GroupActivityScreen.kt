@@ -185,7 +185,7 @@ fun GroupActivityScreen(
     }
 
     DialogScaffold(
-        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showDoYouWantToSaveDialog || state.showShareDialog,
+        showDialog = state.showDiscardDialog || state.showSelectMapTypeDialog || state.showDoYouWantToSaveDialog || state.showShareDialog || state.showConfirmFinishDialog,
         onDismiss = { onAction(GroupActivityAction.DismissDialogs) }
     ) {
         when {
@@ -227,6 +227,10 @@ fun GroupActivityScreen(
                     joinCode = activity.joinCode,
                     onDismissClick = { onAction(GroupActivityAction.DismissDialogs) }
                 )
+            }
+
+            state.showConfirmFinishDialog -> {
+                // TODO
             }
         }
     }
