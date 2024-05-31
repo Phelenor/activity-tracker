@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.core.shared.model.ActivityType
+import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.onSuccess
 import com.skydoves.sandwich.suspendOnSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,14 +30,35 @@ class DashboardViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
-        getPendingActivities()
+        refresh()
     }
 
     fun getPendingActivities() {
         viewModelScope.launch {
-            activityRepository.getGroupActivities().onSuccess {
-                state = state.copy(pendingActivities = data.toImmutableList())
-            }
+            val activities = activityRepository.getGroupActivities().getOrNull()?.toImmutableList()
+            val displayedActivities = activities ?: state.pendingActivities
+
+            state = state.copy(
+                pendingActivities = displayedActivities
+            )
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            val loaderDelay = async { delay(500) }
+
+            state = state.copy(isRefreshing = true)
+
+            val activities = activityRepository.getGroupActivities().getOrNull()?.toImmutableList()
+            val displayedActivities = activities ?: state.pendingActivities
+
+            state = state.copy(
+                pendingActivities = displayedActivities
+            )
+
+            loaderDelay.await()
+            state = state.copy(isRefreshing = false)
         }
     }
 
@@ -100,7 +123,7 @@ class DashboardViewModel @Inject constructor(
             val updatedActivities = state.pendingActivities - state.pendingActivities.first { it.id == groupActivityId }
 
             state = state.copy(
-                pendingActivities = updatedActivities.toImmutableList(),
+                pendingActivities = updatedActivities.toImmutableList()
             )
 
             activityRepository.deleteGroupActivity(groupActivityId)

@@ -5,9 +5,9 @@ import android.os.Build
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -20,6 +20,10 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -144,6 +149,7 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
                 DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
+                DashboardAction.Refresh -> viewModel.refresh()
                 is DashboardAction.OnPendingActivityClick -> navigateToGroupActivity(action.groupActivityId)
                 is DashboardAction.OnPendingActivityDeleteClick -> viewModel.deletePendingActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
@@ -157,7 +163,7 @@ fun DashboardScreenRoot(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun DashboardScreen(
     state: DashboardState,
@@ -166,6 +172,11 @@ fun DashboardScreen(
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val bottomSheetState = rememberModalBottomSheetState()
+
+    val refreshState = rememberPullRefreshState(
+        refreshing = state.isRefreshing,
+        onRefresh = { onAction(DashboardAction.Refresh) }
+    )
 
     var firstLoad = remember { true }
 
@@ -224,73 +235,86 @@ fun DashboardScreen(
         }
     }
 
-    LazyVerticalGrid(
-        state = lazyGridState,
-        columns = GridCells.Adaptive(minSize = 148.dp),
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
+    Box(
+        Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
+            .pullRefresh(refreshState)
     ) {
-        if (state.pendingActivities.isNotEmpty()) {
-            item(
+        LazyVerticalGrid(
+            state = lazyGridState,
+            columns = GridCells.Adaptive(minSize = 148.dp),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            if (state.pendingActivities.isNotEmpty()) {
+                item(
+                    span = { GridItemSpan(maxLineSpan) },
+                    key = "scheduled_activities_header"
+                ) {
+                    Text(
+                        text = stringResource(R.string.scheduled_activities),
+                        style = Typography.displayLarge,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateItem()
+                            .padding(vertical = 8.dp, horizontal = 8.dp)
+                    )
+                }
+            }
+
+            items(
+                items = state.pendingActivities,
                 span = { GridItemSpan(maxLineSpan) },
-                key = "scheduled_activities_header"
-            ) {
-                Text(
-                    text = stringResource(R.string.scheduled_activities),
-                    style = Typography.displayLarge,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem()
-                        .padding(vertical = 8.dp, horizontal = 8.dp)
+                key = { it.id }
+            ) { activity ->
+                PendingActivityCard(
+                    groupActivity = activity,
+                    navigateToGroupActivity = { onAction(DashboardAction.OnPendingActivityClick(activity.id)) },
+                    onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) }
+                )
+            }
+
+            if (state.pendingActivities.isNotEmpty()) {
+                item(
+                    span = { GridItemSpan(maxLineSpan) },
+                    key = "list_margin"
+                ) {
+                    Spacer(Modifier.height(32.dp))
+                }
+            }
+
+            items(
+                DashboardControl.entries,
+                key = { it }
+            ) { control ->
+                ControlCard(
+                    control = control,
+                    modifier = Modifier.aspectRatio(1f),
+                    onClick = {
+                        when (control) {
+                            DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                            DashboardControl.CREATE_GROUP_ACTIVITY -> onAction(DashboardAction.OpenConfigureGroupActivityBottomSheet)
+                            DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenJoinGroupActivityBottomSheet)
+                            DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                            DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                        }
+                    }
                 )
             }
         }
 
-        items(
-            items = state.pendingActivities,
-            span = { GridItemSpan(maxLineSpan) },
-            key = { it.id }
-        ) { activity ->
-            PendingActivityCard(
-                groupActivity = activity,
-                navigateToGroupActivity = { onAction(DashboardAction.OnPendingActivityClick(activity.id)) },
-                onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) },
-            )
-        }
-
-        if (state.pendingActivities.isNotEmpty()) {
-            item(
-                span = { GridItemSpan(maxLineSpan) },
-                key = "list_margin"
-            ) {
-                Spacer(Modifier.height(32.dp))
-            }
-        }
-
-        items(
-            DashboardControl.entries,
-            key = { it }
-        ) { control ->
-            ControlCard(
-                control = control,
-                modifier = Modifier.aspectRatio(1f),
-                onClick = {
-                    when (control) {
-                        DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
-                        DashboardControl.CREATE_GROUP_ACTIVITY -> onAction(DashboardAction.OpenConfigureGroupActivityBottomSheet)
-                        DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenJoinGroupActivityBottomSheet)
-                        DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
-                        DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
-                    }
-                }
-            )
-        }
+        PullRefreshIndicator(
+            modifier = Modifier.align(Alignment.TopCenter),
+            refreshing = state.isRefreshing,
+            state = refreshState,
+            contentColor = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
