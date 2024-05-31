@@ -276,7 +276,8 @@ fun DashboardScreen(
                 PendingActivityCard(
                     groupActivity = activity,
                     navigateToGroupActivity = { onAction(DashboardAction.OnPendingActivityClick(activity.id)) },
-                    onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) }
+                    onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) },
+                    modifier = Modifier.animateItem()
                 )
             }
 
@@ -285,7 +286,11 @@ fun DashboardScreen(
                     span = { GridItemSpan(maxLineSpan) },
                     key = "list_margin"
                 ) {
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .animateItem()
+                            .height(32.dp)
+                    )
                 }
             }
 
@@ -295,7 +300,9 @@ fun DashboardScreen(
             ) { control ->
                 ControlCard(
                     control = control,
-                    modifier = Modifier.aspectRatio(1f),
+                    modifier = Modifier
+                        .animateItem()
+                        .aspectRatio(1f),
                     onClick = {
                         when (control) {
                             DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
