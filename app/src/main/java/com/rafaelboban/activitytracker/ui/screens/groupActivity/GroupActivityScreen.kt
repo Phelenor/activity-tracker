@@ -230,7 +230,15 @@ fun GroupActivityScreen(
             }
 
             state.showConfirmFinishDialog -> {
-                // TODO
+                val subtitle = if (state.isActivityOwner) R.string.finish_activity_owner_subtitle else R.string.finish_activity_subtitle
+
+                InfoDialog(
+                    title = stringResource(R.string.finish_activity_title),
+                    actionText = stringResource(R.string.finish),
+                    subtitle = stringResource(subtitle),
+                    onActionClick = { onAction(GroupActivityAction.OnConfirmFinishClick) },
+                    onDismissClick = { onAction(GroupActivityAction.DismissDialogs) }
+                )
             }
         }
     }

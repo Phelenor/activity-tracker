@@ -6,4 +6,8 @@
     <string name="waiting_for_start">Waiting for Start</string>
     <string name="paused">Paused</string>
     <string name="activity_finished">Activity Finished</string>
+    <string name="finish_activity_owner_subtitle">This will finish the activity for all participants.</string>
+    <string name="finish_activity_subtitle">Other participants will continue the activity.</string>
+    <string name="finish_activity_title">Finish activity?</string>
+    <string name="finish">Finish</string>
 </resources>
