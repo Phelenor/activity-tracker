@@ -207,6 +207,7 @@ class GroupActivityViewModel @Inject constructor(
             val zoneDistribution = HeartRateZoneHelper.calculateHeartRateZoneDistribution(state.activityData.heartRatePoints, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE, state.duration)
             val activity = Activity(
                 activityType = groupActivity.activityType,
+                groupActivityId = groupActivity.id,
                 startTimestamp = tracker.startTimestamp ?: 0,
                 endTimestamp = tracker.endTimestamp ?: 0,
                 durationSeconds = state.duration.inWholeSeconds,

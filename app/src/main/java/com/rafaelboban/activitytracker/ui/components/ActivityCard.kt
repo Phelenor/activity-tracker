@@ -37,7 +37,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -54,10 +56,7 @@ import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTime
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.roundToDecimals
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
-import java.time.Instant
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -88,6 +87,7 @@ fun ActivityCard(
             ActivityDurationSection(
                 duration = activity.durationSeconds,
                 activityType = activity.activityType,
+                isGroupActivity = activity.groupActivityId != null,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -144,6 +144,7 @@ fun MapImage(
 private fun ActivityDurationSection(
     duration: Long,
     activityType: ActivityType,
+    isGroupActivity: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -189,6 +190,21 @@ private fun ActivityDurationSection(
                 style = Typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        if (isGroupActivity) {
+            Icon(
+                imageVector = ImageVector.vectorResource(com.rafaelboban.core.shared.R.drawable.app_logo_main),
+                tint = Color.Unspecified,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(32.dp)
+                    .scale(1.5f)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
@@ -317,29 +333,7 @@ private fun ActivityCardPreview() {
         ActivityCard(
             onDeleteClick = {},
             navigateToActivityOverview = {},
-            activity = Activity(
-                id = "sagsag",
-                activityType = ActivityType.RUN,
-                durationSeconds = (10.minutes + 30.seconds).inWholeSeconds,
-                startTimestamp = Instant.now().epochSecond - 3.hours.inWholeSeconds,
-                distanceMeters = 2543,
-                avgSpeedKmh = 15.6234f,
-                elevation = 123,
-                imageUrl = null,
-                avgHeartRate = 120,
-                heartRateZoneDistribution = emptyMap(),
-                calories = 120,
-                goals = emptyList(),
-                endTimestamp = Instant.now().epochSecond,
-                maxHeartRate = 150,
-                maxSpeedKmh = 5.5f,
-                weather = ActivityWeatherInfo(
-                    temp = 16f,
-                    humidity = 84f,
-                    icon = "04n",
-                    description = "Overcast clouds"
-                )
-            )
+            activity = Activity.MockModel
         )
     }
 }

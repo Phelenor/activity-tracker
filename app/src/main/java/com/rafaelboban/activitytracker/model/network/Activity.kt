@@ -30,7 +30,8 @@ data class Activity(
     val weather: ActivityWeatherInfo?,
     val heartRateZoneDistribution: Map<HeartRateZone, Float>,
     val goals: List<ActivityGoalProgress>,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val groupActivityId: String? = null
 ) {
 
     companion object {
