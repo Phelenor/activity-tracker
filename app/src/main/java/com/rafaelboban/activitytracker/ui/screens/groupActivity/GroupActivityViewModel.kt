@@ -1,5 +1,6 @@
 package com.rafaelboban.activitytracker.ui.screens.groupActivity
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import com.rafaelboban.activitytracker.model.network.ActivityWeatherInfo
 import com.rafaelboban.activitytracker.model.network.FetchStatus
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
+import com.rafaelboban.activitytracker.network.ws.WebSocketClient
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.activitytracker.ui.shared.WeatherUpdateViewModel
@@ -47,6 +49,7 @@ class GroupActivityViewModel @Inject constructor(
     private val tracker: ActivityTracker,
     private val watchConnector: PhoneToWatchConnector,
     private val activityRepository: ActivityRepository,
+    private val webSocketClient: WebSocketClient,
     weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle
 ) : WeatherUpdateViewModel(weatherRepository) {
@@ -59,6 +62,12 @@ class GroupActivityViewModel @Inject constructor(
 
     private val eventChannel = Channel<GroupActivityEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    val socketMessages = webSocketClient
+        .connect("/ws/activity")
+        .onEach { message ->
+            // TODO
+        }.launchIn(viewModelScope)
 
     init {
         getGroupActivity()
@@ -89,6 +98,7 @@ class GroupActivityViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         tracker.data.onEach { data ->
+            webSocketClient.send(data.locations.first().toString())
             state = state.copy(
                 activityData = data,
                 maxSpeed = max(state.maxSpeed, data.speed)
@@ -291,6 +301,7 @@ class GroupActivityViewModel @Inject constructor(
 
         if (ActivityTrackerService.isActive.not()) {
             tracker.clear()
+            webSocketClient.close()
 
             applicationScope.launch {
                 watchConnector.sendMessageToWatch(MessagingAction.CanNotTrack)

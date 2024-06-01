@@ -8,6 +8,7 @@ import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.activitytracker.network.TokenRefreshService
 import com.rafaelboban.activitytracker.network.model.TokenRefreshRequest
+import com.rafaelboban.activitytracker.network.ws.WebSocketClient
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import dagger.Module
@@ -28,12 +29,14 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import timber.log.Timber
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val API_BASE_URL = "http://192.168.8.102:3000"
+    const val API_BASE_URL = "http://192.168.1.96:3000" // "http://192.168.8.102:3000"
 
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
@@ -63,6 +66,7 @@ object NetworkModule {
         @ApplicationContext context: Context
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .pingInterval(30.seconds.toJavaDuration())
             .addInterceptor(ChuckerInterceptor(context))
             .addInterceptor(loggingInterceptor)
             .addInterceptor(authTokenInterceptor)
@@ -148,4 +152,8 @@ object NetworkModule {
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideWebSocketClient(okHttpClient: OkHttpClient) = WebSocketClient(okHttpClient)
 }
