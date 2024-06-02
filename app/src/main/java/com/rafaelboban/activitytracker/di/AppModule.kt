@@ -15,5 +15,5 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providerApplicationContext(@ApplicationContext context: Context) = (context as ActivityTrackerApplication).applicationScope
+    fun provideApplicationScope(@ApplicationContext context: Context) = (context as ActivityTrackerApplication).applicationScope
 }

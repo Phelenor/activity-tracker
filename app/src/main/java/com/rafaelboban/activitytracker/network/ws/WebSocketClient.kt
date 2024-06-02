@@ -1,8 +1,8 @@
 package com.rafaelboban.activitytracker.network.ws
 
 import com.rafaelboban.activitytracker.di.NetworkModule.API_BASE_URL
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
@@ -13,10 +13,12 @@ import javax.inject.Inject
 class WebSocketClient @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
-
     private lateinit var webSocket: WebSocket
 
-    fun connect(path: String) = callbackFlow {
+    private val _messages = MutableSharedFlow<String>()
+    val messages = _messages.asSharedFlow()
+
+    fun connect(path: String) {
         val url = "${API_BASE_URL}$path"
         val listener = object : WebSocketListener() {
 
@@ -25,7 +27,7 @@ class WebSocketClient @Inject constructor(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                trySend(text)
+                _messages.tryEmit(text)
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -42,10 +44,6 @@ class WebSocketClient @Inject constructor(
             request = Request.Builder().url(url).build(),
             listener = listener
         )
-
-        awaitClose {
-            webSocket.close(1000, "Client closing.")
-        }
     }
 
     fun send(message: String) {

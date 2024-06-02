@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.screens.groupActivity
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -57,20 +56,21 @@ class GroupActivityViewModel @Inject constructor(
     private val id: String = checkNotNull(savedStateHandle["id"])
     private val currentUser = checkNotNull(UserData.user)
 
-    var state by mutableStateOf(GroupActivityState())
+    var state by mutableStateOf(GroupActivityState(status = tracker.status.value))
         private set
 
     private val eventChannel = Channel<GroupActivityEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    val socketMessages = webSocketClient
-        .connect("/ws/activity")
-        .onEach { message ->
-            // TODO
-        }.launchIn(viewModelScope)
-
     init {
         getGroupActivity()
+
+        webSocketClient.connect("/ws/activity")
+
+        webSocketClient.messages
+            .onEach { message ->
+                // TODO
+            }.launchIn(viewModelScope)
     }
 
     private fun getGroupActivity() {
