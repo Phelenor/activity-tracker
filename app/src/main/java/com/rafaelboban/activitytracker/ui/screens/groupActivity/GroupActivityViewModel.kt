@@ -10,9 +10,9 @@ import com.rafaelboban.activitytracker.model.network.ActivityWeatherInfo
 import com.rafaelboban.activitytracker.model.network.FetchStatus
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
-import com.rafaelboban.activitytracker.network.ws.WebSocketClient
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.tracking.GroupActivityDataService
 import com.rafaelboban.activitytracker.ui.shared.WeatherUpdateViewModel
 import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
@@ -22,7 +22,6 @@ import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
-import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import com.skydoves.sandwich.suspendOnFailure
@@ -32,7 +31,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max
@@ -48,7 +46,7 @@ class GroupActivityViewModel @Inject constructor(
     private val tracker: ActivityTracker,
     private val watchConnector: PhoneToWatchConnector,
     private val activityRepository: ActivityRepository,
-    private val webSocketClient: WebSocketClient,
+    private val dataService: GroupActivityDataService,
     weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle
 ) : WeatherUpdateViewModel(weatherRepository) {
@@ -64,13 +62,6 @@ class GroupActivityViewModel @Inject constructor(
 
     init {
         getGroupActivity()
-
-        webSocketClient.connect("/ws/activity")
-
-        webSocketClient.messages
-            .onEach { message ->
-                // TODO
-            }.launchIn(viewModelScope)
     }
 
     private fun getGroupActivity() {
@@ -79,14 +70,14 @@ class GroupActivityViewModel @Inject constructor(
 
             activityRepository.getGroupActivity(id).onSuccess {
                 state = state.copy(groupActivity = data, isActivityOwner = currentUser.id == data.userOwnerId, groupActivityFetchStatus = FetchStatus.SUCCESS)
-                initTracker(data.activityType, state.isActivityOwner)
+                initTracker(data.id, data.activityType, state.isActivityOwner)
             }.onFailure {
                 state = state.copy(groupActivityFetchStatus = FetchStatus.ERROR)
             }
         }
     }
 
-    private fun initTracker(type: ActivityType, isActivityOwner: Boolean) {
+    private fun initTracker(id: String, type: ActivityType, isActivityOwner: Boolean) {
         tracker.startTrackingLocation(type, isGroupActivity = true, isGroupActivityOwner = isActivityOwner)
 
         viewModelScope.launch {
@@ -98,7 +89,6 @@ class GroupActivityViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         tracker.data.onEach { data ->
-            webSocketClient.send(data.locations.first().toString())
             state = state.copy(
                 activityData = data,
                 maxSpeed = max(state.maxSpeed, data.speed)
@@ -116,6 +106,8 @@ class GroupActivityViewModel @Inject constructor(
         )
 
         listenToWatchActions()
+
+        dataService.initialize(id)
     }
 
     fun onAction(action: GroupActivityAction, fromWatch: Boolean = false) {
@@ -301,7 +293,7 @@ class GroupActivityViewModel @Inject constructor(
 
         if (ActivityTrackerService.isActive.not()) {
             tracker.clear()
-            webSocketClient.close()
+            dataService.clear(id)
 
             applicationScope.launch {
                 watchConnector.sendMessageToWatch(MessagingAction.CanNotTrack)

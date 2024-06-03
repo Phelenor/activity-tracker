@@ -1,7 +1,9 @@
 package com.rafaelboban.activitytracker.di
 
 import android.content.Context
+import com.rafaelboban.activitytracker.network.ws.WebSocketClient
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.tracking.GroupActivityDataService
 import com.rafaelboban.activitytracker.tracking.LocationObserver
 import com.rafaelboban.core.shared.connectivity.clients.WearMessagingClient
 import com.rafaelboban.core.shared.connectivity.clients.WearNodeDiscovery
@@ -37,4 +39,12 @@ object TrackerModule {
         messagingClient: WearMessagingClient,
         nodeDiscovery: WearNodeDiscovery
     ) = PhoneToWatchConnector(applicationScope, nodeDiscovery, messagingClient)
+
+    @Provides
+    @Singleton
+    fun getGroupActivityDataService(
+        tracker: ActivityTracker,
+        webSocketClient: WebSocketClient,
+        applicationScope: CoroutineScope
+    ) = GroupActivityDataService(tracker, webSocketClient, applicationScope)
 }

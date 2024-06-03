@@ -12,7 +12,13 @@ sealed class ActivityMessage {
 
     @Serializable
     @SerialName("data_update")
-    data class DataUpdate(val data: String) : ActivityMessage()
+    data class DataUpdate(
+        val lat: Float,
+        val long: Float,
+        val distance: Int,
+        val heartRate: Int,
+        val speed: Float
+    ) : ActivityMessage()
 
     @Serializable
     @SerialName("status_change")

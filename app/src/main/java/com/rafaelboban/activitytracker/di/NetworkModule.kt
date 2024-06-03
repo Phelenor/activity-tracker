@@ -36,7 +36,7 @@ import kotlin.time.toJavaDuration
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    const val API_BASE_URL = "http://192.168.1.96:3000" // "http://192.168.8.102:3000"
+    const val API_BASE_URL = "http://192.168.8.102:3000"
 
     @OptIn(ExperimentalSerializationApi::class)
     @Provides

@@ -214,6 +214,7 @@ class ActivityTracker(
                 watchConnector.sendMessageToWatch(MessagingAction.SpeedUpdate(speed))
             }.launchIn(applicationScope)
 
+        // TODO: refactor - defer canTrack registration and send type with it
         _type.onEach { type ->
             watchConnector.sendMessageToWatch(MessagingAction.SetActivityData(type, UserData.user?.age))
         }.launchIn(applicationScope)
