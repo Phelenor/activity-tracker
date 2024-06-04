@@ -33,13 +33,13 @@ class DashboardViewModel @Inject constructor(
         refresh()
     }
 
-    fun getPendingActivities() {
+    fun getScheduledActivities() {
         viewModelScope.launch {
             val activities = activityRepository.getGroupActivities().getOrNull()?.toImmutableList()
-            val displayedActivities = activities ?: state.pendingActivities
+            val displayedActivities = activities ?: state.scheduledActivities
 
             state = state.copy(
-                pendingActivities = displayedActivities
+                scheduledActivities = displayedActivities
             )
         }
     }
@@ -51,10 +51,10 @@ class DashboardViewModel @Inject constructor(
             state = state.copy(isRefreshing = true)
 
             val activities = activityRepository.getGroupActivities().getOrNull()?.toImmutableList()
-            val displayedActivities = activities ?: state.pendingActivities
+            val displayedActivities = activities ?: state.scheduledActivities
 
             state = state.copy(
-                pendingActivities = displayedActivities
+                scheduledActivities = displayedActivities
             )
 
             loaderDelay.await()
@@ -118,15 +118,27 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    fun deletePendingActivity(groupActivityId: String) {
+    fun deleteScheduledActivity(groupActivityId: String) {
         viewModelScope.launch {
-            val updatedActivities = state.pendingActivities - state.pendingActivities.first { it.id == groupActivityId }
+            val updatedActivities = state.scheduledActivities - state.scheduledActivities.first { it.id == groupActivityId }
 
             state = state.copy(
-                pendingActivities = updatedActivities.toImmutableList()
+                scheduledActivities = updatedActivities.toImmutableList()
             )
 
             activityRepository.deleteGroupActivity(groupActivityId)
+        }
+    }
+
+    fun leaveScheduledActivity(groupActivityId: String) {
+        viewModelScope.launch {
+            val updatedActivities = state.scheduledActivities - state.scheduledActivities.first { it.id == groupActivityId }
+
+            state = state.copy(
+                scheduledActivities = updatedActivities.toImmutableList()
+            )
+
+            activityRepository.leaveGroupActivity(groupActivityId)
         }
     }
 }

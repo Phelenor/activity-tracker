@@ -13,5 +13,5 @@ data class DashboardState(
     val isCreatingGroupActivity: Boolean = false,
     val isJoiningGroupActivity: Boolean = false,
     val isRefreshing: Boolean = false,
-    val pendingActivities: ImmutableList<GroupActivity> = persistentListOf()
+    val scheduledActivities: ImmutableList<GroupActivity> = persistentListOf()
 )

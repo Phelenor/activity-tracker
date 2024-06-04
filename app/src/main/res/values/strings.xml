@@ -97,4 +97,6 @@
     <string name="now">Now</string>
     <string name="activity_clear_notice">Activity will be cleared 2 hours after the start time, if not started until then.</string>
     <string name="scheduled_activities">Scheduled activities</string>
+    <string name="in_progress">In progress</string>
+    <string name="leave">Leave</string>
 </resources>

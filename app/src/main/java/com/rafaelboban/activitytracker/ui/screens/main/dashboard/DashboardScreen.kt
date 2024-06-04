@@ -54,7 +54,7 @@ import com.rafaelboban.activitytracker.ui.components.ControlCard
 import com.rafaelboban.activitytracker.ui.components.DialogScaffold
 import com.rafaelboban.activitytracker.ui.components.InfoDialog
 import com.rafaelboban.activitytracker.ui.components.JoinGroupActivityBottomSheet
-import com.rafaelboban.activitytracker.ui.components.PendingActivityCard
+import com.rafaelboban.activitytracker.ui.components.ScheduledActivityCard
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityType
@@ -125,13 +125,13 @@ fun DashboardScreenRoot(
             DashboardEvent.GroupActivityCreationError -> Toast.makeText(context, context.getString(R.string.activity_creation_error), Toast.LENGTH_LONG).show()
             DashboardEvent.GroupActivityJoinError -> Toast.makeText(context, context.getString(R.string.activity_join_error), Toast.LENGTH_LONG).show()
             is DashboardEvent.GroupActivityCreated -> {
-                viewModel.getPendingActivities()
+                viewModel.getScheduledActivities()
                 viewModel.dismissBottomSheet()
                 navigateToGroupActivity(event.groupActivityId)
             }
 
             is DashboardEvent.JoinActivitySuccess -> {
-                viewModel.getPendingActivities()
+                viewModel.getScheduledActivities()
                 viewModel.dismissBottomSheet()
                 navigateToGroupActivity(event.groupActivityId)
             }
@@ -150,10 +150,16 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
                 DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
                 DashboardAction.Refresh -> viewModel.refresh()
-                is DashboardAction.OnPendingActivityClick -> navigateToGroupActivity(action.groupActivityId)
-                is DashboardAction.OnPendingActivityDeleteClick -> viewModel.deletePendingActivity(action.groupActivityId)
+                is DashboardAction.OnScheduledActivityClick -> navigateToGroupActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
+                is DashboardAction.OnScheduledActivityDeleteClick -> {
+                    if (action.isActivityOwner) {
+                        viewModel.deleteScheduledActivity(action.groupActivityId)
+                    } else {
+                        viewModel.leaveScheduledActivity(action.groupActivityId)
+                    }
+                }
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
                     navigateToActivity(action.type)
@@ -187,7 +193,7 @@ fun DashboardScreen(
         }
     }
 
-    LaunchedEffect(state.pendingActivities) {
+    LaunchedEffect(state.scheduledActivities) {
         if (firstLoad) {
             firstLoad = false
             lazyGridState.animateScrollToItem(0)
@@ -250,7 +256,7 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background)
         ) {
-            if (state.pendingActivities.isNotEmpty()) {
+            if (state.scheduledActivities.isNotEmpty()) {
                 item(
                     span = { GridItemSpan(maxLineSpan) },
                     key = "scheduled_activities_header"
@@ -269,19 +275,19 @@ fun DashboardScreen(
             }
 
             items(
-                items = state.pendingActivities,
+                items = state.scheduledActivities,
                 span = { GridItemSpan(maxLineSpan) },
                 key = { it.id }
             ) { activity ->
-                PendingActivityCard(
+                ScheduledActivityCard(
                     groupActivity = activity,
-                    navigateToGroupActivity = { onAction(DashboardAction.OnPendingActivityClick(activity.id)) },
-                    onDeleteClick = { onAction(DashboardAction.OnPendingActivityDeleteClick(activity.id)) },
+                    navigateToGroupActivity = { onAction(DashboardAction.OnScheduledActivityClick(activity.id)) },
+                    onDropdownActionClick = { isOwner -> onAction(DashboardAction.OnScheduledActivityDeleteClick(activity.id, isOwner)) },
                     modifier = Modifier.animateItem()
                 )
             }
 
-            if (state.pendingActivities.isNotEmpty()) {
+            if (state.scheduledActivities.isNotEmpty()) {
                 item(
                     span = { GridItemSpan(maxLineSpan) },
                     key = "list_margin"
@@ -331,7 +337,7 @@ private fun DashboardScreenPreview() {
     ActivityTrackerTheme {
         DashboardScreen(
             state = DashboardState(
-                pendingActivities = List(3) { i ->
+                scheduledActivities = List(3) { i ->
                     GroupActivity(
                         id = "id$i",
                         activityType = ActivityType.RUN,

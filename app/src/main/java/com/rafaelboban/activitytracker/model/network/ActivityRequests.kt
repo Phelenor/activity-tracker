@@ -13,3 +13,8 @@ data class CreateGroupActivityRequest(
 data class JoinGroupActivityRequest(
     val joinCode: String
 )
+
+@Serializable
+data class LeaveGroupActivityRequest(
+    val activityId: String
+)

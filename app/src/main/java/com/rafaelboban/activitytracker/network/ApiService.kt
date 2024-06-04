@@ -6,6 +6,7 @@ import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
 import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.model.network.JoinGroupActivityRequest
+import com.rafaelboban.activitytracker.model.network.LeaveGroupActivityRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
 import com.rafaelboban.activitytracker.network.model.LoginResponse
 import com.rafaelboban.activitytracker.network.model.UpdateUserData
@@ -51,6 +52,9 @@ interface ApiService {
 
     @POST("/api/join-group-activity")
     suspend fun joinGroupActivity(@Body body: JoinGroupActivityRequest): ApiResponse<GroupActivity>
+
+    @POST("/api/leave-group-activity")
+    suspend fun leaveGroupActivity(@Body body: LeaveGroupActivityRequest): ApiResponse<Unit>
 
     @GET("/api/group-activities/{id}")
     suspend fun getGroupActivity(@Path("id") id: String): ApiResponse<GroupActivity>

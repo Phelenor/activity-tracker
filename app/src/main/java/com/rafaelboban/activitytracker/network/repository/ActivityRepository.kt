@@ -3,6 +3,7 @@ package com.rafaelboban.activitytracker.network.repository
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
 import com.rafaelboban.activitytracker.model.network.JoinGroupActivityRequest
+import com.rafaelboban.activitytracker.model.network.LeaveGroupActivityRequest
 import com.rafaelboban.activitytracker.network.ApiService
 import com.rafaelboban.core.shared.model.ActivityType
 import com.skydoves.sandwich.ApiResponse
@@ -42,6 +43,8 @@ class ActivityRepository @Inject constructor(
     suspend fun getGroupActivity(id: String) = api.getGroupActivity(id)
 
     suspend fun deleteGroupActivity(id: String) = api.deleteGroupActivity(id)
+
+    suspend fun leaveGroupActivity(id: String) = api.leaveGroupActivity(LeaveGroupActivityRequest(id))
 
     suspend fun getGroupActivities() = api.getGroupActivities()
 }

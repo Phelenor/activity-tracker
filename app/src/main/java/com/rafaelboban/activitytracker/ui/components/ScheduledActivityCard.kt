@@ -50,13 +50,14 @@ import com.rafaelboban.core.theme.mobile.Typography
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PendingActivityCard(
+fun ScheduledActivityCard(
     groupActivity: GroupActivity,
     navigateToGroupActivity: () -> Unit,
-    onDeleteClick: () -> Unit,
+    onDropdownActionClick: (isOwner: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDropDown by remember { mutableStateOf(false) }
+    val isOwner = groupActivity.userOwnerId == UserData.user?.id
 
     Box(modifier = modifier) {
         Column(
@@ -68,11 +69,13 @@ fun PendingActivityCard(
                 .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .combinedClickable(
-                    onClick = { navigateToGroupActivity() },
-                    onLongClick = {
-                        if (groupActivity.userOwnerId == UserData.user?.id && groupActivity.status.isActive.not()) {
-                            showDropDown = true
+                    onClick = {
+                        if (groupActivity.status.isActive.not()) {
+                            navigateToGroupActivity()
                         }
+                    },
+                    onLongClick = {
+                        showDropDown = true
                     }
                 )
                 .padding(16.dp)
@@ -123,7 +126,8 @@ fun PendingActivityCard(
             }
 
             GroupActivityDateSection(
-                timestamp = groupActivity.startTimestamp
+                timestamp = groupActivity.startTimestamp,
+                isActive = groupActivity.status.isActive
             )
         }
 
@@ -134,14 +138,14 @@ fun PendingActivityCard(
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = stringResource(id = R.string.delete),
+                        text = stringResource(id = if (isOwner) R.string.delete else R.string.leave),
                         color = MaterialTheme.colorScheme.onSurface,
                         style = Typography.bodyMedium
                     )
                 },
                 onClick = {
                     showDropDown = false
-                    onDeleteClick()
+                    onDropdownActionClick(isOwner)
                 }
             )
         }
@@ -151,6 +155,7 @@ fun PendingActivityCard(
 @Composable
 private fun GroupActivityDateSection(
     timestamp: Long,
+    isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -170,6 +175,17 @@ private fun GroupActivityDateSection(
             style = Typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.weight(1f))
+
+        if (isActive) {
+            Text(
+                text = stringResource(R.string.in_progress),
+                style = Typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -177,9 +193,9 @@ private fun GroupActivityDateSection(
 @Composable
 private fun PendingActivityCardPreview() {
     ActivityTrackerTheme {
-        PendingActivityCard(
+        ScheduledActivityCard(
             navigateToGroupActivity = {},
-            onDeleteClick = {},
+            onDropdownActionClick = {},
             groupActivity = GroupActivity(
                 id = "id",
                 activityType = ActivityType.RUN,
