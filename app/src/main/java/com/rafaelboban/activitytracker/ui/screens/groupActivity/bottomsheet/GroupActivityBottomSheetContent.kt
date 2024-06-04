@@ -14,9 +14,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityChipRow
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityDetailsTab
+import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityGroupTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityHeartRateTab
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.tabs.ActivityWeatherTab
 import com.rafaelboban.activitytracker.ui.screens.groupActivity.GroupActivityState
@@ -73,11 +75,16 @@ fun GroupActivityBottomSheetContent(
                         onReloadClick = onLoadWeather
                     )
 
-                    ActivityTabType.GROUP -> ActivityWeatherTab(
-                        weather = state.weather,
-                        isLoading = state.isWeatherLoading,
-                        onReloadClick = onLoadWeather
-                    )
+                    ActivityTabType.GROUP -> {
+                        if (state.groupActivity != null) {
+                            ActivityGroupTab(
+                                userData = state.users,
+                                groupActivity = state.groupActivity
+                            )
+                        } else {
+                            LoadingIndicator(modifier = Modifier.fillMaxSize())
+                        }
+                    }
 
                     else -> Unit
                 }

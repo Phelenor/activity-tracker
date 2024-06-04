@@ -3,6 +3,7 @@ package com.rafaelboban.activitytracker.network.ws
 import com.rafaelboban.activitytracker.model.network.GroupActivity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 enum class ActivityControlAction {
     START, PAUSE, RESUME, FINISH
@@ -18,15 +19,10 @@ sealed class ActivityMessage {
     ) : ActivityMessage()
 
     @Serializable
-    @SerialName("user_finish_signal")
-    data object FinishSignal : ActivityMessage()
-
-    @Serializable
     @SerialName("user_finish")
     data class UserFinish(
         val userId: String,
-        val durationSeconds: Int,
-        val activity: GroupActivity
+        val durationSeconds: Int
     ) : ActivityMessage()
 
     @Serializable
@@ -39,7 +35,8 @@ sealed class ActivityMessage {
         val long: Float,
         val distance: Int,
         val heartRate: Int,
-        val speed: Float
+        val speed: Float,
+        val duration: Duration? = null
     ) : ActivityMessage()
 
     @Serializable

@@ -28,6 +28,8 @@ import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class GroupActivityDataService @Inject constructor(
     private val tracker: ActivityTracker,
@@ -78,10 +80,16 @@ class GroupActivityDataService @Inject constructor(
                     }
 
                     is ActivityMessage.UserFinish -> {
-                        _groupActivity.update { activityMessage.activity }
+                        _userData.update { map ->
+                            map[activityMessage.userId]?.let { user ->
+                                map.toMutableMap().apply {
+                                    put(activityMessage.userId, user.copy(duration = activityMessage.durationSeconds.toDuration(DurationUnit.SECONDS)))
+                                }
+                            } ?: run {
+                                map
+                            }
+                        }
                     }
-
-                    else -> Unit
                 }
             }.launchIn(applicationScope).also { jobs.add(it) }
 
@@ -111,8 +119,9 @@ class GroupActivityDataService @Inject constructor(
         sendMessage(json)
     }
 
-    fun broadcastFinishSignal() {
-        val json = Json.encodeToString<ActivityMessage>(ActivityMessage.FinishSignal)
+    fun broadcastFinishMessage() {
+        val message = ActivityMessage.UserFinish(UserData.requireUser().id, tracker.duration.value.inWholeSeconds.toInt())
+        val json = Json.encodeToString<ActivityMessage>(message)
         sendMessage(json)
     }
 

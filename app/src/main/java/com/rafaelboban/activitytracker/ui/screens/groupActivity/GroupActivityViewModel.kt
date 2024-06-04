@@ -190,7 +190,7 @@ class GroupActivityViewModel @Inject constructor(
                 if (state.isActivityOwner) {
                     dataService.broadcastControlAction(ActivityControlAction.FINISH)
                 } else {
-                    dataService.broadcastFinishSignal()
+                    dataService.broadcastFinishMessage()
                 }
             }
 
