@@ -111,6 +111,7 @@ fun PendingActivityCard(
                 )
 
                 Spacer(Modifier.weight(1f))
+                Spacer(Modifier.width(16.dp))
 
                 Text(
                     text = "Leader: ${groupActivity.userOwnerName}",
@@ -189,7 +190,8 @@ private fun PendingActivityCardPreview() {
                 status = ActivityStatus.IN_PROGRESS,
                 userOwnerId = "sdadasd",
                 userOwnerName = "Rafael",
-                startTimestamp = 31241412
+                startTimestamp = 31241412,
+                connectedUsers = emptyList()
             )
         )
     }

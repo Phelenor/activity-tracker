@@ -2,18 +2,27 @@
 
 package com.rafaelboban.activitytracker.tracking
 
+import com.rafaelboban.activitytracker.model.network.GroupActivity
+import com.rafaelboban.activitytracker.network.ws.ActivityControlAction
 import com.rafaelboban.activitytracker.network.ws.ActivityMessage
 import com.rafaelboban.activitytracker.network.ws.WebSocketClient
+import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.core.shared.utils.F
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -26,20 +35,62 @@ class GroupActivityDataService @Inject constructor(
     private val applicationScope: CoroutineScope
 ) {
 
+    private val _controls = MutableSharedFlow<ActivityControlAction>()
+    val controls = _controls.asSharedFlow()
+
+    private val _groupActivity = MutableStateFlow<GroupActivity?>(null)
+    val groupActivity = _groupActivity.asStateFlow()
+
+    private val _userData = MutableStateFlow<Map<String, ActivityMessage.UserDataSnapshot>>(emptyMap())
+    val userData = _userData.asStateFlow()
+
+    private val activityId: String
+        get() = checkNotNull(_groupActivity.value?.id)
+
     private val jobs = mutableListOf<Job>()
 
-    fun initialize(id: String) {
+    fun initialize(groupActivity: GroupActivity) {
+        this._groupActivity.update { groupActivity }
+
         cancelJobs()
 
-        webSocketClient.connect("/ws/activity/$id")
+        webSocketClient.connect("/ws/activity/$activityId")
             .onEach { message ->
-                // TODO: emit to new users data flow / status update flow
-                Timber.tag("MARIN").d("New message: $message")
+                Timber.tag("WebSocket").i("New message: $message")
+
+                when (val activityMessage = Json.decodeFromString<ActivityMessage>(message)) {
+                    is ActivityMessage.ControlAction -> {
+                        applicationScope.launch {
+                            _controls.emit(activityMessage.action)
+                        }
+                    }
+
+                    is ActivityMessage.UserDataSnapshot -> {
+                        _userData.update { map ->
+                            map.toMutableMap().apply {
+                                put(activityMessage.userId, activityMessage)
+                            }
+                        }
+                    }
+
+                    is ActivityMessage.GroupActivityUpdate -> {
+                        _groupActivity.update { activityMessage.activity }
+                    }
+
+                    is ActivityMessage.UserFinish -> {
+                        _groupActivity.update { activityMessage.activity }
+                    }
+
+                    else -> Unit
+                }
             }.launchIn(applicationScope).also { jobs.add(it) }
 
         tracker.currentLocation.filterNotNull()
             .combine(tracker.data) { location, data ->
-                ActivityMessage.DataUpdate(
+                ActivityMessage.UserDataSnapshot(
+                    userId = UserData.requireUser().id,
+                    userDisplayName = UserData.requireUser().displayName,
+                    userImageUrl = UserData.requireUser().imageUrl,
                     lat = location.location.latitude.F,
                     long = location.location.longitude.F,
                     speed = data.speed,
@@ -50,14 +101,29 @@ class GroupActivityDataService @Inject constructor(
             .distinctUntilChanged()
             .sample(3.seconds)
             .onEach { message ->
-                webSocketClient.send("/ws/activity/$id", Json.encodeToString(message))
+                webSocketClient.send("/ws/activity/$activityId", Json.encodeToString<ActivityMessage>(message))
             }.launchIn(applicationScope).also { jobs.add(it) }
     }
 
-    fun clear(id: String) {
+    fun broadcastControlAction(action: ActivityControlAction) {
+        val message = ActivityMessage.ControlAction(action)
+        val json = Json.encodeToString<ActivityMessage>(message)
+        sendMessage(json)
+    }
+
+    fun broadcastFinishSignal() {
+        val json = Json.encodeToString<ActivityMessage>(ActivityMessage.FinishSignal)
+        sendMessage(json)
+    }
+
+    private fun sendMessage(json: String) {
+        webSocketClient.send("/ws/activity/$activityId", json)
+    }
+
+    fun clear() {
         cancelJobs()
 
-        webSocketClient.close("/ws/activity/$id")
+        webSocketClient.close("/ws/activity/$activityId")
     }
 
     private fun cancelJobs() {

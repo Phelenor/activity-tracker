@@ -6,8 +6,11 @@ import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.activitytracker.model.network.FetchStatus
 import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.network.model.weather.WeatherForecast
+import com.rafaelboban.activitytracker.network.ws.ActivityMessage
 import com.rafaelboban.activitytracker.ui.screens.activity.bottomsheet.components.ActivityTabType
 import com.rafaelboban.core.shared.model.ActivityStatus
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.time.Duration
 
 data class GroupActivityState(
@@ -29,5 +32,6 @@ data class GroupActivityState(
     val isSaving: Boolean = false,
     val groupActivity: GroupActivity? = null,
     val groupActivityFetchStatus: FetchStatus = FetchStatus.IN_PROGRESS,
-    val isActivityOwner: Boolean = false
+    val isActivityOwner: Boolean = false,
+    val users: ImmutableList<ActivityMessage.UserDataSnapshot> = persistentListOf()
 )

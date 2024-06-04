@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -416,7 +417,7 @@ fun ActivityScreen(
                         }
 
                         ActivityStatus.PAUSED -> {
-                            Row {
+                            Row(horizontalArrangement = Arrangement.Center) {
                                 ActivityFloatingActionButton(
                                     icon = Icons.Filled.PlayArrow,
                                     onClick = { onAction(ActivityAction.OnResumeClick) },
@@ -554,7 +555,7 @@ private fun ActivityScreenPreview() {
             toggleTrackerService = {},
             scaffoldState = rememberBottomSheetScaffoldState(),
             state = ActivityState(
-                status = ActivityStatus.IN_PROGRESS,
+                status = ActivityStatus.PAUSED,
                 type = ActivityType.WALK,
                 duration = Duration.parse("1h 30m 52s"),
                 activityData = ActivityData(

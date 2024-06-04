@@ -342,7 +342,8 @@ private fun DashboardScreenPreview() {
                         status = ActivityStatus.IN_PROGRESS,
                         userOwnerId = "sdadasd",
                         startTimestamp = 31241412,
-                        userOwnerName = "Rafael"
+                        userOwnerName = "Rafael",
+                        connectedUsers = emptyList()
                     )
                 }.toImmutableList()
             ),

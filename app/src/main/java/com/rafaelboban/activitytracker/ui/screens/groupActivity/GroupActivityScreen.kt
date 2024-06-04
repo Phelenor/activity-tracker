@@ -647,7 +647,8 @@ private fun ActivityScreenPreview() {
                     status = ActivityStatus.IN_PROGRESS,
                     userOwnerId = "sdadasd",
                     startTimestamp = 31241412,
-                    userOwnerName = "Rafael"
+                    userOwnerName = "Rafael",
+                    connectedUsers = emptyList()
                 ),
                 groupActivityFetchStatus = FetchStatus.SUCCESS,
                 duration = Duration.parse("1h 30m 52s"),

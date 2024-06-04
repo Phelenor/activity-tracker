@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.ActivityWeatherInfo
 import com.rafaelboban.activitytracker.model.network.FetchStatus
+import com.rafaelboban.activitytracker.model.network.GroupActivity
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
 import com.rafaelboban.activitytracker.network.repository.WeatherRepository
+import com.rafaelboban.activitytracker.network.ws.ActivityControlAction
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.activitytracker.tracking.GroupActivityDataService
@@ -19,13 +21,13 @@ import com.rafaelboban.core.shared.connectivity.connectors.PhoneToWatchConnector
 import com.rafaelboban.core.shared.connectivity.model.MessagingAction
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
-import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.DEFAULT_HEART_RATE_TRACKER_AGE
 import com.rafaelboban.core.shared.utils.HeartRateZoneHelper
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import com.skydoves.sandwich.suspendOnFailure
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
@@ -70,15 +72,15 @@ class GroupActivityViewModel @Inject constructor(
 
             activityRepository.getGroupActivity(id).onSuccess {
                 state = state.copy(groupActivity = data, isActivityOwner = currentUser.id == data.userOwnerId, groupActivityFetchStatus = FetchStatus.SUCCESS)
-                initTracker(data.id, data.activityType, state.isActivityOwner)
+                initTracker(data, state.isActivityOwner)
             }.onFailure {
                 state = state.copy(groupActivityFetchStatus = FetchStatus.ERROR)
             }
         }
     }
 
-    private fun initTracker(id: String, type: ActivityType, isActivityOwner: Boolean) {
-        tracker.startTrackingLocation(type, isGroupActivity = true, isGroupActivityOwner = isActivityOwner)
+    private fun initTracker(groupActivity: GroupActivity, isActivityOwner: Boolean) {
+        tracker.startTrackingLocation(groupActivity.activityType, isGroupActivity = true, isGroupActivityOwner = isActivityOwner)
 
         viewModelScope.launch {
             watchConnector.sendMessageToWatch(MessagingAction.GroupActivityMarker(isActivityOwner))
@@ -99,6 +101,27 @@ class GroupActivityViewModel @Inject constructor(
             state = state.copy(duration = duration)
         }.launchIn(viewModelScope)
 
+        if (isActivityOwner.not()) {
+            dataService.controls.onEach { control ->
+                onAction(
+                    when (control) {
+                        ActivityControlAction.START -> GroupActivityAction.OnStartClick
+                        ActivityControlAction.PAUSE -> GroupActivityAction.OnPauseClick
+                        ActivityControlAction.RESUME -> GroupActivityAction.OnResumeClick
+                        ActivityControlAction.FINISH -> GroupActivityAction.OnConfirmFinishClick
+                    }
+                )
+            }.launchIn(viewModelScope)
+        }
+
+        dataService.groupActivity.onEach { activity ->
+            state = state.copy(groupActivity = activity)
+        }.launchIn(viewModelScope)
+
+        dataService.userData.onEach { data ->
+            state = state.copy(users = data.values.toImmutableList())
+        }.launchIn(viewModelScope)
+
         startWeatherUpdates(
             onLoading = { isLoading -> state = state.copy(isWeatherLoading = isLoading) },
             onUpdate = { weather -> state = state.copy(weather = weather) },
@@ -107,11 +130,11 @@ class GroupActivityViewModel @Inject constructor(
 
         listenToWatchActions()
 
-        dataService.initialize(id)
+        dataService.initialize(groupActivity = groupActivity)
     }
 
     fun onAction(action: GroupActivityAction, fromWatch: Boolean = false) {
-        if (!fromWatch) {
+        if (fromWatch.not()) {
             sendActionToWatch(action)
         }
 
@@ -120,18 +143,30 @@ class GroupActivityViewModel @Inject constructor(
                 state = state.copy(status = ActivityStatus.IN_PROGRESS)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
                 tracker.setIsTrackingActivity(true)
+
+                if (state.isActivityOwner) {
+                    dataService.broadcastControlAction(ActivityControlAction.START)
+                }
             }
 
             GroupActivityAction.OnPauseClick -> {
                 state = state.copy(status = ActivityStatus.PAUSED)
                 tracker.setActivityStatus(ActivityStatus.PAUSED)
                 tracker.setIsTrackingActivity(false)
+
+                if (state.isActivityOwner) {
+                    dataService.broadcastControlAction(ActivityControlAction.PAUSE)
+                }
             }
 
             GroupActivityAction.OnResumeClick -> {
                 state = state.copy(status = ActivityStatus.IN_PROGRESS)
                 tracker.setActivityStatus(ActivityStatus.IN_PROGRESS)
                 tracker.setIsTrackingActivity(true)
+
+                if (state.isActivityOwner) {
+                    dataService.broadcastControlAction(ActivityControlAction.RESUME)
+                }
             }
 
             GroupActivityAction.OnFinishClick -> {
@@ -151,6 +186,12 @@ class GroupActivityViewModel @Inject constructor(
                 tracker.setActivityStatus(ActivityStatus.FINISHED)
                 tracker.setIsTrackingActivity(false)
                 tracker.stopTrackingLocation()
+
+                if (state.isActivityOwner) {
+                    dataService.broadcastControlAction(ActivityControlAction.FINISH)
+                } else {
+                    dataService.broadcastFinishSignal()
+                }
             }
 
             GroupActivityAction.OnBackClick -> {
@@ -293,7 +334,7 @@ class GroupActivityViewModel @Inject constructor(
 
         if (ActivityTrackerService.isActive.not()) {
             tracker.clear()
-            dataService.clear(id)
+            dataService.clear()
 
             applicationScope.launch {
                 watchConnector.sendMessageToWatch(MessagingAction.CanNotTrack)
