@@ -12,12 +12,15 @@ import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -29,8 +32,21 @@ class DashboardViewModel @Inject constructor(
     private val eventChannel = Channel<DashboardEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    private var refreshJob: Job? = null
+
     init {
-        refresh()
+        refreshJob = startRefreshJob(triggerRefreshOnStart = true)
+    }
+
+    private fun startRefreshJob(triggerRefreshOnStart: Boolean = false) = viewModelScope.launch {
+        if (triggerRefreshOnStart) {
+            refresh()
+        }
+
+        while (isActive) {
+            delay(30.seconds)
+            getScheduledActivities()
+        }
     }
 
     fun getScheduledActivities() {
@@ -45,6 +61,9 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun refresh() {
+        refreshJob?.cancel()
+        refreshJob = startRefreshJob()
+
         viewModelScope.launch {
             val loaderDelay = async { delay(500) }
 
