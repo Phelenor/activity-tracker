@@ -46,8 +46,11 @@ class GroupActivityDataService @Inject constructor(
     private val _userData = MutableStateFlow<Map<String, ActivityMessage.UserDataSnapshot>>(emptyMap())
     val userData = _userData.asStateFlow()
 
-    private val activityId: String
+    val activityId: String
         get() = checkNotNull(_groupActivity.value?.id)
+
+    val isInitialized: Boolean
+        get() = _groupActivity.value != null
 
     private val jobs = mutableListOf<Job>()
 
@@ -130,9 +133,11 @@ class GroupActivityDataService @Inject constructor(
     }
 
     fun clear() {
-        cancelJobs()
-
         webSocketClient.close("/ws/activity/$activityId")
+
+        cancelJobs()
+        _groupActivity.update { null }
+        _userData.update { emptyMap() }
     }
 
     private fun cancelJobs() {

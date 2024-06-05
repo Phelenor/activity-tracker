@@ -41,9 +41,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:host="current_activity"
-                    android:scheme="activity_tracker" />
+
+                <data android:scheme="activity_tracker" />
+                <data android:host="current_activity" />
+                <data android:host="group_activity" />
             </intent-filter>
         </activity>
 

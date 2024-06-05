@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.getSystemService
@@ -13,6 +14,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
+import com.rafaelboban.activitytracker.tracking.GroupActivityDataService
 import com.rafaelboban.activitytracker.ui.MainActivity
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
@@ -27,6 +29,9 @@ class ActivityTrackerService : LifecycleService() {
 
     @Inject
     lateinit var tracker: ActivityTracker
+
+    @Inject
+    lateinit var dataService: GroupActivityDataService
 
     private val notificationManager by lazy { checkNotNull(getSystemService<NotificationManager>()) }
 
@@ -54,8 +59,14 @@ class ActivityTrackerService : LifecycleService() {
         createNotificationChannel()
 
         val activityIntent = Intent(applicationContext, MainActivity::class.java).apply {
-            data = "activity_tracker://current_activity/${tracker.type.value?.ordinal}".toUri()
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            data = if (dataService.isInitialized) {
+                "activity_tracker://group_activity/${dataService.activityId}"
+            } else {
+                "activity_tracker://current_activity/${tracker.type.value?.ordinal}"
+            }.toUri()
+
+            Log.d("MARIN", "68: start $data")
         }
 
         val pendingIntent = TaskStackBuilder.create(applicationContext).run {

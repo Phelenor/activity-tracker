@@ -71,7 +71,13 @@ fun RootNavigation(
             )
         }
 
-        composableSlide<NavigationGraph.GroupActivity> {
+        composableSlide<NavigationGraph.GroupActivity>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "activity_tracker://group_activity/{id}"
+                }
+            )
+        ) {
             GroupActivityScreenRoot(
                 navigateUp = { navHostController.navigateUp() }
             )
