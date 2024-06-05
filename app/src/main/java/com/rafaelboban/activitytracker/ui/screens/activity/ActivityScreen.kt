@@ -322,24 +322,26 @@ fun ActivityScreen(
                             icon = Icons.AutoMirrored.Outlined.TrendingUp
                         )
 
-                        VerticalDivider(modifier = Modifier.height(24.dp))
+                        if (state.status != ActivityStatus.FINISHED) {
+                            VerticalDivider(modifier = Modifier.height(24.dp))
 
-                        if (state.type.showPace) {
-                            ActivityDataColumn(
-                                modifier = Modifier.weight(1.2f),
-                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
-                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
-                                unit = "min/km",
-                                icon = Icons.Outlined.Speed
-                            )
-                        } else {
-                            ActivityDataColumn(
-                                modifier = Modifier.weight(1f),
-                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
-                                value = state.activityData.speed.roundToDecimals(1),
-                                unit = "km/h",
-                                icon = Icons.Outlined.Speed
-                            )
+                            if (state.type.showPace) {
+                                ActivityDataColumn(
+                                    modifier = Modifier.weight(1.2f),
+                                    title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
+                                    value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
+                                    unit = "min/km",
+                                    icon = Icons.Outlined.Speed
+                                )
+                            } else {
+                                ActivityDataColumn(
+                                    modifier = Modifier.weight(1f),
+                                    title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
+                                    value = state.activityData.speed.roundToDecimals(1),
+                                    unit = "km/h",
+                                    icon = Icons.Outlined.Speed
+                                )
+                            }
                         }
                     }
                 }

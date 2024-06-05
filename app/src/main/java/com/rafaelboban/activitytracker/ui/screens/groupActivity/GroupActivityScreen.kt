@@ -112,6 +112,7 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Montserrat
 import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import java.io.ByteArrayOutputStream
 import kotlin.time.Duration
 
@@ -191,7 +192,7 @@ fun GroupActivityScreen(
         when {
             state.showDiscardDialog -> InfoDialog(
                 title = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity),
-                subtitle = stringResource(id = com.rafaelboban.activitytracker.R.string.discard_activity_info),
+                subtitle = stringResource(id = if (state.isActivityOwner) R.string.discard_activity_info_owner else com.rafaelboban.activitytracker.R.string.discard_activity_info),
                 actionText = stringResource(id = com.rafaelboban.activitytracker.R.string.discard),
                 actionButtonColor = MaterialTheme.colorScheme.error,
                 actionButtonTextColor = MaterialTheme.colorScheme.onError,
@@ -295,7 +296,7 @@ fun GroupActivityScreen(
                                     activityType = activityType,
                                     onBackClick = { onAction(GroupActivityAction.OnBackClick) },
                                     gpsOk = if (state.status != ActivityStatus.FINISHED) state.currentLocation != null else null,
-                                    showShareButton = true,
+                                    showShareButton = state.status == ActivityStatus.NOT_STARTED,
                                     onShareClick = { onAction(GroupActivityAction.OnShareClick) }
                                 )
 
@@ -322,31 +323,33 @@ fun GroupActivityScreen(
                                         icon = Icons.AutoMirrored.Outlined.TrendingUp
                                     )
 
-                                    VerticalDivider(modifier = Modifier.height(24.dp))
+                                    if (state.status != ActivityStatus.FINISHED) {
+                                        VerticalDivider(modifier = Modifier.height(24.dp))
 
-                                    if (activityType.showPace) {
-                                        ActivityDataColumn(
-                                            modifier = Modifier.weight(1.2f),
-                                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
-                                            value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
-                                            unit = "min/km",
-                                            icon = Icons.Outlined.Speed
-                                        )
-                                    } else {
-                                        ActivityDataColumn(
-                                            modifier = Modifier.weight(1f),
-                                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
-                                            value = state.activityData.speed.roundToDecimals(1),
-                                            unit = "km/h",
-                                            icon = Icons.Outlined.Speed
-                                        )
+                                        if (activityType.showPace) {
+                                            ActivityDataColumn(
+                                                modifier = Modifier.weight(1.2f),
+                                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.pace),
+                                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
+                                                unit = "min/km",
+                                                icon = Icons.Outlined.Speed
+                                            )
+                                        } else {
+                                            ActivityDataColumn(
+                                                modifier = Modifier.weight(1f),
+                                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.speed),
+                                                value = state.activityData.speed.roundToDecimals(1),
+                                                unit = "km/h",
+                                                icon = Icons.Outlined.Speed
+                                            )
+                                        }
                                     }
                                 }
                             }
 
                             ActivityTrackerMap(
                                 currentLocation = state.currentLocation,
-                                groupUserData = state.users,
+                                groupUserData = state.users.filter { it.duration == null }.toImmutableList(),
                                 locations = state.activityData.locations,
                                 cameraLocked = state.mapCameraLocked,
                                 mapType = state.mapType,

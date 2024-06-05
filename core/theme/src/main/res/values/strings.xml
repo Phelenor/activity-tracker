@@ -10,4 +10,5 @@
     <string name="finish_activity_subtitle">Other participants will continue the activity.</string>
     <string name="finish_activity_title">Finish activity?</string>
     <string name="finish">Finish</string>
+    <string name="discard_activity_info_owner">This will finish the activity for everyone and it won\'t be saved to yoru activity log.</string>
 </resources>
