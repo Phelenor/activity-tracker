@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,11 +45,14 @@ import com.google.maps.android.ktx.awaitSnapshot
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
+import com.rafaelboban.activitytracker.network.ws.ActivityMessage
 import com.rafaelboban.activitytracker.ui.components.applyIf
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.mobile.ColorSuccess
+import com.rafaelboban.core.theme.mobile.Typography
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -62,7 +67,8 @@ fun ActivityTrackerMap(
     maxSpeed: Float,
     onSnapshot: (Bitmap) -> Unit,
     triggerMapSnapshot: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    groupUserData: ImmutableList<ActivityMessage.UserDataSnapshot> = persistentListOf()
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -164,7 +170,7 @@ fun ActivityTrackerMap(
 
                 map.setOnCameraIdleListener {
                     scope.launch {
-                        delay(100L)
+                        delay(200L)
                         map.awaitSnapshot()?.let(onSnapshot)
                     }
                 }
@@ -214,6 +220,52 @@ fun ActivityTrackerMap(
                         imageVector = ImageVector.vectorResource(id = activityType.drawableRes),
                         showBorder = mapType.hardlyVisible
                     )
+                }
+            }
+
+            groupUserData.forEach { user ->
+                key(user.userId) {
+                    val userMarkerState = rememberMarkerState()
+
+                    val markerLatitude by animateFloatAsState(
+                        targetValue = user.lat,
+                        animationSpec = tween(durationMillis = 500),
+                        label = "user_marker_lat_${user.userDisplayName}"
+                    )
+
+                    val markerLongitude by animateFloatAsState(
+                        targetValue = user.long,
+                        animationSpec = tween(durationMillis = 500),
+                        label = "user_marker_long_${user.userDisplayName}"
+                    )
+
+                    val position = remember(markerLatitude, markerLongitude) {
+                        LatLng(
+                            markerLatitude.toDouble(),
+                            markerLongitude.toDouble()
+                        )
+                    }
+
+                    LaunchedEffect(position) {
+                        userMarkerState.position = position
+                    }
+
+                    MarkerComposable(
+                        userMarkerState.position,
+                        state = userMarkerState,
+                        anchor = Offset(0.5f, 0.5f)
+                    ) {
+                        MapMarker(
+                            showBorder = mapType.hardlyVisible,
+                            backgroundColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            Text(
+                                text = user.userDisplayName.first().uppercase(),
+                                style = Typography.displayLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 }
             }
         }

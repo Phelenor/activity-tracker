@@ -16,8 +16,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun ImageWithIndicator(
@@ -27,14 +29,14 @@ fun ImageWithIndicator(
     placeholder: (@Composable BoxScope.() -> Unit)? = null
 ) {
     SubcomposeAsyncImage(
-        model = url,
+        model = ImageRequest.Builder(LocalContext.current).data(url).allowHardware(false).build(),
         contentDescription = contentDescription,
         modifier = modifier,
         loading = {
             BoxWithConstraints(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(listOf(24f, maxWidth.value / 2, maxHeight.value / 2).min().dp),

@@ -346,6 +346,7 @@ fun GroupActivityScreen(
 
                             ActivityTrackerMap(
                                 currentLocation = state.currentLocation,
+                                groupUserData = state.users,
                                 locations = state.activityData.locations,
                                 cameraLocked = state.mapCameraLocked,
                                 mapType = state.mapType,

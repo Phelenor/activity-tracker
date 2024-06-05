@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -40,11 +40,11 @@ class DashboardViewModel @Inject constructor(
 
     private fun startRefreshJob(triggerRefreshOnStart: Boolean = false) = viewModelScope.launch {
         if (triggerRefreshOnStart) {
-            refresh()
+            getScheduledActivities()
         }
 
         while (isActive) {
-            delay(30.seconds)
+            delay(1.minutes)
             getScheduledActivities()
         }
     }
