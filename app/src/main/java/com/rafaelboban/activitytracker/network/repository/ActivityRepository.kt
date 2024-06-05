@@ -47,4 +47,6 @@ class ActivityRepository @Inject constructor(
     suspend fun leaveGroupActivity(id: String) = api.leaveGroupActivity(LeaveGroupActivityRequest(id))
 
     suspend fun getGroupActivities() = api.getGroupActivities()
+
+    suspend fun getGroupActivityOverview(id: String) = api.getGroupActivityOverview(id)
 }

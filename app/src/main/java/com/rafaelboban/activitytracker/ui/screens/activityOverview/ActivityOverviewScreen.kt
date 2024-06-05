@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.ui.components.ActivityDetailsCard
 import com.rafaelboban.activitytracker.ui.components.ActivityGoalsCard
+import com.rafaelboban.activitytracker.ui.components.ActivityGroupDetailsCard
 import com.rafaelboban.activitytracker.ui.components.ActivityHeartZoneAnalysisCard
 import com.rafaelboban.activitytracker.ui.components.ActivityMapCard
 import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
@@ -86,6 +87,13 @@ private fun ActivityOverviewScreen(
                         ActivityGoalsCard(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             goals = activity.goals
+                        )
+                    }
+
+                    state.groupActivityOverview?.let { users ->
+                        ActivityGroupDetailsCard(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            groupActivityOverview = users
                         )
                     }
                 }

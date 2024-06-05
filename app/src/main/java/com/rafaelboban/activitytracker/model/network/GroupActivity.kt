@@ -13,8 +13,8 @@ data class GroupActivity(
     val startTimestamp: Long,
     val activityType: ActivityType,
     val status: ActivityStatus,
-    val joinedUsers: List<String>,
-    val connectedUsers: List<String>,
-    val startedUsers: List<String>,
-    val activeUsers: List<String>
+    val joinedUsers: List<String> = emptyList(),
+    val connectedUsers: List<String> = emptyList(),
+    val activeUsers: List<String> = emptyList(),
+    val finishedUsers: List<String> = emptyList()
 )

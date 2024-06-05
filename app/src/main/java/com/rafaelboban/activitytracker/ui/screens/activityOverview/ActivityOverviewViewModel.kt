@@ -35,6 +35,12 @@ class ActivityOverviewViewModel @Inject constructor(
                 state = state.copy(activity = data)
             }
 
+            state.activity?.groupActivityId?.let { groupActivityId ->
+                activityRepository.getGroupActivityOverview(groupActivityId).onSuccess {
+                    state = state.copy(groupActivityOverview = data)
+                }
+            }
+
             state = state.copy(isLoading = false)
         }
     }

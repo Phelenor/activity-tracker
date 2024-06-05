@@ -5,6 +5,7 @@ import com.rafaelboban.activitytracker.model.User
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
 import com.rafaelboban.activitytracker.model.network.GroupActivity
+import com.rafaelboban.activitytracker.model.network.GroupActivityOverview
 import com.rafaelboban.activitytracker.model.network.JoinGroupActivityRequest
 import com.rafaelboban.activitytracker.model.network.LeaveGroupActivityRequest
 import com.rafaelboban.activitytracker.network.model.LoginRequest
@@ -64,6 +65,9 @@ interface ApiService {
 
     @GET("/api/group-activities")
     suspend fun getGroupActivities(): ApiResponse<List<GroupActivity>>
+
+    @GET("/api/group-activity-overview/{id}")
+    suspend fun getGroupActivityOverview(@Path("id") id: String): ApiResponse<GroupActivityOverview>
 
     @GET("https://api.openweathermap.org/data/3.0/onecall")
     suspend fun getWeatherData(

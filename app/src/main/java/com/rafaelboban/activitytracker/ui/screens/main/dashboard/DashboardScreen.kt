@@ -341,7 +341,6 @@ private fun DashboardScreenPreview() {
                     GroupActivity(
                         id = "id$i",
                         activityType = ActivityType.RUN,
-                        startedUsers = emptyList(),
                         joinedUsers = emptyList(),
                         activeUsers = emptyList(),
                         joinCode = "AD2323",

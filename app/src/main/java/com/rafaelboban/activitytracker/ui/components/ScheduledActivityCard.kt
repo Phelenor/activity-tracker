@@ -199,7 +199,6 @@ private fun PendingActivityCardPreview() {
             groupActivity = GroupActivity(
                 id = "id",
                 activityType = ActivityType.RUN,
-                startedUsers = emptyList(),
                 joinedUsers = emptyList(),
                 activeUsers = emptyList(),
                 joinCode = "AD2323",

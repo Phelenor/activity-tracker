@@ -107,7 +107,7 @@ class GroupActivityDataService @Inject constructor(
                 )
             }
             .distinctUntilChanged()
-            .sample(3.seconds)
+            .sample(2.seconds)
             .onEach { message ->
                 webSocketClient.send("/ws/activity/$activityId", Json.encodeToString<ActivityMessage>(message))
             }.launchIn(applicationScope).also { jobs.add(it) }
