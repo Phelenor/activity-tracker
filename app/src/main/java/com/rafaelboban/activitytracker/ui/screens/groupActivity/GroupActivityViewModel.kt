@@ -221,6 +221,15 @@ class GroupActivityViewModel @Inject constructor(
             }
 
             GroupActivityAction.DiscardActivity -> {
+                if (state.isActivityOwner) {
+                    state.groupActivity?.id?.let { id ->
+                        applicationScope.launch {
+                            dataService.broadcastControlAction(ActivityControlAction.FINISH)
+                            activityRepository.deleteGroupActivity(id)
+                        }
+                    }
+                }
+
                 viewModelScope.launch {
                     eventChannel.trySend(GroupActivityEvent.NavigateBack)
                 }
