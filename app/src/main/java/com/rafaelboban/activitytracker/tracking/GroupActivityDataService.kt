@@ -133,7 +133,9 @@ class GroupActivityDataService @Inject constructor(
     }
 
     fun clear() {
-        webSocketClient.close("/ws/activity/$activityId")
+        runCatching {
+            webSocketClient.close("/ws/activity/$activityId")
+        }
 
         cancelJobs()
         _groupActivity.update { null }
