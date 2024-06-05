@@ -44,7 +44,7 @@ class DashboardViewModel @Inject constructor(
         }
 
         while (isActive) {
-            delay(1.minutes)
+            delay(5.minutes)
             getScheduledActivities()
         }
     }
