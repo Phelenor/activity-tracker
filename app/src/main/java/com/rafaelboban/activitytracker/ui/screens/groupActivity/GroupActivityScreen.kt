@@ -349,7 +349,7 @@ fun GroupActivityScreen(
 
                             ActivityTrackerMap(
                                 currentLocation = state.currentLocation,
-                                groupUserData = state.users.filter { it.duration == null }.toImmutableList(),
+                                groupUserData = state.users.filter { it.showOnMap }.toImmutableList(),
                                 locations = state.activityData.locations,
                                 cameraLocked = state.mapCameraLocked,
                                 mapType = state.mapType,

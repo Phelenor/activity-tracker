@@ -36,7 +36,8 @@ sealed class ActivityMessage {
         val distance: Int,
         val heartRate: Int,
         val speed: Float,
-        val duration: Duration? = null
+        val duration: Duration? = null,
+        val showOnMap: Boolean = true
     ) : ActivityMessage()
 
     @Serializable

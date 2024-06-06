@@ -80,6 +80,14 @@ class GroupActivityDataService @Inject constructor(
 
                     is ActivityMessage.GroupActivityUpdate -> {
                         _groupActivity.update { activityMessage.activity }
+
+                        _userData.update { data ->
+                            data.toMutableMap().apply {
+                                forEach { (id, snapshot) ->
+                                    put(id, snapshot.copy(showOnMap = snapshot.duration != null && (id in activityMessage.activity.connectedUsers || id in activityMessage.activity.activeUsers)))
+                                }
+                            }
+                        }
                     }
 
                     is ActivityMessage.UserFinish -> {
