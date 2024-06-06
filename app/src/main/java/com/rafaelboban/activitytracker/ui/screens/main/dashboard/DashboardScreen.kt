@@ -148,8 +148,10 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenSelectActivityTypeIndividualBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showSelectActivityBottomSheet)
                 DashboardAction.OpenConfigureGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showConfigureGroupActivityBottomSheet)
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
-                DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GROUP_ACTIVITY) }
                 DashboardAction.Refresh -> viewModel.refresh()
+                DashboardAction.GetEquipmentInfoClick -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GYM_EQUIPMENT) }
+                DashboardAction.JoinGymActivityClick -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
+                is DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(action.type) }
                 is DashboardAction.OnScheduledActivityClick -> navigateToGroupActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
                 is DashboardAction.CreateGroupActivity -> viewModel.createGroupActivity(action.type, action.estimatedStartTimestamp)
@@ -160,6 +162,7 @@ fun DashboardScreenRoot(
                         viewModel.leaveScheduledActivity(action.groupActivityId)
                     }
                 }
+
                 is DashboardAction.StartIndividualActivity -> {
                     viewModel.dismissBottomSheet()
                     navigateToActivity(action.type)
@@ -235,7 +238,7 @@ fun DashboardScreen(
                 state.showJoinGroupActivityBottomSheet -> JoinGroupActivityBottomSheet(
                     isJoiningActivity = state.isJoiningGroupActivity,
                     onJoinClick = { joinCode -> onAction(DashboardAction.JoinGroupActivity(joinCode)) },
-                    onScanQrCodeClick = { onAction(DashboardAction.OpenQRCodeScanner) }
+                    onScanQrCodeClick = { onAction(DashboardAction.OpenQRCodeScanner(ScannerType.GROUP_ACTIVITY)) }
                 )
             }
         }
@@ -314,8 +317,8 @@ fun DashboardScreen(
                             DashboardControl.INDIVIDUAL_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
                             DashboardControl.CREATE_GROUP_ACTIVITY -> onAction(DashboardAction.OpenConfigureGroupActivityBottomSheet)
                             DashboardControl.JOIN_GROUP_ACTIVITY -> onAction(DashboardAction.OpenJoinGroupActivityBottomSheet)
-                            DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
-                            DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.OpenSelectActivityTypeIndividualBottomSheet)
+                            DashboardControl.JOIN_GYM_ACTIVITY -> onAction(DashboardAction.JoinGymActivityClick)
+                            DashboardControl.SCAN_GYM_EQUIPMENT -> onAction(DashboardAction.GetEquipmentInfoClick)
                         }
                     }
                 )
