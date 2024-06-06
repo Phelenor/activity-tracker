@@ -48,7 +48,7 @@ fun ActivityOverviewUserRow(
                     .weight(1f)
                     .padding(end = 8.dp)
             ) {
-                UserImage(
+                UserImageWithLoader(
                     modifier = Modifier.size(40.dp),
                     imageUrl = user.imageUrl
                 )

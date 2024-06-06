@@ -369,6 +369,7 @@ fun GroupActivityScreen(
 
                                     onAction(GroupActivityAction.MapSnapshotDone(stream.toByteArray()))
                                 },
+                                onOtherMarkerClick = { if (state.mapCameraLocked) onAction(GroupActivityAction.OnCameraLockToggle) },
                                 modifier = Modifier.constrainAs(map) {
                                     top.linkTo(infoCard.bottom, margin = (-16).dp)
                                     bottom.linkTo(parent.bottom)

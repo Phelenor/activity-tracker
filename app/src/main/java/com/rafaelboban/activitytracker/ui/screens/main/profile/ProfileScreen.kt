@@ -48,7 +48,7 @@ import com.rafaelboban.activitytracker.ui.components.DatePickerDialog
 import com.rafaelboban.activitytracker.ui.components.EnterNumberBottomSheet
 import com.rafaelboban.activitytracker.ui.components.FullScreenLoadingDialog
 import com.rafaelboban.activitytracker.ui.components.LabeledItem
-import com.rafaelboban.activitytracker.ui.components.UserImage
+import com.rafaelboban.activitytracker.ui.components.UserImageWithLoader
 import com.rafaelboban.activitytracker.util.CredentialHelper
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
@@ -198,7 +198,7 @@ private fun ProfileScreen(
             .background(color = MaterialTheme.colorScheme.background)
             .padding(top = 32.dp, bottom = 16.dp)
     ) {
-        UserImage(
+        UserImageWithLoader(
             imageUrl = state.user.imageUrl,
             modifier = Modifier
                 .border(width = 6.dp, color = MaterialTheme.colorScheme.primary, shape = CircleShape)

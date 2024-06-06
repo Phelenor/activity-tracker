@@ -39,6 +39,7 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.ktx.awaitSnapshot
@@ -46,7 +47,10 @@ import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.model.location.Location
 import com.rafaelboban.activitytracker.model.location.LocationTimestamp
 import com.rafaelboban.activitytracker.network.ws.ActivityMessage
+import com.rafaelboban.activitytracker.ui.components.TrackerMapInfoWindow
 import com.rafaelboban.activitytracker.ui.components.applyIf
+import com.rafaelboban.activitytracker.ui.components.util.rememberComposeBitmapDescriptor
+import com.rafaelboban.activitytracker.util.UserImagePreloader
 import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.shared.utils.F
 import com.rafaelboban.core.theme.mobile.ColorSuccess
@@ -68,6 +72,7 @@ fun ActivityTrackerMap(
     onSnapshot: (Bitmap) -> Unit,
     triggerMapSnapshot: Boolean,
     modifier: Modifier = Modifier,
+    onOtherMarkerClick: () -> Unit = { },
     groupUserData: ImmutableList<ActivityMessage.UserDataSnapshot> = persistentListOf()
 ) {
     val context = LocalContext.current
@@ -99,6 +104,12 @@ fun ActivityTrackerMap(
             userMarkerLatitude.toDouble(),
             userMarkerLongitude.toDouble()
         )
+    }
+
+    LaunchedEffect(groupUserData.map { it.userId }) {
+        groupUserData.forEach { user ->
+            UserImagePreloader.preload(context, user.userImageUrl)
+        }
     }
 
     LaunchedEffect(markerPosition) {
@@ -184,7 +195,6 @@ fun ActivityTrackerMap(
             firstLocation?.let {
                 lastLocation?.let {
                     MarkerComposable(
-                        firstLocation,
                         state = rememberMarkerState(position = LatLng(firstLocation.latLong.latitude, firstLocation.latLong.longitude)),
                         anchor = Offset(0.5f, 0.5f)
                     ) {
@@ -196,7 +206,6 @@ fun ActivityTrackerMap(
                     }
 
                     MarkerComposable(
-                        lastLocation,
                         state = rememberMarkerState(position = LatLng(lastLocation.latLong.latitude, lastLocation.latLong.longitude)),
                         anchor = Offset(0.5f, 0.5f)
                     ) {
@@ -212,7 +221,6 @@ fun ActivityTrackerMap(
         } else {
             currentLocation?.let {
                 MarkerComposable(
-                    currentLocation,
                     state = markerState,
                     anchor = Offset(0.5f, 0.5f)
                 ) {
@@ -250,11 +258,7 @@ fun ActivityTrackerMap(
                         userMarkerState.position = position
                     }
 
-                    MarkerComposable(
-                        userMarkerState.position,
-                        state = userMarkerState,
-                        anchor = Offset(0.5f, 0.5f)
-                    ) {
+                    val icon = rememberComposeBitmapDescriptor {
                         MapMarker(
                             showBorder = mapType.hardlyVisible,
                             backgroundColor = MaterialTheme.colorScheme.tertiary
@@ -265,6 +269,22 @@ fun ActivityTrackerMap(
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
+                    }
+
+                    MarkerInfoWindow(
+                        icon = icon,
+                        state = userMarkerState,
+                        anchor = Offset(0.5f, 0.5f),
+                        infoWindowAnchor = Offset(0.5f, -0.1f),
+                        onClick = {
+                            onOtherMarkerClick()
+                            false
+                        }
+                    ) {
+                        TrackerMapInfoWindow(
+                            data = user,
+                            activityType = activityType
+                        )
                     }
                 }
             }
