@@ -21,7 +21,8 @@ import javax.inject.Inject
 
 class GymActivityDataService @Inject constructor(
     private val webSocketClient: WebSocketClient,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val appJson: Json
 ) {
     private val _controls = MutableSharedFlow<ActivityControlAction>()
     val controls = _controls.asSharedFlow()
@@ -29,8 +30,8 @@ class GymActivityDataService @Inject constructor(
     private val _gymEquipment = MutableStateFlow<GymEquipment?>(null)
     val gymEquipment = _gymEquipment.asStateFlow()
 
-    private val _dataSnapshot = MutableStateFlow<GymActivityMessage.DataSnapshot?>(null)
-    val userData = _dataSnapshot.asStateFlow()
+    private val _dataSnapshot = MutableStateFlow<GymActivityMessage.GymDataSnapshot?>(null)
+    val dataSnapshot = _dataSnapshot.asStateFlow()
 
     val equipmentId: String
         get() = checkNotNull(_gymEquipment.value?.id)
@@ -49,14 +50,14 @@ class GymActivityDataService @Inject constructor(
             .onEach { message ->
                 Timber.tag("WebSocket").i("New message: $message")
 
-                when (val activityMessage = Json.decodeFromString<GymActivityMessage>(message)) {
+                when (val activityMessage = appJson.decodeFromString<GymActivityMessage>(message)) {
                     is GymActivityMessage.ControlAction -> {
                         applicationScope.launch {
                             _controls.emit(activityMessage.action)
                         }
                     }
 
-                    is GymActivityMessage.DataSnapshot -> {
+                    is GymActivityMessage.GymDataSnapshot -> {
                         _dataSnapshot.update { activityMessage }
                     }
                 }
@@ -65,7 +66,7 @@ class GymActivityDataService @Inject constructor(
 
     fun sendControlAction(action: ActivityControlAction) {
         val message = GymActivityMessage.ControlAction(action)
-        val json = Json.encodeToString<GymActivityMessage>(message)
+        val json = appJson.encodeToString<GymActivityMessage>(message)
         sendMessage(json)
     }
 

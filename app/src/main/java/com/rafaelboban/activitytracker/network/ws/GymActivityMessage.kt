@@ -13,14 +13,16 @@ sealed class GymActivityMessage {
     ) : GymActivityMessage()
 
     @Serializable
-    @SerialName("data_snapshot")
-    data class DataSnapshot(
+    @SerialName("gym_data_snapshot")
+    data class GymDataSnapshot(
         val distance: Int,
         val heartRate: Int,
         val speed: Float,
         val avgSpeed: Float,
         val avgHeartRate: Int,
         val elevationGain: Int,
+        val maxSpeed: Float,
+        val maxHeartRate: Int,
         val calories: Int
     ) : GymActivityMessage()
 }

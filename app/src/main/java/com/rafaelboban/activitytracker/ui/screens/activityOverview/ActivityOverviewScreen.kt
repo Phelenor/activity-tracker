@@ -78,10 +78,12 @@ private fun ActivityOverviewScreen(
                         activity = activity
                     )
 
-                    ActivityHeartZoneAnalysisCard(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        heartZoneDistribution = activity.heartRateZoneDistribution
-                    )
+                    if (activity.heartRateZoneDistribution.isNotEmpty()) {
+                        ActivityHeartZoneAnalysisCard(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            heartZoneDistribution = activity.heartRateZoneDistribution
+                        )
+                    }
 
                     if (activity.goals.isNotEmpty()) {
                         ActivityGoalsCard(

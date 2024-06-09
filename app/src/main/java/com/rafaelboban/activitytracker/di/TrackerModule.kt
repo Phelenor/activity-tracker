@@ -15,6 +15,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -53,6 +54,7 @@ object TrackerModule {
     @Singleton
     fun getGymActivityDataService(
         webSocketClient: WebSocketClient,
-        applicationScope: CoroutineScope
-    ) = GymActivityDataService(webSocketClient, applicationScope)
+        applicationScope: CoroutineScope,
+        json: Json
+    ) = GymActivityDataService(webSocketClient, applicationScope, json)
 }

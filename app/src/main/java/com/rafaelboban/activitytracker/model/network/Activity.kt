@@ -31,7 +31,8 @@ data class Activity(
     val heartRateZoneDistribution: Map<HeartRateZone, Float>,
     val goals: List<ActivityGoalProgress>,
     val imageUrl: String? = null,
-    val groupActivityId: String? = null
+    val groupActivityId: String? = null,
+    val isGymActivity: Boolean = false
 ) {
 
     companion object {

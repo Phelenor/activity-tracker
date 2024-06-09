@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -82,12 +83,15 @@ fun ActivityCard(
                 )
                 .padding(16.dp)
         ) {
-            MapImage(imageUrl = activity.imageUrl)
+            activity.imageUrl?.takeUnless { activity.isGymActivity || it.isBlank() }?.let {
+                MapImage(imageUrl = activity.imageUrl)
+            }
 
             ActivityDurationSection(
                 duration = activity.durationSeconds,
                 activityType = activity.activityType,
                 isGroupActivity = activity.groupActivityId != null,
+                isGymActivity = activity.isGymActivity,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -145,6 +149,7 @@ private fun ActivityDurationSection(
     duration: Long,
     activityType: ActivityType,
     isGroupActivity: Boolean,
+    isGymActivity: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -202,6 +207,15 @@ private fun ActivityDurationSection(
                 modifier = Modifier
                     .size(32.dp)
                     .scale(1.5f)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+        } else if (isGymActivity) {
+            Icon(
+                painter = painterResource(R.drawable.ic_gym),
+                tint = MaterialTheme.colorScheme.onSurface,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp)
             )
 
             Spacer(modifier = Modifier.width(8.dp))

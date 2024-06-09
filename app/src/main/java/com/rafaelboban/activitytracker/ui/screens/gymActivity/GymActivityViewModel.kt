@@ -53,7 +53,7 @@ class GymActivityViewModel @Inject constructor(
     private val eventChannel = Channel<GymActivityEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val isTrackingActivity = snapshotFlow { state.status.isActive }
+    private val isTrackingActivity = snapshotFlow { state.status == ActivityStatus.IN_PROGRESS }
 
     init {
         getGymEquipment()
@@ -82,7 +82,7 @@ class GymActivityViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         isTrackingActivity.flatMapLatest { isTracking ->
-            if (isTracking) dataService.userData else flowOf()
+            if (isTracking) dataService.dataSnapshot else flowOf()
         }.filterNotNull().onEach { data ->
             state = state.copy(
                 activityData = state.activityData.copy(
@@ -92,7 +92,9 @@ class GymActivityViewModel @Inject constructor(
                     avgSpeed = data.avgSpeed,
                     avgHeartRate = data.avgHeartRate,
                     elevationGain = data.elevationGain,
-                    calories = data.calories
+                    calories = data.calories,
+                    maxSpeed = data.maxSpeed,
+                    maxHeartRate = data.maxHeartRate
                 )
             )
         }.launchIn(viewModelScope)
@@ -196,7 +198,8 @@ class GymActivityViewModel @Inject constructor(
                 maxSpeedKmh = state.activityData.maxSpeed,
                 heartRateZoneDistribution = emptyMap(),
                 goals = emptyList(),
-                weather = null
+                weather = null,
+                isGymActivity = true
             )
 
             activityRepository.saveActivity(activity, byteArrayOf()).suspendOnFailure {

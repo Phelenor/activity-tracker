@@ -119,7 +119,7 @@ class ActivityTrackerService : LifecycleService() {
     }
 
     private fun startGymNotificationUpdates() {
-        gymDataService.userData.filterNotNull().onEach { data ->
+        gymDataService.dataSnapshot.filterNotNull().onEach { data ->
             val distanceUnit = if (data.distance < 1000) "m" else "km"
             notificationBuilder.setContentText("${ActivityDataFormatter.formatDistanceDisplay(data.distance)} $distanceUnit")
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
