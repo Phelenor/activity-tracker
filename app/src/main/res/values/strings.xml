@@ -64,10 +64,11 @@
     <string name="calories_estimated">Calories (estimated)</string>
     <string name="average_pace">Average pace</string>
     <string name="avg_pace">Avg. pace</string>
-    <string name="avg_sign_pace">Ø pace</string>
+    <string name="avg_sign_distance">Ø Distance</string>
+    <string name="avg_sign_pace">Ø Pace</string>
     <string name="average_speed">Average speed</string>
     <string name="avg_speed">Avg. speed</string>
-    <string name="avg_sign_speed">Ø speed</string>
+    <string name="avg_sign_speed">Ø Speed</string>
     <string name="calories">Calories</string>
     <string name="duration_pct_in_zone">% in HR zone</string>
     <string name="duration_pct_above_below_zone">% above/below HR zone</string>
