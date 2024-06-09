@@ -28,12 +28,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.ui.components.LoadingIndicator
 import com.rafaelboban.activitytracker.ui.components.TrackerTopAppBar
 import com.rafaelboban.activitytracker.ui.components.camera.CameraPreview
@@ -112,7 +114,7 @@ private fun ScannerScreen(
             TrackerTopAppBar(
                 showBackButton = true,
                 onBackButtonClick = { onAction(ScannerScreenAction.OnBackPress) },
-                title = "Scan QR Code"
+                title = stringResource(R.string.scan_qr_code)
             )
         }
     ) { padding ->
