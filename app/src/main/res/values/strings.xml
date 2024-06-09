@@ -101,4 +101,7 @@
     <string name="leave">Leave</string>
     <string name="finished">Finished</string>
     <string name="group_participants">Group Participants</string>
+    <string name="retry">Retry</string>
+    <string name="description">Description</string>
+    <string name="watch_video">Watch video</string>
 </resources>

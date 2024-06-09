@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,51 +16,47 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rafaelboban.core.shared.model.ActivityType
 import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackerTopAppBar(
-    title: String,
+fun EquipmentTopAppBar(
+    name: String,
+    activityType: ActivityType,
     modifier: Modifier = Modifier,
-    showBackButton: Boolean = false,
-    onBackButtonClick: () -> Unit = { }
+    onBackButtonClick: () -> Unit
 ) {
     TopAppBar(
         modifier = modifier,
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
         navigationIcon = {
-            if (showBackButton) {
-                IconButton(onClick = onBackButtonClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+            IconButton(onClick = onBackButtonClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
         },
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = com.rafaelboban.core.shared.R.drawable.app_logo_main),
-                    contentDescription = null,
-                    tint = Color.Unspecified
+                ActivityTypeIcon(
+                    modifier = Modifier.size(32.dp),
+                    activityType = activityType
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = title,
+                    text = name,
                     style = Typography.headlineMedium,
                     fontSize = 22.sp,
                     color = MaterialTheme.colorScheme.onPrimary
@@ -73,6 +70,10 @@ fun TrackerTopAppBar(
 @Composable
 private fun TrackerTopAppBarPreview() {
     ActivityTrackerTheme {
-        TrackerTopAppBar(title = "Profile", showBackButton = true)
+        EquipmentTopAppBar(
+            name = "Treadmill",
+            activityType = ActivityType.RUN,
+            onBackButtonClick = {}
+        )
     }
 }

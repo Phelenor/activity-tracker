@@ -2,6 +2,7 @@ package com.rafaelboban.activitytracker.network
 
 import com.rafaelboban.activitytracker.BuildConfig
 import com.rafaelboban.activitytracker.model.User
+import com.rafaelboban.activitytracker.model.gym.GymEquipment
 import com.rafaelboban.activitytracker.model.network.Activity
 import com.rafaelboban.activitytracker.model.network.CreateGroupActivityRequest
 import com.rafaelboban.activitytracker.model.network.GroupActivity
@@ -18,6 +19,7 @@ import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HEAD
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -68,6 +70,12 @@ interface ApiService {
 
     @GET("/api/group-activity-overview/{id}")
     suspend fun getGroupActivityOverview(@Path("id") id: String): ApiResponse<GroupActivityOverview>
+
+    @GET("/api/gym/equipment/{id}")
+    suspend fun getEquipment(@Path("id") id: String): ApiResponse<GymEquipment>
+
+    @HEAD("/api/gym/equipment/{id}")
+    suspend fun checkIfEquipmentExists(@Path("id") id: String): ApiResponse<Unit>
 
     @GET("https://api.openweathermap.org/data/3.0/onecall")
     suspend fun getWeatherData(

@@ -43,6 +43,7 @@ import kotlin.math.min
 @Composable
 fun ScannerScreenRoot(
     navigateToGroupActivity: (String) -> Unit,
+    navigateToEquipmentScreen: (String) -> Unit,
     navigateUp: () -> Boolean,
     viewModel: ScannerScreenViewModel = hiltViewModel()
 ) {
@@ -52,6 +53,10 @@ fun ScannerScreenRoot(
         when (event) {
             ScannerScreenEvent.GroupActivityJoinFailure -> Toast.makeText(context, "Invalid join code", Toast.LENGTH_LONG).show()
             is ScannerScreenEvent.GroupActivityJoinSuccess -> navigateToGroupActivity(event.activityId)
+            ScannerScreenEvent.EquipmentScanFailure -> Toast.makeText(context, "Scan error.", Toast.LENGTH_LONG).show()
+            is ScannerScreenEvent.EquipmentScanSuccess -> navigateToEquipmentScreen(event.equipmentId)
+            ScannerScreenEvent.GymActivityJoinFailure -> Toast.makeText(context, "Join error.", Toast.LENGTH_LONG).show()
+            is ScannerScreenEvent.GymActivityJoinSuccess -> TODO()
         }
     }
 

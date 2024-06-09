@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.network.repository.ActivityRepository
+import com.rafaelboban.activitytracker.network.repository.GymRepository
 import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ScannerScreenViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val activityRepository: ActivityRepository
+    private val activityRepository: ActivityRepository,
+    private val gymRepository: GymRepository
 ) : ViewModel() {
 
     private val scannerType = checkNotNull(savedStateHandle.get<Int>("scannerTypeOrdinal")?.let { ScannerType.entries[it] })
@@ -34,7 +36,7 @@ class ScannerScreenViewModel @Inject constructor(
         when (scannerType) {
             ScannerType.GROUP_ACTIVITY -> Regex("^activity_tracker://group_activity/([0-9A-F]{6})$")
             ScannerType.GYM_ACTIVITY -> Regex("^activity_tracker://gym_activity/(\\d{8})$")
-            ScannerType.GYM_EQUIPMENT -> Regex("^activity_tracker://gym_equipment/(\\d{8})$")
+            ScannerType.GYM_EQUIPMENT -> Regex("^activity_tracker://gym_equipment/(.{36})$")
         }
     }
 
@@ -56,7 +58,7 @@ class ScannerScreenViewModel @Inject constructor(
                     when (scannerType) {
                         ScannerType.GROUP_ACTIVITY -> handleGroupActivity(code)
                         ScannerType.GYM_ACTIVITY -> TODO()
-                        ScannerType.GYM_EQUIPMENT -> TODO()
+                        ScannerType.GYM_EQUIPMENT -> handleGymEquipment(code)
                     }
                 } else {
                     state = state.copy(isScanningEnabled = true)
@@ -74,6 +76,17 @@ class ScannerScreenViewModel @Inject constructor(
             eventChannel.trySend(ScannerScreenEvent.GroupActivityJoinSuccess(data.id))
         }.suspendOnFailure {
             eventChannel.trySend(ScannerScreenEvent.GroupActivityJoinFailure)
+            state = state.copy(isCheckingDataValidity = false, isScanningEnabled = true)
+        }
+    }
+
+    private suspend fun handleGymEquipment(id: String) = coroutineScope {
+        state = state.copy(isCheckingDataValidity = true)
+
+        gymRepository.checkIfEquipmentExists(id).suspendOnSuccess {
+            eventChannel.trySend(ScannerScreenEvent.EquipmentScanSuccess(id))
+        }.suspendOnFailure {
+            eventChannel.trySend(ScannerScreenEvent.EquipmentScanFailure)
             state = state.copy(isCheckingDataValidity = false, isScanningEnabled = true)
         }
     }
