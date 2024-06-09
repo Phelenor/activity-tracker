@@ -11,6 +11,7 @@ import com.rafaelboban.activitytracker.ui.screens.activityOverview.ActivityOverv
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.camera.ScannerType
 import com.rafaelboban.activitytracker.ui.screens.groupActivity.GroupActivityScreenRoot
+import com.rafaelboban.activitytracker.ui.screens.gymActivity.GymActivityScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.gymEquipment.GymEquipmentScreenRoot
 import com.rafaelboban.activitytracker.ui.screens.login.LoginScreenRoot
 import kotlinx.serialization.Serializable
@@ -96,6 +97,12 @@ fun RootNavigation(
             )
         }
 
+        composableSlide<NavigationGraph.GymActivity> {
+            GymActivityScreenRoot(
+                navigateUp = { navHostController.navigateUp() }
+            )
+        }
+
         composableSlide<NavigationGraph.QRCodeScanner> {
             ScannerScreenRoot(
                 navigateUp = { navHostController.navigateUp() },
@@ -109,6 +116,13 @@ fun RootNavigation(
                 navigateToGroupActivity = { id ->
                     navHostController.navigate(NavigationGraph.GroupActivity(id)) {
                         popUpTo(NavigationGraph.QRCodeScanner(ScannerType.GROUP_ACTIVITY.ordinal)) {
+                            inclusive = true
+                        }
+                    }
+                },
+                navigateToGymActivity = { id ->
+                    navHostController.navigate(NavigationGraph.GymActivity(id)) {
+                        popUpTo(NavigationGraph.QRCodeScanner(ScannerType.GYM_ACTIVITY.ordinal)) {
                             inclusive = true
                         }
                     }
@@ -140,4 +154,7 @@ sealed interface NavigationGraph {
 
     @Serializable
     data class GymEquipment(val id: String) : NavigationGraph
+
+    @Serializable
+    data class GymActivity(val id: String) : NavigationGraph
 }

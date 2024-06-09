@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.screens.gymActivity
 
-
 sealed interface GymActivityAction {
     data object OnBackClick : GymActivityAction
     data object OnStartClick : GymActivityAction

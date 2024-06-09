@@ -35,7 +35,7 @@ class ScannerScreenViewModel @Inject constructor(
     private val urlRegex by lazy {
         when (scannerType) {
             ScannerType.GROUP_ACTIVITY -> Regex("^activity_tracker://group_activity/([0-9A-F]{6})$")
-            ScannerType.GYM_ACTIVITY -> Regex("^activity_tracker://gym_activity/(\\d{8})$")
+            ScannerType.GYM_ACTIVITY,
             ScannerType.GYM_EQUIPMENT -> Regex("^activity_tracker://gym_equipment/(.{36})$")
         }
     }
@@ -57,8 +57,8 @@ class ScannerScreenViewModel @Inject constructor(
 
                     when (scannerType) {
                         ScannerType.GROUP_ACTIVITY -> handleGroupActivity(code)
-                        ScannerType.GYM_ACTIVITY -> TODO()
-                        ScannerType.GYM_EQUIPMENT -> handleGymEquipment(code)
+                        ScannerType.GYM_ACTIVITY -> handleGymEquipment(code) { id -> ScannerScreenEvent.GymActivityJoinSuccess(id) }
+                        ScannerType.GYM_EQUIPMENT -> handleGymEquipment(code) { id -> ScannerScreenEvent.EquipmentScanSuccess(id) }
                     }
                 } else {
                     state = state.copy(isScanningEnabled = true)
@@ -80,11 +80,11 @@ class ScannerScreenViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleGymEquipment(id: String) = coroutineScope {
+    private suspend fun handleGymEquipment(id: String, onSuccess: (id: String) -> ScannerScreenEvent) = coroutineScope {
         state = state.copy(isCheckingDataValidity = true)
 
         gymRepository.checkIfEquipmentExists(id).suspendOnSuccess {
-            eventChannel.trySend(ScannerScreenEvent.EquipmentScanSuccess(id))
+            eventChannel.trySend(onSuccess(id))
         }.suspendOnFailure {
             eventChannel.trySend(ScannerScreenEvent.EquipmentScanFailure)
             state = state.copy(isCheckingDataValidity = false, isScanningEnabled = true)

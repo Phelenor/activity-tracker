@@ -59,7 +59,7 @@
     <string name="current_heartrate">Current heart rate</string>
     <string name="average_heartrate">Average heart rate</string>
     <string name="avg_heartrate">Avg. heart rate</string>
-    <string name="avg_sign_heartrate">Ø heart rate</string>
+    <string name="avg_sign_heartrate">Ø Heart rate</string>
     <string name="max_heartrate">Max. heart rate</string>
     <string name="calories_estimated">Calories (estimated)</string>
     <string name="average_pace">Average pace</string>

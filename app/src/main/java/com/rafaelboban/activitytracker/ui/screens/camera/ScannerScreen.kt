@@ -46,6 +46,7 @@ import kotlin.math.min
 fun ScannerScreenRoot(
     navigateToGroupActivity: (String) -> Unit,
     navigateToEquipmentScreen: (String) -> Unit,
+    navigateToGymActivity: (String) -> Unit,
     navigateUp: () -> Boolean,
     viewModel: ScannerScreenViewModel = hiltViewModel()
 ) {
@@ -58,7 +59,7 @@ fun ScannerScreenRoot(
             ScannerScreenEvent.EquipmentScanFailure -> Toast.makeText(context, "Scan error.", Toast.LENGTH_LONG).show()
             is ScannerScreenEvent.EquipmentScanSuccess -> navigateToEquipmentScreen(event.equipmentId)
             ScannerScreenEvent.GymActivityJoinFailure -> Toast.makeText(context, "Join error.", Toast.LENGTH_LONG).show()
-            is ScannerScreenEvent.GymActivityJoinSuccess -> TODO()
+            is ScannerScreenEvent.GymActivityJoinSuccess -> navigateToGymActivity(event.activityId)
         }
     }
 

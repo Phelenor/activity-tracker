@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-
 package com.rafaelboban.activitytracker.ui.screens.gymActivity
 
 import android.widget.Toast
@@ -29,8 +28,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -141,7 +143,7 @@ fun GymActivityScreenRoot(
 fun GymActivityScreen(
     state: GymActivityState,
     onAction: (GymActivityAction) -> Unit,
-    toggleTrackerService: (Boolean) -> Unit,
+    toggleTrackerService: (Boolean) -> Unit
 ) {
     LaunchedEffect(state.status) {
         if (state.status == ActivityStatus.IN_PROGRESS && ActivityTrackerService.isActive.not()) {
@@ -202,6 +204,8 @@ fun GymActivityScreen(
 
                 ConstraintLayout(
                     modifier = Modifier
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
                         .fillMaxSize()
                         .background(gradient)
                 ) {
@@ -220,7 +224,7 @@ fun GymActivityScreen(
                         ActivityTopAppBar(
                             activityType = activityType,
                             onBackClick = { onAction(GymActivityAction.OnBackClick) },
-                            gpsOk = null,
+                            gpsOk = null
                         )
 
                         Row(
@@ -258,9 +262,12 @@ fun GymActivityScreen(
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 4.dp)
                             .constrainAs(topData) {
                                 width = Dimension.matchParent
                                 bottom.linkTo(time.top, margin = 24.dp)
@@ -272,12 +279,10 @@ fun GymActivityScreen(
                             unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
                             icon = Icons.AutoMirrored.Outlined.TrendingUp,
                             contentColor = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                .padding(vertical = 4.dp, horizontal = 8.dp)
+                            modifier = Modifier.weight(1f)
                         )
 
+                        VerticalDivider(modifier = Modifier.height(40.dp))
 
                         if (activityType.showPace) {
                             ActivityDataColumn(
@@ -286,10 +291,7 @@ fun GymActivityScreen(
                                 unit = "min/km",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                modifier = Modifier.weight(1f)
                             )
                         } else {
                             ActivityDataColumn(
@@ -327,31 +329,32 @@ fun GymActivityScreen(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimary,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 4.dp)
                             .constrainAs(bottomData) {
                                 width = Dimension.matchParent
                                 top.linkTo(time.bottom, margin = 24.dp)
                             }
                     ) {
                         ActivityDataColumn(
-                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.avg_sign_distance),
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.avg_sign_heartrate),
                             value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.distanceMeters),
                             unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
                             icon = Icons.AutoMirrored.Outlined.TrendingUp,
                             contentColor = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                .padding(vertical = 4.dp, horizontal = 8.dp)
+                            modifier = Modifier.weight(1f)
                         )
 
+                        VerticalDivider(modifier = Modifier.height(40.dp))
 
                         if (activityType.showPace) {
                             ActivityDataColumn(
@@ -360,10 +363,7 @@ fun GymActivityScreen(
                                 unit = "min/km",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                modifier = Modifier.weight(1f)
                             )
                         } else {
                             ActivityDataColumn(
@@ -372,10 +372,7 @@ fun GymActivityScreen(
                                 unit = "km/h",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -419,7 +416,7 @@ fun GymActivityScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     ActivityFloatingActionButton(
                                         icon = Icons.Filled.Pause,
-                                        onClick = { onAction(GymActivityAction.OnPauseClick) },
+                                        onClick = { onAction(GymActivityAction.OnPauseClick) }
                                     )
                                 }
                             }
@@ -431,14 +428,14 @@ fun GymActivityScreen(
                                 ) {
                                     ActivityFloatingActionButton(
                                         icon = Icons.Filled.PlayArrow,
-                                        onClick = { onAction(GymActivityAction.OnResumeClick) },
+                                        onClick = { onAction(GymActivityAction.OnResumeClick) }
                                     )
 
                                     Spacer(modifier = Modifier.width(8.dp))
 
                                     ActivityFloatingActionButton(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_finish_flag),
-                                        onClick = { onAction(GymActivityAction.OnFinishClick) },
+                                        onClick = { onAction(GymActivityAction.OnFinishClick) }
                                     )
                                 }
                             }

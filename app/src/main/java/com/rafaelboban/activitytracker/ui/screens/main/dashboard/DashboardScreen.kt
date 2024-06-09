@@ -150,7 +150,7 @@ fun DashboardScreenRoot(
                 DashboardAction.OpenJoinGroupActivityBottomSheet -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
                 DashboardAction.Refresh -> viewModel.refresh()
                 DashboardAction.GetEquipmentInfoClick -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GYM_EQUIPMENT) }
-                DashboardAction.JoinGymActivityClick -> checkLocationPermissionsAndInvoke(viewModel::showJoinGroupActivityBottomSheet)
+                DashboardAction.JoinGymActivityClick -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(ScannerType.GYM_ACTIVITY) }
                 is DashboardAction.OpenQRCodeScanner -> checkCameraPermissionAndInvoke { navigateToQRCodeScanner(action.type) }
                 is DashboardAction.OnScheduledActivityClick -> navigateToGroupActivity(action.groupActivityId)
                 is DashboardAction.JoinGroupActivity -> viewModel.joinGroupActivity(action.joinCode)
