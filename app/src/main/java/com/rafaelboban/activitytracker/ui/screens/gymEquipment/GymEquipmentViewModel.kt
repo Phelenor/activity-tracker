@@ -1,6 +1,5 @@
 package com.rafaelboban.activitytracker.ui.screens.gymEquipment
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.activitytracker.network.repository.GymRepository
-import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,10 +33,8 @@ class GymEquipmentViewModel @Inject constructor(
             state = state.copy(isLoading = true)
 
             gymRepository.getEquipment(id).onSuccess {
-                Log.d("MARIN", "36: getEquipment $data")
                 state = state.copy(isLoading = false, equipment = data)
             }.onFailure {
-                Log.d("MARIN", "36: getEquipment ${message()}")
                 state = state.copy(isLoading = false)
             }
         }

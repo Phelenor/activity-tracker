@@ -45,6 +45,7 @@
                 <data android:scheme="activity_tracker" />
                 <data android:host="current_activity" />
                 <data android:host="group_activity" />
+                <data android:host="gym_activity" />
             </intent-filter>
         </activity>
 

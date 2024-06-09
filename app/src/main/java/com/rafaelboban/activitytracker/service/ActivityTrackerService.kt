@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.getSystemService
@@ -15,13 +14,16 @@ import androidx.lifecycle.lifecycleScope
 import com.rafaelboban.activitytracker.R
 import com.rafaelboban.activitytracker.tracking.ActivityTracker
 import com.rafaelboban.activitytracker.tracking.GroupActivityDataService
+import com.rafaelboban.activitytracker.tracking.GymActivityDataService
 import com.rafaelboban.activitytracker.ui.MainActivity
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -31,7 +33,10 @@ class ActivityTrackerService : LifecycleService() {
     lateinit var tracker: ActivityTracker
 
     @Inject
-    lateinit var dataService: GroupActivityDataService
+    lateinit var groupDataService: GroupActivityDataService
+
+    @Inject
+    lateinit var gymDataService: GymActivityDataService
 
     private val notificationManager by lazy { checkNotNull(getSystemService<NotificationManager>()) }
 
@@ -60,13 +65,11 @@ class ActivityTrackerService : LifecycleService() {
 
         val activityIntent = Intent(applicationContext, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            data = if (dataService.isInitialized) {
-                "activity_tracker://group_activity/${dataService.activityId}"
-            } else {
-                "activity_tracker://current_activity/${tracker.type.value?.ordinal}"
+            data = when {
+                groupDataService.isInitialized -> "activity_tracker://group_activity/${groupDataService.activityId}"
+                gymDataService.isInitialized -> "activity_tracker://gym_activity/${gymDataService.equipmentId}"
+                else -> "activity_tracker://current_activity/${tracker.type.value?.ordinal}"
             }.toUri()
-
-            Log.d("MARIN", "68: start $data")
         }
 
         val pendingIntent = TaskStackBuilder.create(applicationContext).run {
@@ -80,7 +83,12 @@ class ActivityTrackerService : LifecycleService() {
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
-        startNotificationUpdates()
+
+        if (gymDataService.isInitialized) {
+            startGymNotificationUpdates()
+        } else {
+            startNotificationUpdates()
+        }
     }
 
     private fun stop() {
@@ -106,6 +114,14 @@ class ActivityTrackerService : LifecycleService() {
         ) { duration, data ->
             val distanceUnit = if (data.distanceMeters < 1000) "m" else "km"
             notificationBuilder.setContentText("${duration.formatElapsedTimeDisplay()} | ${ActivityDataFormatter.formatDistanceDisplay(data.distanceMeters)} $distanceUnit")
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        }.launchIn(lifecycleScope)
+    }
+
+    private fun startGymNotificationUpdates() {
+        gymDataService.userData.filterNotNull().onEach { data ->
+            val distanceUnit = if (data.distance < 1000) "m" else "km"
+            notificationBuilder.setContentText("${ActivityDataFormatter.formatDistanceDisplay(data.distance)} $distanceUnit")
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
         }.launchIn(lifecycleScope)
     }

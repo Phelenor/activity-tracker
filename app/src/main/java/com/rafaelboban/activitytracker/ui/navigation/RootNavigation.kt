@@ -97,7 +97,13 @@ fun RootNavigation(
             )
         }
 
-        composableSlide<NavigationGraph.GymActivity> {
+        composableSlide<NavigationGraph.GymActivity>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "activity_tracker://gym_activity/{id}"
+                }
+            )
+        ) {
             GymActivityScreenRoot(
                 navigateUp = { navHostController.navigateUp() }
             )

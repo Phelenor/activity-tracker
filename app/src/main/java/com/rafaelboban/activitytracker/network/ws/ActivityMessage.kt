@@ -5,10 +5,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
-enum class ActivityControlAction {
-    START, PAUSE, RESUME, FINISH
-}
-
 @Serializable
 sealed class ActivityMessage {
 

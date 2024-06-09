@@ -38,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Speed
@@ -69,7 +70,6 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rafaelboban.activitytracker.model.ActivityData
 import com.rafaelboban.activitytracker.model.gym.GymEquipment
 import com.rafaelboban.activitytracker.model.network.FetchStatus
 import com.rafaelboban.activitytracker.service.ActivityTrackerService
@@ -85,7 +85,6 @@ import com.rafaelboban.activitytracker.util.UserData
 import com.rafaelboban.core.shared.model.ActivityStatus
 import com.rafaelboban.core.shared.model.ActivityStatus.Companion.isActive
 import com.rafaelboban.core.shared.model.ActivityType
-import com.rafaelboban.core.shared.model.HeartRatePoint
 import com.rafaelboban.core.shared.ui.util.ObserveAsEvents
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter
 import com.rafaelboban.core.shared.utils.ActivityDataFormatter.formatElapsedTimeDisplay
@@ -97,7 +96,6 @@ import com.rafaelboban.core.theme.mobile.ActivityTrackerTheme
 import com.rafaelboban.core.theme.mobile.ColorSuccess
 import com.rafaelboban.core.theme.mobile.Montserrat
 import com.rafaelboban.core.theme.mobile.Typography
-import kotlinx.collections.immutable.persistentListOf
 import kotlin.time.Duration
 
 @Composable
@@ -209,7 +207,17 @@ fun GymActivityScreen(
                         .fillMaxSize()
                         .background(gradient)
                 ) {
-                    val (infoCard, controls, heart, zoneIndicator, time, topData, bottomData) = createRefs()
+                    val (infoCard, controls, heart, zoneIndicator, time, topFirstData, topSecondData, bottomFirstData, bottomSecondData) = createRefs()
+
+                    val blinkAnimation by rememberInfiniteTransition(label = "connection_blink").animateFloat(
+                        initialValue = 0f,
+                        targetValue = 1f,
+                        label = "connection_blink",
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 750),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
 
                     Column(
                         modifier = Modifier
@@ -233,16 +241,6 @@ fun GymActivityScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            val blinkAnimation by rememberInfiniteTransition(label = "connection_blink").animateFloat(
-                                initialValue = 0f,
-                                targetValue = 1f,
-                                label = "connection_blink",
-                                animationSpec = infiniteRepeatable(
-                                    animation = tween(durationMillis = 750),
-                                    repeatMode = RepeatMode.Reverse
-                                )
-                            )
-
                             Text(
                                 text = if (state.gymEquipment != null) "Connected to: ${state.gymEquipment.name}" else "Connecting...",
                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -254,8 +252,8 @@ fun GymActivityScreen(
                                     modifier = Modifier
                                         .padding(start = 8.dp)
                                         .size(8.dp)
-                                        .background(shape = CircleShape, color = ColorSuccess)
                                         .alpha(blinkAnimation)
+                                        .background(shape = CircleShape, color = ColorSuccess)
                                 )
                             }
                         }
@@ -268,7 +266,40 @@ fun GymActivityScreen(
                             .padding(horizontal = 16.dp)
                             .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
                             .padding(vertical = 4.dp)
-                            .constrainAs(topData) {
+                            .constrainAs(topSecondData) {
+                                width = Dimension.matchParent
+                                bottom.linkTo(topFirstData.top, margin = 16.dp)
+                            }
+                    ) {
+                        ActivityDataColumn(
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.calories),
+                            value = state.activityData.calories.toString(),
+                            unit = "kcal",
+                            icon = Icons.Default.LocalFireDepartment,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        VerticalDivider(modifier = Modifier.height(40.dp))
+
+                        ActivityDataColumn(
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.elevation),
+                            value = state.activityData.elevationGain.toString(),
+                            unit = "m",
+                            icon = Icons.Outlined.Speed,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 4.dp)
+                            .constrainAs(topFirstData) {
                                 width = Dimension.matchParent
                                 bottom.linkTo(time.top, margin = 24.dp)
                             }
@@ -340,7 +371,7 @@ fun GymActivityScreen(
                             .padding(horizontal = 16.dp)
                             .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
                             .padding(vertical = 4.dp)
-                            .constrainAs(bottomData) {
+                            .constrainAs(bottomFirstData) {
                                 width = Dimension.matchParent
                                 top.linkTo(time.bottom, margin = 24.dp)
                             }
@@ -349,7 +380,7 @@ fun GymActivityScreen(
                             title = stringResource(id = com.rafaelboban.activitytracker.R.string.avg_sign_heartrate),
                             value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.distanceMeters),
                             unit = if (state.activityData.distanceMeters < 1000) "m" else "km",
-                            icon = Icons.AutoMirrored.Outlined.TrendingUp,
+                            icon = Icons.Default.Favorite,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
@@ -359,7 +390,7 @@ fun GymActivityScreen(
                         if (activityType.showPace) {
                             ActivityDataColumn(
                                 title = stringResource(id = com.rafaelboban.activitytracker.R.string.avg_sign_pace),
-                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.speed),
+                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.avgSpeed),
                                 unit = "min/km",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -368,11 +399,58 @@ fun GymActivityScreen(
                         } else {
                             ActivityDataColumn(
                                 title = stringResource(id = com.rafaelboban.activitytracker.R.string.avg_sign_speed),
-                                value = state.activityData.speed.roundToDecimals(1),
+                                value = state.activityData.avgSpeed.roundToDecimals(1),
                                 unit = "km/h",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 4.dp)
+                            .constrainAs(bottomSecondData) {
+                                width = Dimension.matchParent
+                                top.linkTo(bottomFirstData.bottom, margin = 16.dp)
+                            }
+                    ) {
+                        ActivityDataColumn(
+                            title = stringResource(id = com.rafaelboban.activitytracker.R.string.max_heartrate),
+                            value = ActivityDataFormatter.formatDistanceDisplay(state.activityData.maxHeartRate),
+                            unit = "bpm",
+                            icon = Icons.Default.Favorite,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        VerticalDivider(modifier = Modifier.height(40.dp))
+
+                        if (activityType.showPace) {
+                            ActivityDataColumn(
+                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.max_pace),
+                                value = ActivityDataFormatter.convertSpeedToPace(state.activityData.maxSpeed),
+                                unit = "min/km",
+                                icon = Icons.Outlined.Speed,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            ActivityDataColumn(
+                                title = stringResource(id = com.rafaelboban.activitytracker.R.string.max_speed),
+                                value = state.activityData.maxSpeed.roundToDecimals(1),
+                                unit = "km/h",
+                                icon = Icons.Outlined.Speed,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
+                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
+                                    .padding(vertical = 4.dp, horizontal = 8.dp)
                             )
                         }
                     }
@@ -460,10 +538,11 @@ fun GymActivityScreen(
                         }
                     }
 
-                    state.activityData.currentHeartRate
+                    state.activityData.heartRate
+                        .takeIf { it != 0 }
                         ?.takeIf { state.status.isActive }
-                        ?.let { point ->
-                            val zoneData = HeartRateZoneHelper.getHeartRateZone(point.heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
+                        ?.let { heartRate ->
+                            val zoneData = HeartRateZoneHelper.getHeartRateZone(heartRate, UserData.user?.age ?: DEFAULT_HEART_RATE_TRACKER_AGE)
 
                             HeartRateZoneIndicatorVertical(
                                 currentZone = zoneData.zone,
@@ -492,7 +571,7 @@ fun GymActivityScreen(
                                 )
 
                                 Text(
-                                    text = point.heartRate.toString(),
+                                    text = heartRate.toString(),
                                     fontFamily = Montserrat,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 20.sp,
@@ -566,11 +645,16 @@ private fun GymActivityScreenPreview() {
                 ),
                 gymEquipmentFetchStatus = FetchStatus.SUCCESS,
                 duration = Duration.parse("1h 30m 52s"),
-                activityData = ActivityData(
+                activityData = GymActivityData(
                     distanceMeters = 1925,
                     speed = 9.2f,
-                    heartRatePoints = persistentListOf(HeartRatePoint(102, Duration.ZERO)),
-                    currentHeartRate = HeartRatePoint(102, Duration.ZERO)
+                    avgSpeed = 4.2f,
+                    avgHeartRate = 120,
+                    heartRate = 105,
+                    elevationGain = 10,
+                    calories = 20,
+                    maxSpeed = 12f,
+                    maxHeartRate = 20
                 )
             )
         )
