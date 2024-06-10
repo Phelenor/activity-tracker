@@ -331,10 +331,7 @@ fun GymActivityScreen(
                                 unit = "km/h",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -447,10 +444,7 @@ fun GymActivityScreen(
                                 unit = "km/h",
                                 icon = Icons.Outlined.Speed,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .background(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surface)
-                                    .border(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary, width = 1.dp)
-                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }

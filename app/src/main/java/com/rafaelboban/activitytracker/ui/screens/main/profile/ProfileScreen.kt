@@ -125,7 +125,7 @@ private fun ProfileScreen(
         initialSelectedTimestamp = state.user.birthTimestamp,
         onConfirm = { timestamp -> onAction(ProfileAction.ConfirmBirthDateClick(timestamp)) },
         onDismiss = { onAction(ProfileAction.DismissDialog) },
-        yearRange = 1900..2012
+        yearRange = 1900..2024
     )
 
     if (showBottomSheet) {
