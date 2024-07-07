@@ -1,6 +1,6 @@
 package com.rafaelboban.activitytracker.network.ws
 
-import com.rafaelboban.activitytracker.di.NetworkModule.API_BASE_URL
+import com.rafaelboban.activitytracker.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,7 +36,7 @@ class WebSocketClient @Inject constructor(
             val listener = createWebSocketListener(url, messages)
 
             val webSocket = okHttpClient.newWebSocket(
-                request = Request.Builder().url("${API_BASE_URL}$url").build(),
+                request = Request.Builder().url("${BuildConfig.SERVER_URL}$url").build(),
                 listener = listener
             )
 

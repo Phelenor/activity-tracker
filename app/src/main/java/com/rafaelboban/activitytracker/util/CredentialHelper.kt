@@ -8,6 +8,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.rafaelboban.activitytracker.BuildConfig
 import com.rafaelboban.activitytracker.R
 import java.security.MessageDigest
 import java.util.UUID
@@ -21,7 +22,7 @@ object CredentialHelper {
         onError: (error: Exception) -> Unit
     ) {
         val nonce = generateNonce()
-        val clientId = context.getString(R.string.google_oauth_credential_client_id)
+        val clientId = BuildConfig.GOOGLE_CLIENT_ID
 
         try {
             val token = buildCredentialRequest(

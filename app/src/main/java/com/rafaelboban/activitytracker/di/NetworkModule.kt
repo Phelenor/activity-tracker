@@ -3,6 +3,7 @@ package com.rafaelboban.activitytracker.di
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.rafaelboban.activitytracker.BuildConfig
 import com.rafaelboban.activitytracker.data.session.AuthInfo
 import com.rafaelboban.activitytracker.data.session.EncryptedSessionStorage
 import com.rafaelboban.activitytracker.network.ApiService
@@ -35,8 +36,6 @@ import kotlin.time.toJavaDuration
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    const val API_BASE_URL = "http://192.168.8.102:3000"
 
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
@@ -87,7 +86,7 @@ object NetworkModule {
             .client(okHttpClient)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
             .addConverterFactory(jsonConverterFactory)
-            .baseUrl(API_BASE_URL)
+            .baseUrl(BuildConfig.SERVER_URL)
             .build()
 
         return retrofit.create(TokenRefreshService::class.java)
@@ -143,7 +142,7 @@ object NetworkModule {
             .client(okHttpClient)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
             .addConverterFactory(jsonConverterFactory)
-            .baseUrl(API_BASE_URL)
+            .baseUrl(BuildConfig.SERVER_URL)
             .build()
     }
 

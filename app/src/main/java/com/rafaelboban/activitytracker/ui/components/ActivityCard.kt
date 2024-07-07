@@ -278,18 +278,18 @@ private fun DataGrid(
     modifier: Modifier = Modifier
 ) {
     val speedPaceItem = if (activity.activityType.showPace) {
-        stringResource(id = R.string.avg_sign_pace) to ActivityDataFormatter.convertSpeedToPace(activity.avgSpeedKmh)
+        stringResource(id = R.string.avg_sign_pace) to ActivityDataFormatter.convertSpeedToPace(activity.avgSpeedKmh).let { "$it min/km" }
     } else {
-        stringResource(id = R.string.avg_sign_speed) to activity.avgSpeedKmh.roundToDecimals(1)
+        stringResource(id = R.string.avg_sign_speed) to activity.avgSpeedKmh.roundToDecimals(1).let { "$it km/h" }
     }
 
     val data = listOf(
-        stringResource(id = R.string.distance) to ActivityDataFormatter.formatDistanceDisplay(activity.distanceMeters),
+        stringResource(id = R.string.distance) to ActivityDataFormatter.formatDistanceDisplay(activity.distanceMeters).let { if (activity.distanceMeters < 1000) "$it m" else "$it km" },
         speedPaceItem,
         if (activity.avgHeartRate > 0) {
-            stringResource(R.string.avg_sign_heartrate) to activity.avgHeartRate.toString()
+            stringResource(R.string.avg_sign_heartrate) to activity.avgHeartRate.toString().let { "$it bpm" }
         } else {
-            stringResource(id = R.string.elevation) to ActivityDataFormatter.formatDistanceDisplay(activity.elevation)
+            stringResource(id = R.string.elevation) to ActivityDataFormatter.formatDistanceDisplay(activity.elevation).let { "$it m" }
         }
     )
 
